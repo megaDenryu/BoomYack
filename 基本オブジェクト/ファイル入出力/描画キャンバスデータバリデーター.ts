@@ -1,4 +1,4 @@
-import { FileOperationResult, JSONファイル } from "Extend/FileSystem/ファイル/拡張子付きファイル/JSONファイル";
+import { FileOperationResult, JSONファイル } from "TypeScriptBenriKakuchou/FileSystem/ファイル/拡張子付きファイル/JSONファイル";
 import { I描画キャンバスJSON, 描画キャンバスデータ } from "../描画キャンバス/データクラス";
 
 export class 描画キャンバスデータバリデーター {

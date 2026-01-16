@@ -1,4 +1,4 @@
-import { FileOperationResult, JSONファイル } from "Extend/FileSystem/ファイル/拡張子付きファイル/JSONファイル";
+import { FileOperationResult, JSONファイル } from "TypeScriptBenriKakuchou/FileSystem/ファイル/拡張子付きファイル/JSONファイル";
 import { テキスト用グラフ, 付箋text, isテキスト用グラフ_付箋text, Graph } from "../描画キャンバス/配置物グラフ/テキスト化情報";
 
 

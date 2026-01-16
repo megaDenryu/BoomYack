@@ -2,7 +2,7 @@
 // Strategy実装: 何もしない後処理
 // ========================================
 
-import { IDMap } from "Extend/DDDBase/IDBase";
+import { IDMap } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
 import { 付箋ID } from "BoomYack/基本オブジェクト/ID";
 import { CanvasGraphModel } from "BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
 import { node付箋pair } from "../ValueObjects/node付箋pair";

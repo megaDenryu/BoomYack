@@ -2,7 +2,7 @@ import { 描画座標点 } from "SengenUI/index";
 
 import { CanvasGraphModel } from "../描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
 import { テキスト用グラフ, テキスト用グラフノード, 付箋text } from "../描画キャンバス/配置物グラフ/テキスト化情報";
-import { IDMap } from "Extend/DDDBase/IDBase";
+import { IDMap } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
 import { 付箋ID } from "../ID";
 import { 階層的レイアウトStrategy } from "./レイアウトStrategy/階層的レイアウトStrategy";
 import { レイアウト設定 } from "./ValueObjects/レイアウト設定";

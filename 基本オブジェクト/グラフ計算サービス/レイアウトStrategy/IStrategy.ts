@@ -1,5 +1,5 @@
 import { 描画座標点 } from "SengenUI/index";
-import { IDMap } from "Extend/DDDBase/IDBase";
+import { IDMap } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
 import { 付箋ID } from "BoomYack/基本オブジェクト/ID";
 import { CanvasGraphModel } from "BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
 import { テキスト用グラフノード, 付箋text } from "BoomYack/基本オブジェクト/描画キャンバス/配置物グラフ/テキスト化情報";

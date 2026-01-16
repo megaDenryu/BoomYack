@@ -1,6 +1,6 @@
 import { 描画キャンバスデータ, I描画キャンバスJSON } from "../描画キャンバス/データクラス";
-import { FileOperationResult } from "Extend/FileSystem/ファイル/拡張子付きファイル/JSONファイル";
-import { DropFileLoader } from "Extend/FileSystem/ローダー/DropFileLoader";
+import { FileOperationResult } from "TypeScriptBenriKakuchou/FileSystem/ファイル/拡張子付きファイル/JSONファイル";
+import { DropFileLoader } from "TypeScriptBenriKakuchou/FileSystem/ローダー/DropFileLoader";
 import { 描画キャンバスデータバリデーター } from "./描画キャンバスデータバリデーター";
 
 // 今後ほかのデータ型も扱う

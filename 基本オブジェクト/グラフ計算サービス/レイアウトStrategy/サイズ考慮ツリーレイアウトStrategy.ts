@@ -2,7 +2,7 @@ import { Px2DVector, Px長さ, 描画座標点 } from "SengenUI/index";
 import { CanvasGraphModel } from "BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
 import { node付箋pair } from "../ValueObjects/node付箋pair";
 import { I後処理位置調整Strategy } from "./IStrategy";
-import { IDMap } from "Extend/DDDBase/IDBase";
+import { IDMap } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
 import { 付箋ID } from "BoomYack/基本オブジェクト/ID";
 import { レイアウト設定 } from "../ValueObjects/レイアウト設定";
 

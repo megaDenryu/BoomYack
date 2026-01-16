@@ -1,5 +1,5 @@
 import { 配置物座標点 } from "SengenUI/index";
-import { IDMap } from "Extend/DDDBase/IDBase";
+import { IDMap } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
 import { 付箋ID, 折れ線矢印ID } from "../../../../BoomYack/基本オブジェクト/ID";
 import { I配置物集約 } from "../../../../BoomYack/基本オブジェクト/I配置物";
 

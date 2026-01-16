@@ -1,4 +1,4 @@
-import { IDBase自動採番 } from "Extend/DDDBase/IDBase";
+import { IDBase自動採番 } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
 
 export class ノードID extends IDBase自動採番<"ノードID",ノードID> {
     constructor(id?:string) {
