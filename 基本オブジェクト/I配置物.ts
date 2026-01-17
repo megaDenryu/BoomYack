@@ -1,5 +1,4 @@
-import { Drag中値, LV2HtmlComponentBase, Px2DVector, 図形内座標点, 描画座標点, 配置物座標点 } from "SengenUI/index";
-import { number } from "zod/v4";
+import { Drag中値, LV2HtmlComponentBase, Px2DVector, 描画座標点, 配置物座標点 } from "SengenUI/index";
 
 
 
