@@ -1,4 +1,4 @@
-import { RequestAPI } from "../../../Web/RequestApi";
+import { RequestAPI } from "TypeScriptBenriKakuchou/Web/RequestApi";
 import { キャンバスメタデータ, キャンバス保存レスポンス, 描画キャンバスデータ, 描画キャンバスデータからメタデータ抽出, 描画キャンバスJSON, I描画キャンバスJSON } from "./データクラス";
 
 
