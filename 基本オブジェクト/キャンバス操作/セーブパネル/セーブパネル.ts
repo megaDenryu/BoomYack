@@ -43,28 +43,28 @@ export type { SaveMode, ISavePanelEvents } from "./セーブパネル型定義";
  */
 export class セーブパネル extends LV2HtmlComponentBase {
     protected _componentRoot: DivC;
-    private _backdrop: DivC;
-    private _panel: DivC;
+    private _backdrop!: DivC;
+    private _panel!: DivC;
     private _isVisible: boolean = false;
     private _currentMode: SaveMode = "local";
     private _events: ISavePanelEvents;
     private _currentCanvasName: string|null = null;
 
     // 子コンポーネント
-    private _trash: セーブパネル仮ゴミ箱;
-    private _list: セーブパネルリスト;
-    private _json出力サービス: キャンバスJSON出力サービス
+    private _trash!: セーブパネル仮ゴミ箱;
+    private _list!: セーブパネルリスト;
+    private _json出力サービス!: キャンバスJSON出力サービス
 
     // UI要素参照
-    private _localModeBtn: ButtonC;
-    private _serverModeBtn: ButtonC;
-    private _currentCanvasNameSpan: SpanC;
-    private _currentCanvasNameInput: InputC;
+    private _localModeBtn!: ButtonC;
+    private _serverModeBtn!: ButtonC;
+    private _currentCanvasNameSpan!: SpanC;
+    private _currentCanvasNameInput!: InputC;
     private _isRenaming: boolean = false;
-    private _overwriteSaveButton: ButtonC;
-    private _newSaveNameInput: InputC;
-    private _newSaveButton: ButtonC;
-    private _loadButton: ButtonC;
+    private _overwriteSaveButton!: ButtonC;
+    private _newSaveNameInput!: InputC;
+    private _newSaveButton!: ButtonC;
+    private _loadButton!: ButtonC;
     private _trashToggleBtn: ButtonC | null = null;
     private _trashBadgeSpan: SpanC | null = null;
 
