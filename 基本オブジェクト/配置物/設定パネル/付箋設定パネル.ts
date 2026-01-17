@@ -19,7 +19,7 @@ export class 付箋設定パネル extends LV2HtmlComponentBase {
     private _on設定変更: (新設定: 付箋設定状態) => void;
     private _on閉じる: () => void;
     private _position: ビューポート座標値;
-    private _mouseWife: MouseWife;
+    private _mouseWife!: MouseWife;
 
     constructor(options: 付箋設定パネルオプション) {
         super();
