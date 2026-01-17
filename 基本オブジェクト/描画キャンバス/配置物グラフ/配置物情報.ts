@@ -4,7 +4,7 @@ import { 折れ線矢印集約 } from "../../../../BoomYack/基本オブジェ�
 import { 矢印接続可能付箋Old } from "../../../../BoomYack/基本オブジェクト/配置物/付箋2/矢印接続可能付箋Old";
 
 import { 配置物データ, 付箋データ, 折れ線矢印データ } from "../データクラス";
-import { Func } from "OneONetアーキテクチャ支援/アーキテクチャBase";
+import { Func } from "TypeScriptBenriKakuchou/アーキテクチャBase";
 
 interface I配置物情報 {
     type: "付箋データ"|"折れ線矢印"

@@ -4,7 +4,7 @@ import { 付箋ID, 折れ線矢印ID } from "../../../../BoomYack/基本オブ�
 import { I配置物集約 } from "../../../../BoomYack/基本オブジェクト/I配置物";
 
 import { 付箋情報, 折れ線矢印情報, 配置物情報 } from "./配置物情報";
-import { Func } from "OneONetアーキテクチャ支援/アーキテクチャBase";
+import { Func } from "TypeScriptBenriKakuchou/アーキテクチャBase";
 
 export class 配置物グラフ {
 

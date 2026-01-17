@@ -6,7 +6,7 @@ import { ButtonC, DivC, HtmlComponentBase, LV2HtmlComponentBase, MousePosition, 
 import { 円状メニューコンテナ, 円状メニューアイテム, 円状メニュー中央エリア, fadeInKeyframes, fadeOutKeyframes, 円状メニューアニメーション時間 } from "../style.css";
 
 
-import { Action, AsyncAction } from "OneONetアーキテクチャ支援/アーキテクチャBase";
+import { Action, AsyncAction } from "TypeScriptBenriKakuchou/アーキテクチャBase";
 
 export interface 円状メニューアイテムオプション {
     label?: string;

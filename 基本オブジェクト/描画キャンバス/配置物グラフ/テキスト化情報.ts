@@ -2,7 +2,7 @@ import { 配置物座標点 } from "SengenUI/index";
 
 import { 配置物連結グラフ } from "./配置物連結グラフ";
 import { 付箋情報 } from "./配置物情報";
-import { Func } from "OneONetアーキテクチャ支援/アーキテクチャBase";
+import { Func } from "TypeScriptBenriKakuchou/アーキテクチャBase";
 
 // テキスト埋め込み用情報
 export interface GraphNode<T>{id:string;nodeData:T;linkNode:{nextIDs:string[];prevIDs:string[];}}
