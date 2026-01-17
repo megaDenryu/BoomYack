@@ -1,5 +1,4 @@
 import { Canvas座標Base } from "SengenUI/index";
-import { external } from "jszip";
 import { エッジID, ノードID } from "../ID";
 import { サイズ } from "../数値";
 
