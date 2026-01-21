@@ -98,56 +98,114 @@ export function  配置物連結グラフtoテキスト用グラフノード(グ
 
 // バリデーション関数
 export function isテキスト用グラフ_付箋text(obj: unknown): obj is Graph<付箋text> {
-    if (typeof obj !== 'object' || obj === null) return false;
+    if (typeof obj !== 'object' || obj === null) {
+        console.error('[BoomYack検証] Graphオブジェクトが無効:', typeof obj);
+        return false;
+    }
     const g = obj as any; // テキスト用グラフ<T> の構造チェック
 
     // nodes プロパティチェック
-    if (!Array.isArray(g.nodes)) return false;
+    if (!Array.isArray(g.nodes)) {
+        console.error('[BoomYack検証] nodesが配列ではない:', typeof g.nodes);
+        return false;
+    }
+
+    console.log('[BoomYack検証] グラフバリデーション開始:', g.nodes.length, 'ノード');
 
     // 各ノードのチェック
-    for (const node of g.nodes) {
-        if (!isテキスト用付箋ノード(node)) return false;
+    for (let i = 0; i < g.nodes.length; i++) {
+        const node = g.nodes[i];
+        if (!isテキスト用付箋ノード(node, i)) {
+            console.error(`[BoomYack検証] ノード[${i}]の検証失敗:`, node);
+            return false;
+        }
+    }
+
+    console.log('[BoomYack検証] ✓ すべてのノードが有効です');
+    return true;
+}
+
+function isテキスト用付箋ノード(obj: unknown, index?: number): boolean {
+    const prefix = index !== undefined ? `[BoomYack検証] ノード[${index}]` : '[BoomYack検証] ノード';
+    
+    if (typeof obj !== 'object' || obj === null) {
+        console.error(`${prefix} がオブジェクトではない:`, typeof obj);
+        return false;
+    }
+    const n = obj as any; // GraphNode<付箋text> の構造チェック
+
+    // id
+    if (typeof n.id !== 'string') {
+        console.error(`${prefix} idが文字列ではない:`, typeof n.id, n.id);
+        return false;
+    }
+
+    // nodeData (付箋text)
+    if (!is付箋text(n.nodeData, `${prefix} nodeData`)) {
+        return false;
+    }
+
+    // linkNode
+    if (typeof n.linkNode !== 'object' || n.linkNode === null) {
+        console.error(`${prefix} linkNodeがオブジェクトではない:`, n.linkNode);
+        return false;
+    }
+    if (!Array.isArray(n.linkNode.nextIDs)) {
+        console.error(`${prefix} nextIDsが配列ではない:`, typeof n.linkNode.nextIDs);
+        return false;
+    }
+    if (!n.linkNode.nextIDs.every((id: any) => typeof id === 'string')) {
+        console.error(`${prefix} nextIDs内に非文字列がある:`, n.linkNode.nextIDs);
+        return false;
+    }
+
+    if (!Array.isArray(n.linkNode.prevIDs)) {
+        console.error(`${prefix} prevIDsが配列ではない:`, typeof n.linkNode.prevIDs);
+        return false;
+    }
+    if (!n.linkNode.prevIDs.every((id: any) => typeof id === 'string')) {
+        console.error(`${prefix} prevIDs内に非文字列がある:`, n.linkNode.prevIDs);
+        return false;
     }
 
     return true;
 }
 
-function isテキスト用付箋ノード(obj: unknown): boolean {
-    if (typeof obj !== 'object' || obj === null) return false;
-    const n = obj as any; // GraphNode<付箋text> の構造チェック
-
-    // id
-    if (typeof n.id !== 'string') return false;
-
-    // nodeData (付箋text)
-    if (!is付箋text(n.nodeData)) return false;
-
-    // linkNode
-    if (typeof n.linkNode !== 'object' || n.linkNode === null) return false;
-    if (!Array.isArray(n.linkNode.nextIDs)) return false;
-    if (!n.linkNode.nextIDs.every((id: any) => typeof id === 'string')) return false;
-
-    if (!Array.isArray(n.linkNode.prevIDs)) return false;
-    if (!n.linkNode.prevIDs.every((id: any) => typeof id === 'string')) return false;
-
-    return true;
-}
-
-function is付箋text(obj: unknown): obj is 付箋text {
-    if (typeof obj !== 'object' || obj === null) return false;
+function is付箋text(obj: unknown, context?: string): obj is 付箋text {
+    const prefix = context ?? '[BoomYack検証] 付箋text';
+    
+    if (typeof obj !== 'object' || obj === null) {
+        console.error(`${prefix} がオブジェクトではない:`, typeof obj);
+        return false;
+    }
     const d = obj as any;
-    return typeof d.text === 'string';
+    if (typeof d.text !== 'string') {
+        console.error(`${prefix} textプロパティが文字列ではない:`, typeof d.text, '実際のプロパティ:', Object.keys(d));
+        return false;
+    }
+    return true;
 }
 
 export function テキスト用グラフ_付箋textfromJson(json: string): テキスト用グラフ<付箋text> | null {
     try {
+        console.log('[BoomYack] JSON解析開始, 長さ:', json.length);
         const obj = JSON.parse(json);
+        console.log('[BoomYack] JSON解析成功, オブジェクト型:', typeof obj);
+        
         if (isテキスト用グラフ_付箋text(obj)) {
+            console.log('[BoomYack] ✓ グラフバリデーション成功');
             return テキスト用グラフ.fromGraph<付箋text>(obj, 付箋text型説明);
         } else {
+            console.error('[BoomYack] ✗ グラフバリデーション失敗:', obj);
             return null;
         }
-    } catch {
+    } catch (error) {
+        console.error('[BoomYack] JSON解析エラー:', error instanceof Error ? error.message : error);
+        if (error instanceof SyntaxError) {
+            console.error('[BoomYack] JSON構文エラー詳細:', error.message);
+            // JSONの問題箇所を特定するためのヒント出力
+            console.error('[BoomYack] JSONテキスト(最初500文字):', json.substring(0, 500));
+        }
         return null;
     }
 }

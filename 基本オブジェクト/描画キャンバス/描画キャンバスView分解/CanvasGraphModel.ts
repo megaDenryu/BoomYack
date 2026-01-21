@@ -227,11 +227,32 @@ export class CanvasGraphModel implements I描画空間, I配置物リポジト�
     }
 
     public async クリップボードから貼り付け(e: MouseEvent){
+        console.log('[BoomYack貼り付け] 貼り付け処理開始');
         const data = new MouseEventData(e);
         const pos = new 画面座標点(data.pos2DVector).to描画座標点(this.描画基準座標);
         const text = await this.クリップボードサービス.貼り付け();
+        console.log('[BoomYack貼り付け] クリップボードから取得したテキスト長:', text.length);
+        
         const グラフ:テキスト用グラフ<付箋text>|null = テキスト用グラフ_付箋textfromJson(text);
-        グラフ?.exec(グラフ => {return new テキスト用グラフからキャンバスに配置するサービス(this, グラフ, pos).グラフを配置する();})
+        
+        if (グラフ === null) {
+            console.error('[BoomYack貼り付け] ✗ グラフのパースに失敗しました');
+            console.error('[BoomYack貼り付け] 受け取ったテキスト(最初300文字):', text.substring(0, 300));
+            return;
+        }
+        
+        try {
+            console.log('[BoomYack貼り付け] ✓ グラフのパース成功, 配置開始');
+            グラフ.exec(グラフ => {
+                return new テキスト用グラフからキャンバスに配置するサービス(this, グラフ, pos).グラフを配置する();
+            });
+            console.log('[BoomYack貼り付け] ✓ 貼り付け完了');
+        } catch (error) {
+            console.error('[BoomYack貼り付け] ✗ 配置処理中にエラー:', error instanceof Error ? error.message : error);
+            if (error instanceof Error) {
+                console.error('[BoomYack貼り付け] スタックトレース:', error.stack);
+            }
+        }
     }
 }
 
