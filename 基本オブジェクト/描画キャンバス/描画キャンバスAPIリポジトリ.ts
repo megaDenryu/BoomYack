@@ -1,5 +1,6 @@
 import { RequestAPI } from "TypeScriptBenriKakuchou/Web/RequestApi";
-import { キャンバスメタデータ, キャンバス保存レスポンス, 描画キャンバスデータ, 描画キャンバスデータからメタデータ抽出, 描画キャンバスJSON, I描画キャンバスJSON } from "./データクラス";
+import { キャンバスメタデータ, 描画キャンバスデータ, 描画キャンバスデータからメタデータ抽出, 描画キャンバスJSON, I描画キャンバスJSON } from "./データクラス";
+import { CanvasDeleteResponse, CanvasListResponse, CanvasLoadResponse, キャンバス保存レスポンス } from "./CanvasResponse";
 
 
 export interface 描画キャンバスリポジトリ {api: 描画キャンバスAPIリポジトリ, local: 描画キャンバスローカルリポジトリ}
@@ -39,7 +40,7 @@ export class 描画キャンバスAPIリポジトリ {
      * @returns キャンバスデータのJSON形式、存在しない場合はnull
      */
     public async 読み込み(canvasId: string): Promise<描画キャンバスJSON | null> {
-        return RequestAPI.postRequest2<{ success: boolean; data: any | null }>(
+        return RequestAPI.postRequest2<CanvasLoadResponse>(
             `${this._endpointBase}/load`,
             { canvasId }
         ).then(response => response.success ? response.data : null)
@@ -54,10 +55,10 @@ export class 描画キャンバスAPIリポジトリ {
      * @returns キャンバスメタデータの一覧
      */
     public async 一覧取得(): Promise<キャンバスメタデータ[]> {
-        return RequestAPI.postRequest2<{ success: boolean; items: キャンバスメタデータ[] }>(
+        return RequestAPI.postRequest2<CanvasListResponse>(
             `${this._endpointBase}/list`,
             {}
-        ).then(response => response.success ? response.items : [])
+        ).then(response => response.success ? response.items.map(item => キャンバスメタデータ.fromJSON(item)) : [])
          .catch(error => {
             console.error("キャンバス一覧取得エラー:", error);
             return [];
@@ -70,7 +71,7 @@ export class 描画キャンバスAPIリポジトリ {
      * @returns 削除結果
      */
     public async 削除(canvasId: string): Promise<{ success: boolean; message: string }> {
-        return RequestAPI.postRequest2<{ success: boolean; message: string }>(
+        return RequestAPI.postRequest2<CanvasDeleteResponse>(
             `${this._endpointBase}/delete`,
             { canvasId }
         ).then(response => response)

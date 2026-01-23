@@ -596,12 +596,7 @@ export class 描画キャンバスデータ {
 /** 描画キャンバスデータのJSON形式 */
 export type 描画キャンバスJSON = I描画キャンバスJSON;
 
-/** サーバーレスポンス形式 */
-export interface キャンバス保存レスポンス {
-    success: boolean;
-    message: string;
-    data?: 描画キャンバスJSON;
-}
+
 
 /**
  * 描画キャンバスデータからメタデータを抽出する
