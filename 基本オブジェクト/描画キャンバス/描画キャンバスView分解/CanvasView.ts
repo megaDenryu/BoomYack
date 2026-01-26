@@ -16,6 +16,7 @@ import { 折れ線矢印VM } from "../../配置物"; // export確認要
 import { 折れ線矢印ID, キャンバスID } from "../../ID";
 import { 配置物連結グラフ, 配置物連結グラフをすべて抽出 } from "../配置物グラフ/配置物連結グラフ";
 import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?url';
+import SaveIcon from '../../../SVGImg/SaveIcon.svg?url';
 import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
 import 折れ線矢印Icon from '../../../SVGImg/折れ線矢印.svg?url';
 import { まとめて移動サービス } from "./まとめて移動サービス";
@@ -31,6 +32,7 @@ export interface I配置物選択機能集約用のキャンバス機能 extends
 export interface CanvasViewOptions {
     canvasId?: string;
     追加メニュー項目?: 円状メニューアイテムオプション[];
+    onSaveClick?: () => void;
 }
 
 export class CanvasView extends LV2HtmlComponentBase implements I配置物選択機能集約用のキャンバス機能 {
@@ -105,14 +107,18 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     }
 
     protected createComponentRoot(): DivC {
+        console.log(SaveIcon);
         const menuItems: 円状メニューアイテムオプション[] = [
-            { iconUrl: ゴミ箱Icon, onClick: () => this.deleteSelectedItem() , backgroundColor: '#ffffff', borderColor: 'green' },
+            { iconUrl: ゴミ箱Icon, onClick: (e) => this.deleteSelectedItem() , backgroundColor: '#ffffff', borderColor: 'green' },
             { iconUrl: 付箋Icon, onClick: (e) => this.onAddStickyNote(e) , backgroundColor: '#ffffff', borderColor: 'green' },
             { iconUrl: 折れ線矢印Icon, onClick: (e) => this.onAddArrow(e) , backgroundColor: '#ffffff', borderColor: 'green' },
             { label: "グラフ選択", onClick: (e) => this.グラフ選択() },
             { label: "グラフテキストコピー", onClick: (e) => this.グラフをテキストとしてコピー()},
             { label: "グラフJson", onClick: (e) => this.グラフを選択してjsonファイル出力()},
+            { iconUrl: SaveIcon, onClick: (e) => this._options.onSaveClick?.(), backgroundColor: '#ffffff', borderColor: 'green' },
+
             { label: "貼り付け", onClick: (e) => this.クリップボードから貼り付け(e)},
+
             ...(this._options.追加メニュー項目 ?? [])
         ];
 

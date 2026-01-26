@@ -19,7 +19,6 @@ import { 自動リサイズ付箋View } from 'BoomYack/基本オブジェクト/
 import { JSON読み込みサービス } from 'BoomYack/基本オブジェクト/ファイル入出力/JSON読み込みサービス';
 import { 描画キャンバスデータバリデーター } from 'BoomYack/基本オブジェクト/ファイル入出力/描画キャンバスデータバリデーター';
 import { DropFileLoader } from 'TypeScriptBenriKakuchou/FileSystem/ローダー/DropFileLoader';
-import セーブIcon from '../SVGImg/セーブアイコン.svg?url';
 
 /**
  * Miroのような付箋グラフボードページ
@@ -128,13 +127,6 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
         return name.replace(/[<>:"/\\|?*]/g, '_').trim() || 'untitled';
     }
 
-    /** コンテキストメニューに追加するメニュー項目を生成 */
-    private createAdditionalMenuItems(): 円状メニューアイテムオプション[] {
-        return [
-            { iconUrl: セーブIcon, backgroundColor: 'white', borderColor: 'green', onClick: () => this._セーブパネル.開く() },
-        ];
-    }
-
     private onDropFile = async (e: DragEvent) => {
         console.log("ファイルドロップ検出", e);
         const json = await this._json読み込みサービス.ドロップイベントから読み込み(e);
@@ -154,7 +146,7 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
         // 描画キャンバスViewのオプション（DI）
         const canvasOptions: CanvasViewOptions = {
             canvasId: "sticky-graph-board",
-            追加メニュー項目: this.createAdditionalMenuItems()
+            onSaveClick: () => this._セーブパネル.開く()
         };
 
         return new DivC({ class: sticky_graph_board_container }).childs([

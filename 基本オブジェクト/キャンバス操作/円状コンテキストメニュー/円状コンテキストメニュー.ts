@@ -139,7 +139,7 @@ export class 円状メニューアイテムボタン extends LV2HtmlComponentBas
         // SVGアイコンが指定されている場合は背景画像として設定
         if (this._option.iconUrl) {
             btn.setStyleCSS({
-                backgroundImage: `url(${this._option.iconUrl})`,
+                backgroundImage: `url("${this._option.iconUrl}")`,
                 backgroundSize: 'contain',
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center',
