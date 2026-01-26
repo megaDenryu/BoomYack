@@ -19,7 +19,7 @@ import { 自動リサイズ付箋View } from 'BoomYack/基本オブジェクト/
 import { JSON読み込みサービス } from 'BoomYack/基本オブジェクト/ファイル入出力/JSON読み込みサービス';
 import { 描画キャンバスデータバリデーター } from 'BoomYack/基本オブジェクト/ファイル入出力/描画キャンバスデータバリデーター';
 import { DropFileLoader } from 'TypeScriptBenriKakuchou/FileSystem/ローダー/DropFileLoader';
-import セーブIcon from 'SVGImg/セーブアイコン.svg?url';
+import セーブIcon from '../SVGImg/セーブアイコン.svg?url';
 
 /**
  * Miroのような付箋グラフボードページ

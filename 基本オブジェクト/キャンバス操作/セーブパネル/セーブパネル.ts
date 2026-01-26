@@ -30,7 +30,7 @@ import { SaveMode, ISavePanelEvents } from "./セーブパネル型定義";
 import { セーブパネル仮ゴミ箱 } from "./セーブパネル仮ゴミ箱";
 import { セーブパネルリスト } from "BoomYack/基本オブジェクト/キャンバス操作/セーブパネル/セーブパネルリスト";
 import { 描画キャンバスデータ } from "BoomYack/基本オブジェクト/描画キャンバス/データクラス";
-import ゴミ箱Icon from "SVGImg/ゴミ箱.svg?url";
+import ゴミ箱Icon from "../../../SVGImg/ゴミ箱.svg?url";
 
 import { キャンバスJSON出力サービス } from "BoomYack/基本オブジェクト/ファイル入出力/キャンバスJSON出力サービス";
 

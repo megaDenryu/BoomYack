@@ -15,9 +15,9 @@ import { キャンバスメタデータ } from "../データクラス";
 import { 折れ線矢印VM } from "../../配置物"; // export確認要
 import { 折れ線矢印ID, キャンバスID } from "../../ID";
 import { 配置物連結グラフ, 配置物連結グラフをすべて抽出 } from "../配置物グラフ/配置物連結グラフ";
-import 付箋Icon from 'SVGImg/付箋文字でか斜め色付き.svg?url';
-import ゴミ箱Icon from 'SVGImg/ゴミ箱2.svg?url';
-import 折れ線矢印Icon from 'SVGImg/折れ線矢印.svg?url';
+import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?url';
+import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
+import 折れ線矢印Icon from '../../../SVGImg/折れ線矢印.svg?url';
 import { まとめて移動サービス } from "./まとめて移動サービス";
 
 export interface 全ての接続点を表示非表示切り替え可能 {

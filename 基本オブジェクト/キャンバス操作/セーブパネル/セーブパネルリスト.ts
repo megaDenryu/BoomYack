@@ -17,7 +17,7 @@ import {
     jsonFileOutputButton
 } from "./style.css";
 import { キャンバスメタデータ } from "../../描画キャンバス/データクラス";
-import ゴミ箱Icon from "SVGImg/ゴミ箱.svg?url";
+import ゴミ箱Icon from "../../../SVGImg/ゴミ箱.svg?url";
 
 /** リスト選択イベント */
 export interface ISaveListEvents {
