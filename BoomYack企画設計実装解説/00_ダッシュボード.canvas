@@ -1,13 +1,17 @@
 {
 	"nodes":[
-		{"id":"archive_node","type":"group","x":0,"y":400,"width":400,"height":200,"label":"情報の墓場 (Archive)"},
-		{"id":"archive_readme","type":"text","text":"ここには信頼できない古いドキュメントが格納されています。\n参照は慎重に。","x":20,"y":420,"width":360,"height":160},
-		{"id":"mechanics_node","type":"file","file":"10_要件定義・メカニクス/データハンドリング仕様.md","x":20,"y":-200,"width":300,"height":400},
-		{"id":"concept_node","type":"file","file":"01_コンセプト/BoomYackプロジェクト憲章.md","x":-800,"y":-200,"width":300,"height":400},
-		{"id":"architecture_node","type":"file","file":"20_アーキテクチャ・設計/README.md","x":880,"y":-200,"width":300,"height":400}
+		{"id":"concept_node","type":"file","file":"app-ts/src/BoomYack/BoomYack企画設計実装解説/01_コンセプト/BoomYackプロジェクト憲章.md","x":-800,"y":-200,"width":300,"height":400,"color":"1"},
+		{"id":"mechanics_node","type":"file","file":"app-ts/src/BoomYack/BoomYack企画設計実装解説/10_要件定義・メカニクス/データハンドリング仕様.md","x":-300,"y":-200,"width":300,"height":400,"color":"2"},
+		{"id":"mechanics_detail_node","type":"file","file":"app-ts/src/BoomYack/BoomYack企画設計実装解説/10_要件定義・メカニクス/グラフ操作マニュアル.md","x":-300,"y":250,"width":300,"height":300,"color":"2"},
+		{"id":"architecture_readme_node","type":"file","file":"app-ts/src/BoomYack/BoomYack企画設計実装解説/20_アーキテクチャ・設計/README.md","x":200,"y":-400,"width":400,"height":200,"color":"3"},
+		{"id":"basic_object_node","type":"file","file":"app-ts/src/BoomYack/BoomYack企画設計実装解説/20_アーキテクチャ・設計/基本オブジェクト構造.md","x":200,"y":-100,"width":400,"height":400,"color":"3"},
+		{"id":"canvas_model_node","type":"file","file":"app-ts/src/BoomYack/BoomYack企画設計実装解説/20_アーキテクチャ・設計/CanvasGraphModel構造分析.md","x":700,"y":-100,"width":400,"height":400,"color":"3"},
+		{"id":"archive_node","type":"group","label":"情報の墓場 (Archive)","x":200,"y":500,"width":400,"height":200,"color":"6"},
+		{"id":"archive_readme","type":"text","text":"ここには信頼できない古いドキュメントが格納されています。\n参照は慎重に。","x":220,"y":520,"width":360,"height":160}
 	],
 	"edges":[
 		{"id":"edge_concept_to_mechanics","fromNode":"concept_node","fromSide":"right","toNode":"mechanics_node","toSide":"left","label":"具現化 (Spec)"},
-		{"id":"edge_mechanics_to_arch","fromNode":"mechanics_node","fromSide":"right","toNode":"architecture_node","toSide":"left","label":"実装設計 (Design)"}
+		{"id":"edge_mechanics_to_basic_obj","fromNode":"mechanics_node","fromSide":"right","toNode":"basic_object_node","toSide":"left","label":"データ定義"},
+		{"id":"edge_basic_obj_to_canvas_model","fromNode":"basic_object_node","fromSide":"right","toNode":"canvas_model_node","toSide":"left","label":"管理・制御"}
 	]
 }
