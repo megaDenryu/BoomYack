@@ -6,6 +6,7 @@ import { Px2DVector, Px長さ, 描画座標点 } from "SengenUI/index";
 import { IDMap } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
 import { 付箋ID } from "BoomYack/基本オブジェクト/ID";
 import { CanvasGraphModel } from "BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
+import { Iグラフ配置先 } from "BoomYack/基本オブジェクト/配置物リポジトリ";
 import { node付箋pair } from "../ValueObjects/node付箋pair";
 import { I後処理位置調整Strategy } from "./IStrategy";
 
@@ -22,7 +23,7 @@ export class グリッドレイアウトStrategy implements I後処理位置調�
         return new グリッドレイアウトStrategy(列数);
     }
 
-    public 実行(pairMap: IDMap<付箋ID, node付箋pair>, model: CanvasGraphModel): void {
+    public 実行(pairMap: IDMap<付箋ID, node付箋pair>, 配置先: Iグラフ配置先): void {
         const pairs = Array.from(pairMap.values());
 
         pairs.forEach((pair, index) => {
@@ -34,7 +35,7 @@ export class グリッドレイアウトStrategy implements I後処理位置調�
                     this.開始位置.x.plus(new Px長さ(this.セル幅.値 * 列)),
                     this.開始位置.y.plus(new Px長さ(this.セル高さ.値 * 行))
                 ),
-                model.描画基準座標
+                配置先.描画基準座標
             );
 
             pair.付箋.view.位置を設定(位置);

@@ -1,5 +1,5 @@
 import { Px2DVector, Px長さ, 描画座標点 } from "SengenUI/index";
-import { CanvasGraphModel } from "BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
+import { Iグラフ配置先 } from "BoomYack/基本オブジェクト/配置物リポジトリ";
 import { node付箋pair } from "../ValueObjects/node付箋pair";
 import { I後処理位置調整Strategy } from "./IStrategy";
 import { IDMap } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
@@ -14,8 +14,8 @@ export class サイズ考慮ツリーレイアウトStrategy implements I後処�
         this.設定 = 設定;
     }
 
-    public 実行(pairMap: IDMap<付箋ID, node付箋pair>, model: CanvasGraphModel): void {
-        const layoutContext = new TreeLayoutContext(pairMap, this.設定, model);
+    public 実行(pairMap: IDMap<付箋ID, node付箋pair>, 配置先: Iグラフ配置先): void {
+        const layoutContext = new TreeLayoutContext(pairMap, this.設定, 配置先);
         layoutContext.execute();
     }
 }
@@ -24,18 +24,18 @@ class TreeLayoutContext {
     private readonly pairMap: IDMap<付箋ID, node付箋pair>;
     private readonly nodeIDMap: Map<string, node付箋pair>;
     private readonly config: レイアウト設定;
-    private readonly model: CanvasGraphModel;
+    private readonly 配置先: Iグラフ配置先;
     private readonly visited = new Set<string>();
     private readonly subtreeWidths = new Map<string, number>();
 
     constructor(
         pairMap: IDMap<付箋ID, node付箋pair>,
         config: レイアウト設定,
-        model: CanvasGraphModel
+        配置先: Iグラフ配置先
     ) {
         this.pairMap = pairMap;
         this.config = config;
-        this.model = model;
+        this.配置先 = 配置先;
         this.nodeIDMap = new Map();
 
         // NodeIDで引けるようにマップを作成
@@ -144,7 +144,7 @@ class TreeLayoutContext {
         // 描画座標点を作成してセット
         const pos = new 描画座標点(
             new Px2DVector(new Px長さ(x), new Px長さ(y)),
-            this.model.描画基準座標
+            this.配置先.描画基準座標
         );
         pair.付箋.位置を設定(pos);
 

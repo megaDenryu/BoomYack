@@ -1,6 +1,6 @@
 import { 描画座標点 } from "SengenUI/index";
 
-import { CanvasGraphModel } from "../描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
+import { Iグラフ配置先 } from "../配置物リポジトリ";
 import { テキスト用グラフ, テキスト用グラフノード, 付箋text } from "../描画キャンバス/配置物グラフ/テキスト化情報";
 import { IDMap } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
 import { 付箋ID } from "../ID";
@@ -19,7 +19,7 @@ import { サイズ考慮ツリーレイアウトStrategy } from "./レイアウ�
 // ========================================
 
 export class テキスト用グラフからキャンバスに配置するサービス {
-    private readonly model: CanvasGraphModel;
+    private readonly 配置先: Iグラフ配置先;
     private readonly グラフ: テキスト用グラフ<付箋text>;
     private readonly node付箋pairMap: IDMap<付箋ID, node付箋pair> = new IDMap<付箋ID, node付箋pair>();
     private readonly 先行位置調整サービス: I前処理位置調整Strategy;
@@ -27,18 +27,18 @@ export class テキスト用グラフからキャンバスに配置するサー�
     private readonly nodeID別node付箋pairMap: Map<string, node付箋pair> = new Map();
 
     public constructor(
-        model: CanvasGraphModel,
+        配置先: Iグラフ配置先,
         グラフ: テキスト用グラフ<付箋text>,
         開始位置?: 描画座標点,
         前処理Strategy?: I前処理位置調整Strategy,
         後処理Strategy?: I後処理位置調整Strategy
     ) {
-        this.model = model;
+        this.配置先 = 配置先;
         this.グラフ = グラフ;
         const 基本設定 = レイアウト設定.default();
         const 設定 = 開始位置 ? 基本設定.with開始位置(開始位置.px2DVector) : 基本設定;
         this.先行位置調整サービス = 前処理Strategy ??
-            new 階層的レイアウトStrategy(グラフ, model, 設定);
+            new 階層的レイアウトStrategy(グラフ, 配置先, 設定);
         this.後処理位置調整サービス = 後処理Strategy ??
             new サイズ考慮ツリーレイアウトStrategy(設定);
     }
@@ -60,7 +60,7 @@ export class テキスト用グラフからキャンバスに配置するサー�
 
         // 前処理Strategyから位置を取得
         const pos = this.先行位置調整サービス.ノード位置を計算(node);
-        const node付箋 = new node付箋pair(node, this.model.描画座標点でadd付箋(pos, node.nodeData.text));
+        const node付箋 = new node付箋pair(node, this.配置先.描画座標点でadd付箋(pos, node.nodeData.text));
         this.node付箋pairMap.set(node付箋.付箋.id, node付箋);
         this.nodeID別node付箋pairMap.set(node.id, node付箋);
 
@@ -83,7 +83,7 @@ export class テキスト用グラフからキャンバスに配置するサー�
     }
 
     private 後処理による位置調整(): void {
-        this.後処理位置調整サービス.実行(this.node付箋pairMap, this.model);
+        this.後処理位置調整サービス.実行(this.node付箋pairMap, this.配置先);
     }
 }
 

@@ -5,7 +5,7 @@ import { Px2DVector, 描画座標点 } from "SengenUI/index";
 
 import { IDMap } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
 import { 付箋ID } from "BoomYack/基本オブジェクト/ID";
-import { CanvasGraphModel } from "BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
+import { Iグラフ配置先 } from "BoomYack/基本オブジェクト/配置物リポジトリ";
 import { 力ベクトル } from "../ValueObjects/力ベクトル";
 import { node付箋pair } from "../ValueObjects/node付箋pair";
 import { I後処理位置調整Strategy } from "./IStrategy";
@@ -27,7 +27,7 @@ export class ForceDirectedLayoutStrategy implements I後処理位置調整Strate
         return new ForceDirectedLayoutStrategy(反発係数, 引力係数, イテレーション回数);
     }
 
-    public 実行(pairMap: IDMap<付箋ID, node付箋pair>, model: CanvasGraphModel): void {
+    public 実行(pairMap: IDMap<付箋ID, node付箋pair>, 配置先: Iグラフ配置先): void {
         const pairs = Array.from(pairMap.values());
         
         // 初期位置をランダムに配置
@@ -37,7 +37,7 @@ export class ForceDirectedLayoutStrategy implements I後処理位置調整Strate
                     Math.random() * 800 + 100,
                     Math.random() * 600 + 100
                 ),
-                model.描画基準座標
+                配置先.描画基準座標
             );
             pair.付箋.view.位置を設定(初期位置);
         });
@@ -101,7 +101,7 @@ export class ForceDirectedLayoutStrategy implements I後処理位置調整Strate
                 const 新しい位置 = 現在位置.plus(移動量.ベクトル);
 
                 pair.付箋.view.位置を設定(
-                    new 描画座標点(新しい位置, model.描画基準座標)
+                    new 描画座標点(新しい位置, 配置先.描画基準座標)
                 );
             });
         }

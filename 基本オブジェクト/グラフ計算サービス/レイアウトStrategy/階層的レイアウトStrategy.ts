@@ -3,7 +3,7 @@ import { Px2DVector, Px長さ, 描画座標点 } from "SengenUI/index";
 // Strategy実装: 階層的レイアウト（前処理型）
 // ========================================
 
-import { CanvasGraphModel } from "BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
+import { Iグラフ配置先 } from "BoomYack/基本オブジェクト/配置物リポジトリ";
 import { テキスト用グラフ, 付箋text, テキスト用グラフノード } from "BoomYack/基本オブジェクト/描画キャンバス/配置物グラフ/テキスト化情報";
 
 import { グラフ階層情報 } from "../ValueObjects/グラフ階層情報";
@@ -13,16 +13,16 @@ import { I前処理位置調整Strategy } from "./IStrategy";
 export class 階層的レイアウトStrategy implements I前処理位置調整Strategy {
     private readonly 階層情報: グラフ階層情報;
     private readonly 設定: レイアウト設定;
-    private readonly model: CanvasGraphModel;
+    private readonly 配置先: Iグラフ配置先;
 
     public constructor(
         グラフ: テキスト用グラフ<付箋text>,
-        model: CanvasGraphModel,
+        配置先: Iグラフ配置先,
         設定: レイアウト設定
     ) {
         this.階層情報 = グラフ階層情報.fromグラフ(グラフ);
         this.設定 = 設定;
-        this.model = model;
+        this.配置先 = 配置先;
     }
 
     public ノード位置を計算(node: テキスト用グラフノード<付箋text>): 描画座標点 {
@@ -43,7 +43,7 @@ export class 階層的レイアウトStrategy implements I前処理位置調整S
 
         return new 描画座標点(
             new Px2DVector(x座標, y座標),
-            this.model.描画基準座標
+            this.配置先.描画基準座標
         );
     }
 }
