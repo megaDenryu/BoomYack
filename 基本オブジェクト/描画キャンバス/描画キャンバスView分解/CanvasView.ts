@@ -52,7 +52,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     public readonly persistence: CanvasPersistenceManager;
     private selectionManager: 配置物選択機能集約;
     private 選択物まとめて移動サービス: まとめて移動サービス = new まとめて移動サービス();
-    private readonly グラフ操作サービス: キャンバスグラフ操作サービス;
+    public readonly グラフ操作サービス: キャンバスグラフ操作サービス;
     private _再描画予約済み = false;
     private _再描画リクエストID: number | null = null;
     
@@ -131,12 +131,18 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             { iconUrl: ゴミ箱Icon, onClick: (e) => this.deleteSelectedItem() , backgroundColor: '#ffffff', borderColor: 'green' },
             { iconUrl: 付箋Icon, onClick: (e) => this.onAddStickyNote(e) , backgroundColor: '#ffffff', borderColor: 'green' },
             { iconUrl: 折れ線矢印Icon, onClick: (e) => this.onAddArrow(e) , backgroundColor: '#ffffff', borderColor: 'green' },
-            { label: "グラフ選択", onClick: (e) => this.グラフ選択() },
-            { label: "グラフテキストコピー", onClick: (e) => this.グラフをテキストとしてコピー()},
-            { label: "グラフJson", onClick: (e) => this.グラフを選択してjsonファイル出力()},
+            { label: "グラフ選択", onClick: (e) => this.executeGraphSelection() },
+            { label: "グラフテキストコピー", onClick: (e) => {
+                const 選択配置物 = this.selectionManager.選択中配置物[0];
+                if (選択配置物) { this.グラフ操作サービス.グラフをテキストとしてコピー(選択配置物); }
+            }},
+            { label: "グラフJson", onClick: (e) => {
+                const 選択配置物 = this.selectionManager.選択中配置物[0];
+                if (選択配置物) { this.グラフ操作サービス.グラフを選択してjsonファイル出力(選択配置物); }
+            }},
             { iconUrl: SaveIcon, onClick: (e) => this._options.onSaveClick?.(), backgroundColor: '#ffffff', borderColor: 'green' },
 
-            { label: "貼り付け", onClick: (e) => this.クリップボードから貼り付け(e)},
+            { label: "貼り付け", onClick: (e) => this.グラフ操作サービス.クリップボードから貼り付け(e)},
 
             ...(this._options.追加メニュー項目 ?? [])
         ];
@@ -280,26 +286,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         );
     }
 
-    public 現在の描画キャンバスデータを取得() {
-        return this.persistence.serialize();
-    }
 
-    // Proxy methods for compatibility or usage
-    public async 保存(): Promise<{ success: boolean; message: string }> {
-        return this.persistence.save(this.canvasId);
-    }
-    
-    public async 読み込み(): Promise<boolean> {
-        return this.persistence.load(this.canvasId);
-    }
-    
-    public ローカル保存(): void {
-        this.persistence.localSave(this.canvasId);
-    }
-    
-    public ローカル読み込み(): boolean {
-        return this.persistence.localLoad(this.canvasId);
-    }
 
     public 全配置物クリア(): void {
         this.model.全配置物クリア();
@@ -310,7 +297,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         this.contextMenuContainer.delete(); 
     }
 
-    public グラフ選択(): void {
+    private executeGraphSelection(): void {
         const 選択中配置物リスト = this.selectionManager.選択中配置物;
         const 選択中配置物グラフリスト: 配置物連結グラフ[] = 選択中配置物リスト.map(配置物 => this.グラフ操作サービス.グラフを選択(配置物))
                                                                           .filter((graph) => graph !== null);
@@ -319,19 +306,5 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                 this.selectionManager.追加選択(配置物);
             }
         }
-    }
-
-    public グラフを選択してjsonファイル出力(){
-        const 選択配置物 = this.selectionManager.選択中配置物[0];
-        if (選択配置物) { this.グラフ操作サービス.グラフを選択してjsonファイル出力(選択配置物); }
-    }
-
-    public グラフをテキストとしてコピー(){
-        const 選択配置物 = this.selectionManager.選択中配置物[0];
-        if (選択配置物) { this.グラフ操作サービス.グラフをテキストとしてコピー(選択配置物); }
-    }
-
-    public クリップボードから貼り付け(e: MouseEvent){
-        this.グラフ操作サービス.クリップボードから貼り付け(e);
     }
 }

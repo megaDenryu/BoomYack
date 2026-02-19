@@ -70,17 +70,17 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
                 const safeId = this.toSafeId(name);
                 this._描画キャンバスView.setCanvasIdAndName(safeId, name);
                 if (mode === "server") {
-                    await this._描画キャンバスView.保存();
+                    await this._描画キャンバスView.persistence.save(this._描画キャンバスView.canvasId);
                 } else {
-                    this._描画キャンバスView.ローカル保存();
+                    this._描画キャンバスView.persistence.localSave(this._描画キャンバスView.canvasId);
                 }
             },
             onLoad: async (id: string, mode: SaveMode) => {
                 this._描画キャンバスView.setCanvasId(id);
                 if (mode === "server") {
-                    await this._描画キャンバスView.読み込み();
+                    await this._描画キャンバスView.persistence.load(this._描画キャンバスView.canvasId);
                 } else {
-                    this._描画キャンバスView.ローカル読み込み();
+                    this._描画キャンバスView.persistence.localLoad(this._描画キャンバスView.canvasId);
                 }
             },
             onDelete: async (id: string, mode: SaveMode) => {
@@ -98,7 +98,7 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
                 }
             },
             onGetCurrentCanvasData: () => {
-                return this._描画キャンバスView.現在の描画キャンバスデータを取得();
+                return this._描画キャンバスView.persistence.serialize();
             },
             onGetCanvasDataById: async (id: string, mode: SaveMode) => {
                 if (mode === "server") {
