@@ -1,53 +1,229 @@
 ---
 type: Proposal
-status: Draft
+status: Draft (v2)
 created: 2026-02-19
+updated: 2026-02-19
 author: AI Agent
+supersedes: 提案-001_v1 (99_Archive/提案-001_CanvasGraphModelリファクタリング_v1_Draft.md)
 ---
-# 提案-001: CanvasGraphModelの責務分割とリファクタリング計画
+# 提案-001: BoomYackキャンバス基盤アーキテクチャリファクタリング
+
+> **v1からの変更点**: CanvasGraphModel単体の3分割から、アーキテクチャ全体の段階的リファクタリングへと方針を拡大。
+> v1ではCanvasGraphModelの責務分割のみが対象だったが、コードベース精査の結果、CanvasGraphModel以前に対処すべき構造問題が複数発見されたため計画を再構成した。
 
 ## 1. 現状 (Current State)
-`CanvasGraphModel` (`app-ts/src/BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasGraphModel.ts`) は、現在以下の3つの主要な責務を単一のクラスで担っています。
 
-1.  **Repository**: 配置物のリスト管理 (`add付箋`, `remove配置物`, etc.)
-2.  **Contact Resolver**: マウス位置からの接触判定 (`接触点を取得`, `I接触点を教えてくれる人`の実装)
-3.  **Rendering Controller**: 描画ループの制御 (`requestAnimationFrame`による再描画スケジューリング)
+キャンバス基盤は以下のクラス群で構成されている:
+
+| クラス | ファイル | 行数 | 現在の責務 |
+|---|---|---|---|
+| `CanvasGraphModel` | `描画キャンバスView分解/CanvasGraphModel.ts` | ~260行 | 配置物リスト管理 + 接触判定 + 描画スケジューリング + グラフ分析 + クリップボード/JSON出力 |
+| `CanvasView` | `描画キャンバスView分解/CanvasView.ts` | ~320行 | DOM構築 + イベントハンドリング + Persistence/Model/Factoryの組み立て + 大量のプロキシメソッド |
+| `CanvasItemFactory` | `描画キャンバスView分解/CanvasItemFactory.ts` | ~130行 | 配置物生成 + 設定パネル表示（衝突判定サービスを内包） |
+| `CanvasPersistenceManager` | `描画キャンバスView分解/CanvasPersistenceManager.ts` | ~170行 | 保存/読み込み/シリアライズ/デシリアライズ（比較的クリーン） |
+| `I配置物リポジトリ` | `配置物リポジトリ.ts` | ~15行 | コレクション管理 + ファクトリ + 接触判定を1インターフェースに混在 |
 
 ## 2. 問題点・課題 (Problem / Motivation)
-- **責務の過集中 (God Class)**: クラスが肥大化しつつあり、変更の影響範囲が予測しづらい状態です。特に「描画制御」と「データ管理」が密結合しているため、データロジックのテストが困難です。
-- **SengenUI憲法違反の懸念**: `Functional DDD` の原則（可変状態の分離）に反し、状態（`描画基準座標`）とロジック、さらに副作用（描画命令）が混在しています。
-- **拡張性の欠如**: 今後「レイヤー機能」や「サブグラフ（グループ）」を実装する際、現在の構造では複雑度が指数関数的に増大します。
+
+### 2-1. `instanceof`地獄 — Open-Closed原則の崩壊【最重要】
+
+コードベース全体で`矢印接続可能付箋Old`と`折れ線矢印集約`に対する`instanceof`チェックが**10箇所以上**散在している:
+
+- `CanvasGraphModel.ts:100,102` — `add配置物()`内で接触判定の登録分岐
+- `まとめて移動サービス.ts:23,27` — ドラッグ対象抽出
+- `配置物連結グラフ.ts:64,71` — グラフ検索
+- `配置物情報.ts:46,49` — 配置物情報ファクトリ
+- `配置物選択管理.ts:43,45` — 右クリック処理（**空分岐で未実装**）
+
+**影響**: 新しい配置物タイプ（例: `グループミニキャンバス`、型定義は存在するが未実装）を追加するたびに、上記全ファイルを修正する必要がある。
+
+### 2-2. `CanvasGraphModel`にApplicationServiceロジックが侵入
+
+ModelがMouseEventを直接受け取り（`クリップボードから貼り付け(e: MouseEvent)`）、JSON出力サービスやクリップボードサービスといったインフラ層を直接保持している。明確なレイヤー違反。
+
+- `グラフを選択してjsonファイル出力()` — ファイルI/Oユースケース
+- `グラフをテキストとしてコピー()` — クリップボードユースケース
+- `クリップボードから貼り付け(e: MouseEvent)` — UIイベント処理がModelに存在
+- `Json出力サービス` / `クリップボードサービス` — インフラサービスの直接保持
+
+### 2-3. `I配置物リポジトリ`のISP違反
+
+```typescript
+// 現状: 4つの責務が1インターフェースに混在
+interface I配置物リポジトリ<座標点T> {
+    配置物リスト: I配置物集約[];           // コレクション管理
+    add付箋(pos): 矢印接続可能付箋Old;    // ファクトリ（具象型を返す！）
+    add折れ線矢印(...): 折れ線矢印集約;   // ファクトリ
+    接触点を取得(pos): ...;              // 接触判定
+    未接続の点ハンドルを接続点と接続をtryする(...): void; // 接続ロジック
+}
+```
+
+ファクトリメソッドが具象型`矢印接続可能付箋Old`を返すため、このインターフェースに依存する全コードが具象クラスに引きずられる。
+
+### 2-4. 責務の過集中 (God Class)
+
+`CanvasGraphModel`(260行)と`CanvasView`(320行)が100行を超え始めており、変更の影響範囲が広くテスト困難な状態。
+
+### 2-5. `CanvasView`のプロキシメソッド過多
+
+`CanvasView`が`保存()`, `読み込み()`, `ローカル保存()`, `ローカル読み込み()`, `グラフ選択()`, `グラフをテキストとしてコピー()`など大量のプロキシメソッドを持ち、上位層（`StickyGraphBoard`）がModelに直接アクセスすべき所をViewに委譲させている。
+
+### 2-6. Oldクラスの残存
+
+`矢印接続可能付箋Old` — 名前に"Old"がついたまま唯一の付箋実装として使われている。`自動リサイズ付箋View`と`自動リサイズ付箋View2`も両方存在し、中途半端な移行の痕跡が残る。
 
 ## 3. 提案内容 (Proposed Solution)
-`CanvasGraphModel` を以下の3つのクラス・サービスに分割することを提案します。
 
-1.  **`CanvasGraphRepository` (New)**:
-    -   純粋なデータ管理（配置物リストの保持、追加、削除）。
-    -   イベント通知 (`ADDED`, `REMOVED`) の発行。
-    -   `CanvasGraphModel` からデータ管理部分を委譲。
+CanvasGraphModel単体の分割ではなく、**段階的にアーキテクチャ全体を改善**する。各Phaseは独立してmerge/revert可能な単位にする。
 
-2.  **`ContactResolverService` (Refactor)**:
-    -   既存の `I接触点を教えてくれる人` ロジックを独立したサービスとして切り出し。
-    -   Repositoryを受け取り、計算結果（接触点）を返す純粋な計算機に近い形を目指す。
+### Phase 0: instanceof排除【最優先・影響範囲小】
 
-3.  **`CanvasRenderingController` (New/Refactor)**:
-    -   `requestAnimationFrame` ループと再描画スケジューリングを管理。
-    -   Model (Repository) の変更イベントを購読し、View (Placement Views) に描画を指示する。
+`I配置物集約`にポリモーフィックなメソッドを追加し、各具象クラスが自分の登録方法を知るようにする。
+
+```typescript
+// Before: CanvasGraphModel内のinstanceof分岐
+if (item instanceof 矢印接続可能付箋Old) {
+    this._i接触点を教えてくれる人.add接続点リスト(item.接続点リスト);
+} else if (item instanceof 折れ線矢印集約) {
+    this._i接触点を教えてくれる人.add配置物(item.始点ハンドル);
+    this._i接触点を教えてくれる人.add配置物(item.終点ハンドル);
+}
+
+// After: 各配置物が自身で登録（Visitorパターン簡略版）
+interface I配置物集約 {
+    // 既存...
+    接触判定対象を登録する(target: I接触点登録先): void;
+}
+
+// 矢印接続可能付箋Old側
+接触判定対象を登録する(target: I接触点登録先): void {
+    target.add接続点リスト(this.接続点リスト);
+}
+
+// 折れ線矢印集約側
+接触判定対象を登録する(target: I接触点登録先): void {
+    target.add配置物(this.始点ハンドル);
+    target.add配置物(this.終点ハンドル);
+}
+```
+
+同様に`配置物連結グラフ`、`配置物情報`、`まとめて移動サービス`のinstanceof分岐も各配置物側に移動。
+
+**変更対象ファイル・行**:
+- `I配置物.ts` — インターフェース拡張
+- `矢印接続可能付箋Old.ts` — メソッド実装
+- `折れ線矢印集約.ts` — メソッド実装
+- `CanvasGraphModel.ts:95-108` — instanceof分岐の除去
+- `まとめて移動サービス.ts:20-30` — 同上
+- `配置物連結グラフ.ts:60-80` — 同上
+- `配置物情報.ts:44-53` — 同上
+
+### Phase 1: ApplicationServiceロジックの抽出
+
+`CanvasGraphModel`からグラフ分析・クリップボード・JSON出力のロジックを`キャンバスユースケースサービス`に抽出。ModelはMouseEventもインフラサービスも知らない純粋な状態管理に特化させる。
+
+```
+// 抽出対象メソッド群 → 新クラスへ移動
+CanvasGraphModel.グラフを抽出()
+CanvasGraphModel.グラフを選択()
+CanvasGraphModel.グラフを選択してjsonファイル出力()
+CanvasGraphModel.グラフをテキストとしてコピー()
+CanvasGraphModel.クリップボードから貼り付け(e: MouseEvent)  ← レイヤー違反
+CanvasGraphModel.Json出力サービス                          ← インフラ依存
+CanvasGraphModel.クリップボードサービス                      ← インフラ依存
+```
+
+**新クラス**: `キャンバスグラフ操作サービス`（ApplicationService層）
+- コンストラクタでModelへの参照とインフラサービスを受け取る
+- `CanvasView`がこのサービスを呼び出す形に変更
+
+### Phase 2: `I配置物リポジトリ`のインターフェース分割
+
+```typescript
+// 純粋なコレクション管理（ISP原則に基づく分割）
+interface I配置物コレクション {
+    readonly 配置物リスト: ReadonlyArray<I配置物集約>;
+    add配置物(item: I配置物集約): void;
+    remove配置物(item: I配置物集約): void;
+    全配置物クリア(): void;
+}
+
+// 接触判定は既存のI接触点を教えてくれる人をそのまま使う
+// ファクトリはCanvasItemFactoryが既に担っている
+
+// I配置物リポジトリは廃止し、利用箇所は上記の分割インターフェースに置き換え
+```
+
+### Phase 3: 描画スケジューリングのView層移動
+
+`requestAnimationFrame`ロジックを`CanvasGraphModel`からView層に移動。  
+Modelの`GraphEvent`をViewがsubscribeし、View側でバッチ再描画をスケジューリングする形に変更。
+
+```
+// Before: Model内に描画ロジック
+CanvasGraphModel.再描画をスケジュール()  ← requestAnimationFrame
+CanvasGraphModel.即座に再描画()
+CanvasGraphModel.配置物再描画()
+
+// After: View側で制御
+CanvasView が GraphEvent('UPDATED') を受け取り、
+requestAnimationFrame でバッチ再描画をスケジューリング
+```
+
+### Phase 4: CanvasViewのスリム化
+
+プロキシメソッド（`保存()`, `読み込み()`, `グラフ選択()`等）を排除。  
+`StickyGraphBoard`が`model`や`persistence`、`キャンバスグラフ操作サービス`に直接アクセスする形に変更。  
+CanvasViewはDOM構築とUIイベントハンドリングのみに集中させる。
 
 ### 3-1. UI/UX設計案 (UI Design)
-内部リファクタリングであるため、**既存のUI/UXに変更はありません。**
-ただし、描画パフォーマンス（ズーム・パン時の滑らかさ）が維持・向上されることを確認します。
+全Phaseが内部リファクタリングであるため、**既存のUI/UXに変更はありません。**
+描画パフォーマンス（ズーム・パン時の滑らかさ）が維持・向上されることを確認します。
 
 ### 3-2. 設計憲法・適合チェック (Constitution Check)
-- [x] DOM操作を直接行っていないか？ -> はい（Controller分割によりDOM操作も整理される）
-- [x] LV2コンポーネントを継承していないか？ -> はい
-- [x] スタイルは Vanilla Extract を使用しているか？ -> 該当なし（ロジックのみ）
-- [x] 安易な `any` や `cast` を使用する計画になっていないか？ -> はい、型安全性を重視する
+- [x] DOM操作を直接行っていないか？ → Phase 3でDOM操作はView層に集約される
+- [x] LV2コンポーネントを継承していないか？ → はい、新規クラスはすべてPlainクラス
+- [x] スタイルは Vanilla Extract を使用しているか？ → 該当なし（ロジックのみ）
+- [x] 安易な `any` や `cast` を使用する計画になっていないか？ → はい。instanceof排除により型安全性が**向上**する
+- [x] `Functional DDD` の原則に沿っているか？ → Phase 1でModelからインフラ依存と副作用を排除し純粋な状態管理に近づける
 
 ## 4. 影響範囲 (Impact)
-- `CanvasView.ts`: Modelの生成・利用部分に変更が入ります。
-- `CanvasItemFactory.ts`: Modelへの依存方法が変わる可能性があります。
-- 既存のテストコード（もしあれば）。
+
+### Phase別影響マトリクス
+
+| ファイル | Phase 0 | Phase 1 | Phase 2 | Phase 3 | Phase 4 |
+|---|:---:|:---:|:---:|:---:|:---:|
+| `I配置物.ts` | **変更** | - | - | - | - |
+| `矢印接続可能付箋Old.ts` | **変更** | - | - | - | - |
+| `折れ線矢印集約.ts` | **変更** | - | - | - | - |
+| `CanvasGraphModel.ts` | 変更 | **大幅変更** | 変更 | **大幅変更** | - |
+| `まとめて移動サービス.ts` | **変更** | - | - | - | - |
+| `配置物連結グラフ.ts` | **変更** | - | - | - | - |
+| `配置物情報.ts` | **変更** | - | - | - | - |
+| `CanvasView.ts` | - | 変更 | - | 変更 | **大幅変更** |
+| `CanvasItemFactory.ts` | - | - | 変更 | - | - |
+| `配置物リポジトリ.ts` | - | - | **廃止** | - | - |
+| `StickyGraphBoard（付箋グラフボード.ts）` | - | - | - | - | 変更 |
+| **新規作成** | - | `キャンバスグラフ操作サービス.ts` | - | - | - |
+
+### 各Phaseのリスク評価
+
+| Phase | リスク | 理由 |
+|---|---|---|
+| Phase 0 | **低** | メソッド追加のみ。既存の呼び出し元は順次置換。型エラーで漏れを検知可能 |
+| Phase 1 | **低〜中** | メソッド移動が主。CanvasView側のプロキシ呼び出しが変わる |
+| Phase 2 | **中** | ISP分割でインターフェースの利用箇所すべてに波及。ただし静的型検査で安全に実施可能 |
+| Phase 3 | **中** | 描画タイミングの変更はパフォーマンスに直結。手動テスト必須 |
+| Phase 4 | **低** | プロキシメソッド削除のみ。呼び出し元変更は機械的 |
 
 ## 5. 代替案 (Alternatives)
-- **現状維持**: 小規模なうちは問題ないが、ボイスロイド同人誌作成ツールとして機能拡張（レイヤー、タイムライン等）が進むにつれ、技術的負債が開発速度を著しく低下させるリスクがあるため却下。
+
+### 代替案A: CanvasGraphModel単体の3分割（v1提案）
+**不採用理由**: 分割後のRepository・ContactResolver・RenderingController内にinstanceof分岐がそのまま再現される。根本原因（Open-Closed原則違反）を先に解決しないと分割の意味が薄い。
+
+### 代替案B: 全体を一度にリライト
+**不採用理由**: 影響範囲が大きすぎてリグレッションリスクが高い。Phase分割による段階的改善のほうが安全かつ各段階でのrevertが可能。
+
+### 代替案C: 現状維持
+**不採用理由**: `グループミニキャンバス`等の新配置物タイプを追加する際にinstanceofチェックが爆発する。技術的負債が開発速度を著しく低下させるため却下。
