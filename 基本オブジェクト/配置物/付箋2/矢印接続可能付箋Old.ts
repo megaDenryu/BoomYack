@@ -1,5 +1,5 @@
-import { I描画空間, Px2DVector, 描画座標点, 配置物座標点 } from "SengenUI/index";
-import { Iシリアライズ可能配置物, I付箋VM, I付箋集約, I選択可能配置物 } from "../../I配置物";
+import { I描画空間, LV2HtmlComponentBase, Px2DVector, 描画座標点, 配置物座標点 } from "SengenUI/index";
+import { Iシリアライズ可能配置物, I付箋VM, I付箋集約, I選択可能配置物, I接触点登録先, Iドラッグ移動可能 } from "../../I配置物";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 
 import { I接続点親情報, 接続点 } from "../矢印接続可能なもの/接続点";
@@ -157,6 +157,13 @@ export class 矢印接続可能付箋Old<座標点T extends 配置物座標点> 
     /** ID取得 */
     public get id(): 付箋ID { return this.view.配置物ID; }
 
+    public get idString(): string { return this.id.id; }
+
+    public ドラッグ移動対象を収集する(除外view?: LV2HtmlComponentBase): Iドラッグ移動可能[] {
+        if (除外view !== undefined && this.view === 除外view) { return []; }
+        return [this.view];
+    }
+
     public 接続点から矢印を作る(上下左右: '上' | '下' | '左' | '右'): 折れ線矢印集約<座標点T> {
         const point = this.矢印接続可能なもの.接続点_上;
         return point.矢印作成()
@@ -182,5 +189,9 @@ export class 矢印接続可能付箋Old<座標点T extends 配置物座標点> 
     public 設定を適用(新設定: 付箋設定状態): void {
         this._設定状態 = 新設定;
         this.view.設定を適用(新設定);
+    }
+
+    public 接触判定対象を登録する(target: I接触点登録先): void {
+        target.add接続点リスト(this.接続点リスト);
     }
 }

@@ -5,8 +5,6 @@ import { IDMap } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
 import { 付箋ID, 折れ線矢印ID } from "../../../../BoomYack/基本オブジェクト/ID";
 
 import { 付箋情報, 折れ線矢印情報 } from "./配置物情報";
-import { 折れ線矢印集約 } from "../../../../BoomYack/基本オブジェクト/配置物";
-import { 矢印接続可能付箋Old } from "../../../../BoomYack/基本オブジェクト/配置物/付箋2/矢印接続可能付箋Old";
 
 export class 配置物連結グラフ {
     public readonly 付箋map: IDMap<付箋ID, 付箋情報<配置物座標点>> = new IDMap();
@@ -60,21 +58,11 @@ export class 配置物連結グラフ群 {
         this.配置物連結グラフリスト = 配置物連結グラフリスト;
     }
 
-    public 配置物が含まれるグラフを取得(配置物:I配置物集約): 配置物連結グラフ | null {
-        if (配置物 instanceof 折れ線矢印集約){
-            for (const グラフ of this.配置物連結グラフリスト){
-                if (グラフ.折れ線矢印map.has(配置物.id)){ return グラフ;}
-            }
-            return null;
+    public 配置物が含まれるグラフを取得(配置物: I配置物集約): 配置物連結グラフ | null {
+        const id = 配置物.idString;
+        for (const グラフ of this.配置物連結グラフリスト) {
+            if (グラフ.折れ線矢印map.hasString(id) || グラフ.付箋map.hasString(id)) { return グラフ; }
         }
-
-        if (配置物 instanceof 矢印接続可能付箋Old){
-            for (const グラフ of this.配置物連結グラフリスト){
-                if (グラフ.付箋map.has(配置物.id)){return グラフ; }
-            }
-            return null;
-        }
-        
         return null;
     }
 

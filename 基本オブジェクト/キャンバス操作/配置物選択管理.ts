@@ -5,8 +5,6 @@ import { Drag中値, 配置物座標点 } from "SengenUI/index";
 import { I配置物集約 } from "../I配置物";
 import { I配置物選択機能集約用のキャンバス機能 } from "../描画キャンバス/描画キャンバスView分解/CanvasView";
 import { まとめて移動サービス } from "../描画キャンバス/描画キャンバスView分解/まとめて移動サービス";
-import { 折れ線矢印集約 } from "../配置物";
-import { 矢印接続可能付箋Old } from "../配置物/付箋2/矢印接続可能付箋Old";
 import { 自動リサイズ付箋View } from "../配置物/付箋2/自動リサイズ付箋View";
 
 export interface I配置物選択機能集約 {
@@ -38,14 +36,8 @@ export class 配置物選択機能集約 implements I配置物選択機能集約
         this._選択物まとめて移動サービス = 選択物まとめて移動サービス;
     }
 
-    private On右クリック(e: MouseEvent): void {
-        if (this.選択中配置物) {
-            if (this.選択中配置物 instanceof 矢印接続可能付箋Old) {
-
-            } else if (this.選択中配置物 instanceof 折れ線矢印集約) {
-
-            }
-        }
+    private On右クリック(_e: MouseEvent): void {
+        // 右クリック処理は将来実装
     }
 
     public set選択中配置物(配置物: I配置物集約): void {

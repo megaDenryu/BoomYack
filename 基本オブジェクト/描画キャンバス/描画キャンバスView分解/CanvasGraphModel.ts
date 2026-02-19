@@ -1,5 +1,5 @@
 import { I描画空間, MouseEventData, Px2DVector, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
-import { I接触点を教えてくれる人, I配置物集約, リスト配置可能, 接触判定可能な点, I接続点 } from "../../I配置物";
+import { I接触点を教えてくれる人, I配置物集約, リスト配置可能, 接触判定可能な点, I接続点, I接触点登録先 } from "../../I配置物";
 
 import { 無分割管理 } from "../../接触点を教えてくれる人/無分割管理";
 import { I配置物リポジトリ } from "../../配置物リポジトリ";
@@ -92,22 +92,12 @@ export class CanvasGraphModel implements I描画空間, I配置物リポジト�
     }
 
     public add配置物(item: I配置物集約 | 接触判定可能な点) {
-        // I配置物集約 かどうかを簡易判定 ('view'プロパティと'id'プロパティを持つか)
-        if ('view' in item && 'id' in item) {
-            this.配置物リスト.push(item as I配置物集約);
-            
-            // 接触判定への登録
-            if (item instanceof 矢印接続可能付箋Old) {
-                 this._i接触点を教えてくれる人.add接続点リスト(item.接続点リスト);
-            } else if (item instanceof 折れ線矢印集約) {
-                 this._i接触点を教えてくれる人.add配置物(item.始点ハンドル);
-                 this._i接触点を教えてくれる人.add配置物(item.終点ハンドル);
-            }
-            
-            this.notify({ type: 'ADDED', item: item as I配置物集約 });
+        if (!('判定' in item)) {
+            this.配置物リスト.push(item);
+            item.接触判定対象を登録する(this._i接触点を教えてくれる人);
+            this.notify({ type: 'ADDED', item });
         } else {
-            // 接触判定可能な点
-            this._i接触点を教えてくれる人.add配置物(item as 接触判定可能な点);
+            this._i接触点を教えてくれる人.add配置物(item);
         }
     }
     

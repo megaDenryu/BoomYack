@@ -1,6 +1,6 @@
-import { Drag中値, Drag開始値, I描画空間, Px2DVector, 描画座標点, 画面座標点, 配置物座標点 } from "SengenUI/index";
+import { Drag中値, Drag開始値, I描画空間, LV2HtmlComponentBase, Px2DVector, 描画座標点, 画面座標点, 配置物座標点 } from "SengenUI/index";
 
-import {  I折れ線矢印集約, I点ハンドル, I線分ハンドル, I点と線のリポジトリ, I接触点を教えてくれる人, Iシリアライズ可能配置物 } from "../../I配置物";
+import {  I折れ線矢印集約, I点ハンドル, I線分ハンドル, I点と線のリポジトリ, I接触点を教えてくれる人, Iシリアライズ可能配置物, I接触点登録先, Iドラッグ移動可能 } from "../../I配置物";
 import { 中点ハンドルView, 折れ線矢印View } from "./折れ線矢印View";
 import { 中点State, 始点State, 終点State } from "./折れ線矢印state";
 import { 折れ線矢印VM } from "./折れ線矢印VM";
@@ -8,7 +8,7 @@ import { 折れ線矢印VM } from "./折れ線矢印VM";
 import { 始点ハンドル, 終点ハンドル, 線分ハンドル } from "./矢印集約";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 import { 折れ線矢印データ, 座標データ } from "../../描画キャンバス/データクラス";
-import { 折れ線矢印ID } from "../../ID";
+import { 付箋ID, 折れ線矢印ID } from "../../ID";
 import { I接続点親情報 } from "../矢印接続可能なもの/接続点";
 import { 矢印設定状態 } from "../設定パネル";
 /**
@@ -315,6 +315,20 @@ export class 折れ線矢印集約<座標点T extends 配置物座標点> implem
     /** ID取得 */
     public get id(): 折れ線矢印ID { return this._id; }
 
+    public get idString(): string { return this._id.id; }
+
+    public ドラッグ移動対象を収集する(_除外view?: LV2HtmlComponentBase): Iドラッグ移動可能[] {
+        return [...this.点ハンドルリスト];
+    }
+
+    public get始点接続付箋ID(): 付箋ID | null {
+        return this.始点ハンドル.接続点?.親配置物ID ?? null;
+    }
+
+    public get終点接続付箋ID(): 付箋ID | null {
+        return this.終点ハンドル.接続点?.親配置物ID ?? null;
+    }
+
     public 始点と終点の付箋の接続点を最短のものに切り替える(){
         const 始点の付箋:I接続点親情報<座標点T>|undefined = this.始点ハンドル.接続点?.親interface;
         const 終点の付箋:I接続点親情報<座標点T>|undefined = this.終点ハンドル.接続点?.親interface;
@@ -337,6 +351,11 @@ export class 折れ線矢印集約<座標点T extends 配置物座標点> implem
             if (始点の最短接続点 !== this.始点ハンドル.接続点) {this.始点ハンドル.接続(始点の最短接続点);}
             if (終点の最短接続点 !== this.終点ハンドル.接続点) {this.終点ハンドル.接続(終点の最短接続点);}
         }
+    }
+
+    public 接触判定対象を登録する(target: I接触点登録先): void {
+        target.add配置物(this.始点ハンドル);
+        target.add配置物(this.終点ハンドル);
     }
 }
 

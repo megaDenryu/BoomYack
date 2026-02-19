@@ -35,6 +35,12 @@ export interface CanvasViewOptions {
     onSaveClick?: () => void;
 }
 
+/**
+ * 普通のMVPをやっているわけではなく、Viewがモデルやサービスを持っているのがこのプロジェクトです。
+ * これは理由があって、Viewをモデルに持たせるとViewの宣言的な組み立てがしにくいなーというのがありました。
+ * すべてのViewに対してモデルとプレゼンターがあるというのがMVPだと思いますが、そうするとViewを宣言的に組み立てる前にモデルを宣下的に組み立てる必要が出てきて、Viewが宣言的に見えなくなるなと思いました。
+ */
+
 export class CanvasView extends LV2HtmlComponentBase implements I配置物選択機能集約用のキャンバス機能 {
     protected _componentRoot: DivC;
     private _mouseWife!: MouseWife;

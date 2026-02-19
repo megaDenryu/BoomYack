@@ -26,12 +26,24 @@ export interface I衝突判定可能 {
     get衝突判定用矩形(): { 位置: 描画座標点; サイズ: Px2DVector };
 }
 
+/** 接触判定システムへの登録先。instanceof分岐を各配置物側に閉じ込めるためのポリモーフィズム口 */
+export interface I接触点登録先 {
+    add配置物(node: 接触判定可能な点): void;
+    add接続点リスト(接続点リスト: Iterable<接続点<any>>): void;
+}
+
 export interface I配置物集約 extends I選択可能配置物, Iシリアライズ可能配置物, I衝突判定可能 {
     type: 配置物type;
     readonly view: LV2HtmlComponentBase
+    /** IDの生文字列。異種IDMapを横断検索するためのエスケープハッチ（IDMapのhasString()と組み合わせる） */
+    readonly idString: string;
     再描画(): void;
     選択状態のzIndexにする(): void;
     通常状態のzIndexにする(): void;
+    /** 接触判定システムへ自身の判定対象を登録する。型分岐をここに閉じ込める */
+    接触判定対象を登録する(target: I接触点登録先): void;
+    /** ドラッグ移動対象を収集する。付箋はviewを、矢印は点ハンドルリストを返す。除外するviewを指定可能 */
+    ドラッグ移動対象を収集する(除外view?: LV2HtmlComponentBase): Iドラッグ移動可能[];
 }
 
 export interface 接触判定可能な点 {
@@ -147,6 +159,10 @@ export interface I折れ線矢印View extends LV2HtmlComponentBase {
 export interface I折れ線矢印集約<座標点T extends 配置物座標点> extends I配置物集約, I点と線のリポジトリ<座標点T> {
     type: "折れ線矢印";
     始点と終点の付箋の接続点を最短のものに切り替える():void;
+    /** 始点に接続している付箋のID。未接続のnull */
+    get始点接続付箋ID(): 付箋ID | null;
+    /** 終点に接続している付箋のID。未接続のnull */
+    get終点接続付箋ID(): 付箋ID | null;
 }
 
 
