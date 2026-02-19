@@ -1,10 +1,16 @@
 ---
 type: Proposal
-status: Draft (v2)
+status: InProgress
 created: 2026-02-19
 updated: 2026-02-19
 author: AI Agent
 supersedes: 提案-001_v1 (99_Archive/提案-001_CanvasGraphModelリファクタリング_v1_Draft.md)
+progress:
+  phase0: done
+  phase1: done
+  phase2: done
+  phase3: done
+  phase4: pending
 ---
 # 提案-001: BoomYackキャンバス基盤アーキテクチャリファクタリング
 
@@ -216,6 +222,26 @@ CanvasViewはDOM構築とUIイベントハンドリングのみに集中させ�
 | Phase 2 | **中** | ISP分割でインターフェースの利用箇所すべてに波及。ただし静的型検査で安全に実施可能 |
 | Phase 3 | **中** | 描画タイミングの変更はパフォーマンスに直結。手動テスト必須 |
 | Phase 4 | **低** | プロキシメソッド削除のみ。呼び出し元変更は機械的 |
+
+## 実装進捗 (Implementation Progress)
+
+> **最終更新**: 2026-02-19
+
+| Phase | 内容 | ステータス | BoomYack commit |
+|---|---|---|---|
+| Phase 0 | instanceof排除、ポリモーフィックメソッド追加 | ✅ Done | `055cfb0` |
+| Phase 1 | `キャンバスグラフ操作サービス`抽出、`Iグラフ配置先`導入 | ✅ Done | `13eb00d`, `6feae6c` |
+| Phase 2 | `I矢印生成先`でISP分割、`接続点`の依存絞り込み | ✅ Done | `0a56b51` |
+| Phase 3 | `requestAnimationFrame`をView層へ移動 | ✅ Done | `c8a6853` |
+| Phase 4 | `CanvasView`プロキシメソッドの整理、上位層からの直接アクセス化 | ⏳ Pending | - |
+
+### Phase 4 詳細（未実装）
+
+`CanvasView`が`保存()`, `読み込み()`, `グラフ選択()`等大量のプロキシメソッドを持ち、上位層（`StickyGraphBoard`等）が直接`model`/`persistence`/`グラフ操作サービス`にアクセスする形に変更。
+
+**実装時の確認事項**:
+- `CanvasView`から削除できるプロキシメソッド一覧を`grep`で抽出
+- `StickyGraphBoard`等の呼び出し元を確認し残留が必要なものを別途対応
 
 ## 5. 代替案 (Alternatives)
 
