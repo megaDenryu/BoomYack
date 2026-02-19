@@ -1,4 +1,4 @@
-﻿# Phase 4: CanvasViewのスリム化【⏳ Pending】
+﻿# Phase 4: CanvasViewのスリム化【✅ Done】
 
 > **リスク**: 低（プロキシメソッド削除のみ。呼び出し元変更は機械的）
 
