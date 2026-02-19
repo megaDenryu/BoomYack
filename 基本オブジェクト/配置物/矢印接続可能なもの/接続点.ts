@@ -6,7 +6,7 @@ import { CircleC, DivC, I描画空間, LV2HtmlComponentBase, Px2DVector, SvgC, �
 import { 矢印ID, 折れ線矢印ID, 配置物ID, 付箋ID } from "../../ID";
 import {  接触判定可能な点, I点ハンドル, I接続点, 配置物zIndex, I折れ線矢印集約 } from "../../I配置物";
 
-import { I配置物リポジトリ } from "../../配置物リポジトリ";
+import { I矢印生成先 } from "../../配置物リポジトリ";
 import { 折れ線矢印VM, 折れ線矢印集約 } from "../折れ線矢印";
 import { 矢印VM } from "../折れ線矢印/矢印集約";
 import { 接続参照データ, 接続点位置 } from "../../描画キャンバス/データクラス";
@@ -21,7 +21,7 @@ export interface I接続点親情報<座標点T extends 配置物座標点> {
 }
 
 export class 接続点<座標点T extends 配置物座標点> extends LV2HtmlComponentBase implements 接触判定可能な点, I接続点<座標点T>{
-    private i配置物リポジトリ: I配置物リポジトリ<座標点T>;
+    private i矢印生成先: I矢印生成先<座標点T>;
     private _接続点state: 接続点State<座標点T>;
     private i描画基準座標を持つ: I描画空間;
     private 接続している点ハンドルのリスト: I点ハンドル<座標点T>[] = [];
@@ -32,14 +32,14 @@ export class 接続点<座標点T extends 配置物座標点> extends LV2HtmlCom
     
     public constructor( 
         接続点state: 接続点State<座標点T>, 
-        i配置物リポジトリ: I配置物リポジトリ<座標点T>, 
+        i矢印生成先: I矢印生成先<座標点T>, 
         i描画基準座標を持つ: I描画空間,
         接続位置: 接続点位置,
         親情報: I接続点親情報<座標点T>
     ) {
         super();
         this._接続点state = 接続点state;
-        this.i配置物リポジトリ = i配置物リポジトリ;
+        this.i矢印生成先 = i矢印生成先;
         this.i描画基準座標を持つ = i描画基準座標を持つ;
         this._接続位置 = 接続位置;
         this.親interface = 親情報;
@@ -123,7 +123,7 @@ export class 接続点<座標点T extends 配置物座標点> extends LV2HtmlCom
     }
 
     public 矢印作成(): 折れ線矢印集約<座標点T>{
-        const arrow = this.i配置物リポジトリ.add折れ線矢印(this._接続点state.折れ線矢印vm);
+        const arrow = this.i矢印生成先.add折れ線矢印(this._接続点state.折れ線矢印vm);
         arrow.始点ハンドル.接続(this);
         return arrow;
     }
@@ -139,7 +139,7 @@ export class 接続点<座標点T extends 配置物座標点> extends LV2HtmlCom
     public update位置(pos:座標点T, 相対pos: Px2DVector): void {
         this._接続点state.pos = pos;
         this._componentRoot.setTranslate(相対pos);
-        this.i配置物リポジトリ.未接続の点ハンドルを接続点と接続をtryする(this);
+        this.i矢印生成先.未接続の点ハンドルを接続点と接続をtryする(this);
         this.接続している点ハンドルのリスト.forEach(点ハンドル=>{
             点ハンドル.setPosition(pos);
         });

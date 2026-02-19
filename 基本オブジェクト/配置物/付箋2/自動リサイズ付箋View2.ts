@@ -11,7 +11,6 @@ import { I付箋View, 配置物zIndex } from "../../I配置物";
 
 import { 絶対矢印上下左右Position, 矢印接続可能なもの, 矢印接続可能なもの依存関係, 矢印上下左右Position } from "../矢印接続可能なもの/矢印接続可能なもの";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
-import { I配置物リポジトリ } from "../../配置物リポジトリ";
 import { 付箋ID } from "../../ID";
 import { コンテキストメニューコンテナ } from "BoomYack/基本オブジェクト/キャンバス操作/円状コンテキストメニュー/コンテキストメニューコンテナ";
 import { 付箋設定状態 } from "../設定パネル";

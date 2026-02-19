@@ -15,6 +15,12 @@ export interface I配置物リポジトリ<座標点T extends 図形内座標点
     未接続の点ハンドルを接続点と接続をtryする(接続点:接続点<座標点T>):void;
 }
 
+/** 接続点・矢印接続可能なものが要求する最小インターフェース（ISP分割済み） */
+export interface I矢印生成先<座標点T extends 図形内座標点 | 描画座標点> {
+    add折れ線矢印(折れ線矢印vm: 折れ線矢印VM<座標点T>): 折れ線矢印集約<座標点T>;
+    未接続の点ハンドルを接続点と接続をtryする(接続点: 接続点<座標点T>): void;
+}
+
 /** グラフ計算サービス・レイアウトStrategyが要求する最小インターフェース。CanvasGraphModelが実装する */
 export interface Iグラフ配置先 {
     readonly 描画基準座標: 描画基準座標;

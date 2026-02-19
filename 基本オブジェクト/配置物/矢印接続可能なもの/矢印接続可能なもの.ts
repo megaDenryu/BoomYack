@@ -2,7 +2,7 @@ import { DivC, HtmlComponentBase, I描画空間, LV2HtmlComponentBase, Px2DVecto
 
 
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
-import { I配置物リポジトリ } from "../../配置物リポジトリ";
+import { I矢印生成先 } from "../../配置物リポジトリ";
 import { I接続点親情報, I矢印接続可能なもの中央PositionState, 接続点, 接続点State } from "./接続点";
 import { I折れ線矢印集約 } from "BoomYack/基本オブジェクト/I配置物";
 
@@ -28,7 +28,7 @@ export interface 矢印上下左右Position<座標点T extends 配置物座標�
 
 
 export interface 矢印接続可能なもの依存関係<座標点T extends 配置物座標点> {
-    i配置物リポジトリ: I配置物リポジトリ<座標点T>;
+    i矢印生成先: I矢印生成先<座標点T>;
     i描画空間: I描画空間;
     i配置物選択機能集約:I配置物選択機能集約;
 }
@@ -63,10 +63,10 @@ export class 矢印接続可能なもの<座標点T extends 配置物座標点> 
         super();
         this._i配置物選択機能集約 = 依存.i配置物選択機能集約;
         this._中央pos = pos.上.plus(pos.下.px2DVector).divide(2) as 座標点T;
-        this._接続点_上 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.上, this), 依存.i配置物リポジトリ, 依存.i描画空間, "上", 親情報);
-        this._接続点_右 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.右, this), 依存.i配置物リポジトリ, 依存.i描画空間, "右", 親情報);
-        this._接続点_下 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.下, this), 依存.i配置物リポジトリ, 依存.i描画空間, "下", 親情報);
-        this._接続点_左 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.左, this), 依存.i配置物リポジトリ, 依存.i描画空間, "左", 親情報);
+        this._接続点_上 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.上, this), 依存.i矢印生成先, 依存.i描画空間, "上", 親情報);
+        this._接続点_右 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.右, this), 依存.i矢印生成先, 依存.i描画空間, "右", 親情報);
+        this._接続点_下 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.下, this), 依存.i矢印生成先, 依存.i描画空間, "下", 親情報);
+        this._接続点_左 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.左, this), 依存.i矢印生成先, 依存.i描画空間, "左", 親情報);
         this._componentRoot = this.createComponentRoot();
     }
 

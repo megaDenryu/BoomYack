@@ -34,7 +34,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 コンテキストメニューコンテナ: this.contextMenuContainer,
             }, 
             {
-                i配置物リポジトリ: this.model,
+                i矢印生成先: this.model,
                 i描画空間: this.model,
                 i配置物選択機能集約: this.selectionManager
             },
@@ -58,7 +58,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 コンテキストメニューコンテナ: this.contextMenuContainer,
             },
             {
-                i配置物リポジトリ: this.model,
+                i矢印生成先: this.model,
                 i描画空間: this.model,
                 i配置物選択機能集約: this.selectionManager
             },
