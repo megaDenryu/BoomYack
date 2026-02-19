@@ -79,7 +79,7 @@ export class CanvasGraphModel implements I描画空間, I配置物リポジト�
     }
 
     public add配置物(item: I配置物集約 | 接触判定可能な点) {
-        if (!('判定' in item)) {
+        if ('接触判定対象を登録する' in item) {
             this.配置物リスト.push(item);
             item.接触判定対象を登録する(this._i接触点を教えてくれる人);
             this.notify({ type: 'ADDED', item });
