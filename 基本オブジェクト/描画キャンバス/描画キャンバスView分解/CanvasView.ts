@@ -53,6 +53,8 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     private selectionManager: 配置物選択機能集約;
     private 選択物まとめて移動サービス: まとめて移動サービス = new まとめて移動サービス();
     private readonly グラフ操作サービス: キャンバスグラフ操作サービス;
+    private _再描画予約済み = false;
+    private _再描画リクエストID: number | null = null;
     
     // UI Elements
     private menu!: 円状コンテキストメニュー;
@@ -108,11 +110,19 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             this._配置物コンテナ.child(e.item.view);
         } else if (e.type === 'REMOVED' && e.item) {
              e.item.view.delete();
-        } else if (e.type === 'CLEARED') {
-            // Already handled by REMOVED events loop in Model
         } else if (e.type === 'UPDATED') {
-            // Repaint triggered by Model calling item.再描画()
+            this.再描画をスケジュール();
         }
+    }
+
+    private 再描画をスケジュール(): void {
+        if (this._再描画予約済み) return;
+        this._再描画予約済み = true;
+        this._再描画リクエストID = requestAnimationFrame(() => {
+            this.model.配置物再描画();
+            this._再描画予約済み = false;
+            this._再描画リクエストID = null;
+        });
     }
 
     protected createComponentRoot(): DivC {
@@ -220,7 +230,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     }
 
     private onCanvasDragEnd(e: Drag中値): void {
-        this.model.配置物再描画();
+        this.再描画をスケジュール();
     }
 
     public 全ての接続点を表示非表示切り替え(表示する: boolean): void {

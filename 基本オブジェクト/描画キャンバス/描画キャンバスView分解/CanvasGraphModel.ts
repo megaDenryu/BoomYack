@@ -32,10 +32,6 @@ export class CanvasGraphModel implements I描画空間, I配置物リポジト�
     
     // Factory
     private _factory?: ICanvasItemFactory;
-    
-    // 再描画バッチ処理用（パフォーマンス最適化）
-    private _再描画予約済み: boolean = false;
-    private _再描画リクエストID: number | null = null;
 
     constructor() {
         this.描画基準座標 = new 描画基準座標(new 画面座標点(Px2DVector.fromNumbers(0,0)));
@@ -50,7 +46,7 @@ export class CanvasGraphModel implements I描画空間, I配置物リポジト�
     public update拡縮率(delta: number, center: 画面座標点) {
         this.描画基準座標.拡縮率 = delta;
         this.描画基準座標.拡縮中心点 = center;
-        this.再描画をスケジュール();
+        this.notify({ type: 'UPDATED' });
     }
 
     public subscribe(listener: (e: GraphEvent) => void): () => void {
@@ -125,37 +121,6 @@ export class CanvasGraphModel implements I描画空間, I配置物リポジト�
     
     public update描画基準座標原点(new原点: 画面座標点) {
         this.描画基準座標.描画原点 = new原点;
-        this.再描画をスケジュール();
-    }
-    
-    /**
-     * 再描画をスケジュール（RequestAnimationFrameでバッチ処理）
-     * 同一フレーム内の複数の更新リクエストを1回の再描画にまとめることで
-     * 大量の配置物があってもパフォーマンスを維持
-     */
-    private 再描画をスケジュール(): void {
-        if (this._再描画予約済み) return; // 既にスケジュール済み
-        
-        this._再描画予約済み = true;
-        this._再描画リクエストID = requestAnimationFrame(() => {
-            this.配置物再描画();
-            this.notify({ type: 'UPDATED' });
-            this._再描画予約済み = false;
-            this._再描画リクエストID = null;
-        });
-    }
-    
-    /**
-     * 即座に再描画（スケジュールをキャンセルして同期実行）
-     * 通常は使用せず、必要な場合のみ明示的に呼び出す
-     */
-    public 即座に再描画(): void {
-        if (this._再描画リクエストID !== null) {
-            cancelAnimationFrame(this._再描画リクエストID);
-            this._再描画リクエストID = null;
-        }
-        this._再描画予約済み = false;
-        this.配置物再描画();
         this.notify({ type: 'UPDATED' });
     }
 
