@@ -1,19 +1,13 @@
-import { I描画空間, MouseEventData, Px2DVector, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
+import { I描画空間, Px2DVector, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
 import { I接触点を教えてくれる人, I配置物集約, リスト配置可能, 接触判定可能な点, I接続点, I接触点登録先 } from "../../I配置物";
 
 import { 無分割管理 } from "../../接触点を教えてくれる人/無分割管理";
-import { I配置物リポジトリ } from "../../配置物リポジトリ";
+import { I配置物リポジトリ, Iグラフ配置先 } from "../../配置物リポジトリ";
 import { 矢印接続可能付箋Old } from "../../配置物/付箋2/矢印接続可能付箋Old";
 import { 折れ線矢印VM, 折れ線矢印集約 } from "../../配置物";
 import { 接続点 } from "../../配置物/矢印接続可能なもの/接続点";
 import { キャンバスメタデータ } from "../データクラス";
 import { キャンバスID } from "../../ID";
-import { 配置物連結グラフ, 配置物連結グラフをすべて抽出, 配置物連結グラフ群 } from "../配置物グラフ/配置物連結グラフ";
-import { テキスト用グラフ, テキスト用グラフ_付箋textfromJson, 付箋text, 配置物連結グラフtoテキスト用グラフノード } from "../配置物グラフ/テキスト化情報";
-import { JSONファイル出力サービス } from "../../../../BoomYack/基本オブジェクト/ファイル入出力/JSONファイル出力サービス";
-import { クリップボードサービス } from "../../../../BoomYack/基本オブジェクト/ファイル入出力/クリップボードサービス";
-
-import { テキスト用グラフからキャンバスに配置するサービス } from "BoomYack/基本オブジェクト/グラフ計算サービス/グラフ計算サービス";
 
 /** グラフの変更イベント */
 export type GraphEvent = 
@@ -27,14 +21,11 @@ export interface ICanvasItemFactory {
     create折れ線矢印(折れ線矢印vm: 折れ線矢印VM<描画座標点>): 折れ線矢印集約<描画座標点>;
 }
 
-export class CanvasGraphModel implements I描画空間, I配置物リポジトリ<描画座標点>, I接触点を教えてくれる人<描画座標点>, リスト配置可能<描画座標点> {
+export class CanvasGraphModel implements I描画空間, I配置物リポジトリ<描画座標点>, I接触点を教えてくれる人<描画座標点>, リスト配置可能<描画座標点>, Iグラフ配置先 {
     public 配置物リスト: I配置物集約[] = [];
     private _i接触点を教えてくれる人: I接触点を教えてくれる人<描画座標点> & リスト配置可能<描画座標点>;
     public readonly 描画基準座標: 描画基準座標;
     public metadata: キャンバスメタデータ;
-    public Json出力サービス: JSONファイル出力サービス = JSONファイル出力サービス.create();
-    public クリップボードサービス: クリップボードサービス = クリップボードサービス.create();
-
     
     // イベントリスナー
     private _listeners: Set<(e: GraphEvent) => void> = new Set();
@@ -188,62 +179,6 @@ export class CanvasGraphModel implements I描画空間, I配置物リポジト�
         this._i接触点を教えてくれる人.add接続点リスト(接続点リスト);
     }
 
-    public グラフを抽出(): 配置物連結グラフ群 {
-        return 配置物連結グラフをすべて抽出(this.配置物リスト);
-    }
-
-    public グラフを選択(配置物: I配置物集約): 配置物連結グラフ | null {
-        return this.グラフを抽出().配置物が含まれるグラフを取得(配置物);
-    }
-
-    public グラフを選択してjsonファイル出力(配置物: I配置物集約):void {
-        const テキスト用グラフ = this.グラフを選択(配置物)?.exec(グラフ => {
-            return グラフ.exec(配置物連結グラフtoテキスト用グラフノード)
-        })
-        if (!テキスト用グラフ) return;
-        this.Json出力サービス.出力(テキスト用グラフ, `${this.metadata.name}.graphtext.json`);
-    }
-
-    public グラフをテキストとしてコピー(選択配置物: I配置物集約){
-        const テキスト用グラフ = this.グラフを選択(選択配置物)?.exec(グラフ => {
-                    return グラフ.exec(配置物連結グラフtoテキスト用グラフノード)
-                })
-        if (!テキスト用グラフ) return;
-        this.クリップボードサービス.コピー(テキスト用グラフ.toJson());
-    }
-
-    public グラフJson出力(選択配置物: I配置物集約){
-
-    }
-
-    public async クリップボードから貼り付け(e: MouseEvent){
-        console.log('[BoomYack貼り付け] 貼り付け処理開始');
-        const data = new MouseEventData(e);
-        const pos = new 画面座標点(data.pos2DVector).to描画座標点(this.描画基準座標);
-        const text = await this.クリップボードサービス.貼り付け();
-        console.log('[BoomYack貼り付け] クリップボードから取得したテキスト長:', text.length);
-        
-        const グラフ:テキスト用グラフ<付箋text>|null = テキスト用グラフ_付箋textfromJson(text);
-        
-        if (グラフ === null) {
-            console.error('[BoomYack貼り付け] ✗ グラフのパースに失敗しました');
-            console.error('[BoomYack貼り付け] 受け取ったテキスト(最初300文字):', text.substring(0, 300));
-            return;
-        }
-        
-        try {
-            console.log('[BoomYack貼り付け] ✓ グラフのパース成功, 配置開始');
-            グラフ.exec(グラフ => {
-                return new テキスト用グラフからキャンバスに配置するサービス(this, グラフ, pos).グラフを配置する();
-            });
-            console.log('[BoomYack貼り付け] ✓ 貼り付け完了');
-        } catch (error) {
-            console.error('[BoomYack貼り付け] ✗ 配置処理中にエラー:', error instanceof Error ? error.message : error);
-            if (error instanceof Error) {
-                console.error('[BoomYack貼り付け] スタックトレース:', error.stack);
-            }
-        }
-    }
 }
 
 

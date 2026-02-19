@@ -19,6 +19,7 @@ import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?ur
 import SaveIcon from '../../../SVGImg/SaveIcon.svg?url';
 import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
 import 折れ線矢印Icon from '../../../SVGImg/折れ線矢印.svg?url';
+import { キャンバスグラフ操作サービス } from "./キャンバスグラフ操作サービス";
 import { まとめて移動サービス } from "./まとめて移動サービス";
 
 export interface 全ての接続点を表示非表示切り替え可能 {
@@ -51,6 +52,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     public readonly persistence: CanvasPersistenceManager;
     private selectionManager: 配置物選択機能集約;
     private 選択物まとめて移動サービス: まとめて移動サービス = new まとめて移動サービス();
+    private readonly グラフ操作サービス: キャンバスグラフ操作サービス;
     
     // UI Elements
     private menu!: 円状コンテキストメニュー;
@@ -80,6 +82,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         this.selectionManager = new 配置物選択機能集約(this, this.選択物まとめて移動サービス);
         this.model = new CanvasGraphModel();
         this.contextMenuContainer = new コンテキストメニューコンテナ();
+        this.グラフ操作サービス = new キャンバスグラフ操作サービス(this.model, () => this.model.metadata.name);
 
         this.factory = new CanvasItemFactory(
             this.model, 
@@ -299,7 +302,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
 
     public グラフ選択(): void {
         const 選択中配置物リスト = this.selectionManager.選択中配置物;
-        const 選択中配置物グラフリスト: 配置物連結グラフ[] = 選択中配置物リスト.map(配置物 => this.model.グラフを選択(配置物))
+        const 選択中配置物グラフリスト: 配置物連結グラフ[] = 選択中配置物リスト.map(配置物 => this.グラフ操作サービス.グラフを選択(配置物))
                                                                           .filter((graph) => graph !== null);
         for (const グラフ of 選択中配置物グラフリスト) {
             for (const 配置物 of グラフ.配置物集約リスト) {
@@ -310,16 +313,15 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
 
     public グラフを選択してjsonファイル出力(){
         const 選択配置物 = this.selectionManager.選択中配置物[0];
-        if (選択配置物) {this.model.グラフを選択してjsonファイル出力(選択配置物);}
-        
+        if (選択配置物) { this.グラフ操作サービス.グラフを選択してjsonファイル出力(選択配置物); }
     }
 
     public グラフをテキストとしてコピー(){
         const 選択配置物 = this.selectionManager.選択中配置物[0];
-        if (選択配置物) {this.model.グラフをテキストとしてコピー(選択配置物);}
+        if (選択配置物) { this.グラフ操作サービス.グラフをテキストとしてコピー(選択配置物); }
     }
 
     public クリップボードから貼り付け(e: MouseEvent){
-        this.model.クリップボードから貼り付け(e);
+        this.グラフ操作サービス.クリップボードから貼り付け(e);
     }
 }
