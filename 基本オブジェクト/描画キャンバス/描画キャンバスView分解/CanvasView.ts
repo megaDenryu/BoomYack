@@ -137,7 +137,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
 
             // カテゴリ（テキスト系）を斜め方向に配置
             { id: "L1-ai", label: ["AI", "分解"], Position: 'lt' },
-            { id: "L1-file", label: ["外部", "出力"], Position: 'rt' },
+            { id: "L1-graph", label: ["グラフ", "操作"], Position: 'rt' },
             { id: "L1-edit", label: ["編集", "操作"], Position: 'lb' },
             { id: "L1-other", label: "その他", Position: 'rb' }
         ];
@@ -146,19 +146,19 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             // AI (LT)
             // TODO: 必要に応じてAI操作を追加
 
-            // 外部・出力 (RT)
-            { parentId: "L1-file", label: ["グラフをテキスト", "としてコピー"], onClick: (e: MouseEvent) => {
+            // グラフ操作 (RT)
+            { parentId: "L1-graph", label: "グラフ選択", onClick: (e: MouseEvent) => this.executeGraphSelection() },
+            { parentId: "L1-graph", label: ["グラフをテキスト", "としてコピー"], onClick: (e: MouseEvent) => {
                 const 選択配置物 = this.selectionManager.選択中配置物[0];
                 if (選択配置物) { this.グラフ操作サービス.グラフをテキストとしてコピー(選択配置物); }
             }},
-            { parentId: "L1-file", label: ["グラフを", "JSON出力"], onClick: (e: MouseEvent) => {
+            { parentId: "L1-graph", label: ["グラフを", "JSON出力"], onClick: (e: MouseEvent) => {
                 const 選択配置物 = this.selectionManager.選択中配置物[0];
                 if (選択配置物) { this.グラフ操作サービス.グラフを選択してjsonファイル出力(選択配置物); }
             }},
 
             // 編集・操作 (LB)
             { parentId: "L1-edit", label: "貼り付け", onClick: (e: MouseEvent) => this.グラフ操作サービス.クリップボードから貼り付け(e)},
-            { parentId: "L1-edit", label: "範囲選択", onClick: (e: MouseEvent) => this.executeGraphSelection() },
 
             // その他 (RB)
             // 必要に応じて追加
