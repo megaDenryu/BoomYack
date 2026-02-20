@@ -22,6 +22,8 @@ export interface Iコンテキストメニュー {
     表示トグル(pos:MousePosition): Promise<this>;
     isVisible: boolean;
     delete(): void;
+    他のコンテキストメニューを全て非表示にする?: AsyncAction;
+    onDestroy?: Action;
 }
 
 export class 円状コンテキストメニュー extends LV2HtmlComponentBase implements Iコンテキストメニュー {

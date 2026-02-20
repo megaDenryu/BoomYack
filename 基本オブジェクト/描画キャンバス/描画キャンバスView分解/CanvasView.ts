@@ -2,7 +2,8 @@ import { DivC, Drag中値, LV2HtmlComponentBase, MouseEventData, MouseWife, Px2D
 import { I配置物集約, 配置物zIndex } from "../../I配置物";
 
 
-import { 円状コンテキストメニュー, 円状メニューアイテムオプション } from "../../キャンバス操作/円状コンテキストメニュー/円状コンテキストメニュー";
+import { Iコンテキストメニュー } from "../../キャンバス操作/円状コンテキストメニュー/円状コンテキストメニュー";
+import { 多段格子コンテキストメニュー, 格子メニュー1層オプション, 格子メニュー2層オプション } from "../../キャンバス操作/多段格子コンテキストメニュー/多段格子コンテキストメニュー";
 import { コンテキストメニューコンテナ } from "../../キャンバス操作/円状コンテキストメニュー/コンテキストメニューコンテナ";
 import { 配置物選択機能集約, I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 import { 描画キャンバスリポジトリ } from "../描画キャンバスAPIリポジトリ";
@@ -32,7 +33,6 @@ export interface I配置物選択機能集約用のキャンバス機能 extends
 
 export interface CanvasViewOptions {
     canvasId?: string;
-    追加メニュー項目?: 円状メニューアイテムオプション[];
     onSaveClick?: () => void;
 }
 
@@ -57,7 +57,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     private _再描画リクエストID: number | null = null;
     
     // UI Elements
-    private menu!: 円状コンテキストメニュー;
+    private menu!: Iコンテキストメニュー;
     private contextMenuContainer: コンテキストメニューコンテナ;
     private _配置物コンテナ!: DivC;
     
@@ -126,25 +126,34 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     }
 
     protected createComponentRoot(): DivC {
-        console.log(SaveIcon);
-        const menuItems: 円状メニューアイテムオプション[] = [
-            { iconUrl: ゴミ箱Icon, onClick: (e) => this.deleteSelectedItem() , backgroundColor: '#ffffff', borderColor: 'green' },
-            { iconUrl: 付箋Icon, onClick: (e) => this.onAddStickyNote(e) , backgroundColor: '#ffffff', borderColor: 'green' },
-            { iconUrl: 折れ線矢印Icon, onClick: (e) => this.onAddArrow(e) , backgroundColor: '#ffffff', borderColor: 'green' },
-            { label: "グラフ選択", onClick: (e) => this.executeGraphSelection() },
-            { label: "グラフテキストコピー", onClick: (e) => {
+        const layer1Items: 格子メニュー1層オプション[] = [
+            { id: "L1-left", label: ["AI操作", "分解"], Position: 'left' },
+            { id: "L1-right", label: ["追加操作", "保存など"], Position: 'right' },
+            { id: "L1-top", label: ["キャンバス", "操作"], Position: 'top' },
+            { id: "L1-bottom", label: ["設定表示", "オプション"], Position: 'bottom' }
+        ];
+
+        const layer2Items: 格子メニュー2層オプション[] = [
+            // L1-top (キャンバス操作 等)
+            { parentId: "L1-top", label: "付箋追加", iconUrl: 付箋Icon, onClick: (e) => this.onAddStickyNote(e) },
+            { parentId: "L1-top", label: "矢印追加", iconUrl: 折れ線矢印Icon, onClick: (e) => this.onAddArrow(e) },
+            
+            // L1-right (追加操作 等)
+            { parentId: "L1-right", label: ["グラフをテキスト", "としてコピー"], onClick: (e: MouseEvent) => {
                 const 選択配置物 = this.selectionManager.選択中配置物[0];
                 if (選択配置物) { this.グラフ操作サービス.グラフをテキストとしてコピー(選択配置物); }
             }},
-            { label: "グラフJson", onClick: (e) => {
+            { parentId: "L1-right", label: ["グラフを", "Json出力"], onClick: (e: MouseEvent) => {
                 const 選択配置物 = this.selectionManager.選択中配置物[0];
                 if (選択配置物) { this.グラフ操作サービス.グラフを選択してjsonファイル出力(選択配置物); }
             }},
-            { iconUrl: SaveIcon, onClick: (e) => this._options.onSaveClick?.(), backgroundColor: '#ffffff', borderColor: 'green' },
+            { parentId: "L1-right", label: "保存", iconUrl: SaveIcon, onClick: (e: MouseEvent) => this._options.onSaveClick?.() },
 
-            { label: "貼り付け", onClick: (e) => this.グラフ操作サービス.クリップボードから貼り付け(e)},
-
-            ...(this._options.追加メニュー項目 ?? [])
+            // L1-bottom (各種設定操作等 - いったんDeleteやその他をここに)
+            { parentId: "L1-bottom", label: "グラフ選択", onClick: (e: MouseEvent) => this.executeGraphSelection() },
+            { parentId: "L1-bottom", label: "貼り付け", onClick: (e: MouseEvent) => this.グラフ操作サービス.クリップボードから貼り付け(e)},
+            { parentId: "L1-bottom", label: "削除", iconUrl: ゴミ箱Icon, onClick: (e: MouseEvent) => this.deleteSelectedItem() },
+            
         ];
 
         return new DivC({"class": "キャンバスコンテナ"}).childs([
@@ -189,7 +198,13 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                     
                     this.contextMenuContainer
                         .bind(self => {
-                            self.コンテキストメニュー追加(new 円状コンテキストメニュー(menuItems).bind(self => this.menu = self))
+                            self.コンテキストメニュー追加(new 多段格子コンテキストメニュー({
+                                mode: "clickable",
+                                opacity: 0.85,
+                                showCenterButton: true,
+                                layer1Items: layer1Items,
+                                layer2Items: layer2Items
+                            }).bind((self: Iコンテキストメニュー) => this.menu = self))
                         })
                         .zIndex(配置物zIndex.キャンバス.コンテキストメニューコンテナ)
         ]);

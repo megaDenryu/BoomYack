@@ -11,7 +11,8 @@ import { I付箋View, 配置物zIndex } from "../../I配置物";
 
 import { 絶対矢印上下左右Position, 矢印接続可能なもの, 矢印接続可能なもの依存関係, 矢印上下左右Position } from "../矢印接続可能なもの/矢印接続可能なもの";
 import { 付箋ID } from "../../ID";
-import { Iコンテキストメニュー, 円状コンテキストメニュー } from "../../キャンバス操作/円状コンテキストメニュー/円状コンテキストメニュー";
+import { Iコンテキストメニュー } from "../../キャンバス操作/円状コンテキストメニュー/円状コンテキストメニュー";
+import { 多段格子コンテキストメニュー } from "../../キャンバス操作/多段格子コンテキストメニュー/多段格子コンテキストメニュー";
 
 import { コンテキストメニューコンテナ } from "BoomYack/基本オブジェクト/キャンバス操作/円状コンテキストメニュー/コンテキストメニューコンテナ";
 import { 付箋設定状態 } from "../設定パネル";
@@ -88,7 +89,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
     private _onTextChange?: (text: string) => void;
     private _mouseWife: MouseWife;
     public get mouseWife(): MouseWife { return this._mouseWife; }
-    private _円状コンテキストメニュー: Iコンテキストメニュー;
+    private _コンテキストメニュー: Iコンテキストメニュー;
     private _コンテキストメニューコンテナ: コンテキストメニューコンテナ;
 
     public constructor(
@@ -109,16 +110,31 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
         this._onTextChange = option.onTextChange;
         this._componentRoot = this.createComponentRoot(option, 矢印接続可能なもの依存関係, コンテキストメニュー依存関係);
         this._コンテキストメニューコンテナ.コンテキストメニュー追加(
-            new 円状コンテキストメニュー([
-                { label: "削除", onClick: () => { コンテキストメニュー依存関係.on削除(); } },
-                { label: "設定", onClick: () => { 
-                    const 現在位置 = this._position.to描画座標点();
-                    コンテキストメニュー依存関係.on設定パネル表示(現在位置); 
-                } },
-                { label: "続き生成", onClick: () => { コンテキストメニュー依存関係.onAI生成?.(); } },
-                { label: "LLM分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_LLM?.(); } },
-                { label: "区切り分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_区切り文字?.(); } },
-            ]).bind((menu) => { this._円状コンテキストメニュー = menu; })
+            new 多段格子コンテキストメニュー({
+                mode: "clickable",
+                opacity: 0.85,
+                showCenterButton: true,
+                layer1Items: [
+                    { id: 'L1-left', label: 'AI操作', Position: 'left' },
+                    { id: 'L1-right', label: '設定・操作', Position: 'right' },
+                    { id: 'L1-top', label: '上方向', Position: 'top' },
+                    { id: 'L1-bottom', label: '下方向', Position: 'bottom' },
+                    { id: 'L1-lt', label: '左上', Position: 'lt' },
+                    { id: 'L1-rt', label: '右上', Position: 'rt' },
+                    { id: 'L1-lb', label: '左下', Position: 'lb' },
+                    { id: 'L1-rb', label: '右下', Position: 'rb' },
+                ],
+                layer2Items: [
+                    { parentId: 'L1-left', label: "続き生成", onClick: () => { コンテキストメニュー依存関係.onAI生成?.(); } },
+                    { parentId: 'L1-left', label: "LLM分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_LLM?.(); } },
+                    { parentId: 'L1-left', label: "区切り分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_区切り文字?.(); } },
+                    { parentId: 'L1-right', label: "背景設定(TODO)", onClick: () => { 
+                        const 現在位置 = this._position.to描画座標点();
+                        コンテキストメニュー依存関係.on設定パネル表示(現在位置); 
+                    } },
+                    { parentId: 'L1-right', label: "削除", onClick: () => { コンテキストメニュー依存関係.on削除(); } },
+                ]
+            }).bind((menu) => { this._コンテキストメニュー = menu; })
         );
 
     }
@@ -146,10 +162,10 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                                                                     })
                                                                             .addDivEventListener('contextmenu', (e: MouseEvent) => {
                                                                                 e.preventDefault();
-                                                                                this._円状コンテキストメニュー.表示(new MouseEventData(e).position);
+                                                                                this._コンテキストメニュー.表示(new MouseEventData(e).position);
                                                                             })
                                                                             .addDivEventListener('click', (e: MouseEvent) => {
-                                                                                this._円状コンテキストメニュー.非表示();
+                                                                                this._コンテキストメニュー.非表示();
                                                                             })
                                                                             .addDivEventListener('mousedown', (e: MouseEvent) => {
                                                                                 this.選択する?.(e);
@@ -384,7 +400,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
 
     public delete(): void {
         super.delete();
-        this._円状コンテキストメニュー.delete();
+        this._コンテキストメニュー.delete();
         this._formatterCleanup?.();
     }
 

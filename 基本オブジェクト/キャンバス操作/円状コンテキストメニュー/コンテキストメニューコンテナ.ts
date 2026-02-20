@@ -29,7 +29,7 @@ export class コンテキストメニューコンテナ extends LV2HtmlComponent
         return Promise.all(非表示Promises).then(() => {});
     }
 
-    public コンテキストメニュー追加(コンテキストメニュー: 円状コンテキストメニュー): this {
+    public コンテキストメニュー追加(コンテキストメニュー: Iコンテキストメニュー & LV2HtmlComponentBase): this {
         コンテキストメニュー.他のコンテキストメニューを全て非表示にする = async () => {await this.すべてのコンテキストメニューを非表示にする()};
         コンテキストメニュー.onDestroy = () => { this._コンテキストメニューList = this._コンテキストメニューList.filter(cm => cm !== コンテキストメニュー);};
         this._componentRoot.child(コンテキストメニュー);
