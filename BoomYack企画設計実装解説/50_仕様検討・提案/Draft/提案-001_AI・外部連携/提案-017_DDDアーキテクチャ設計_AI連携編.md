@@ -3,6 +3,9 @@ type: Proposal
 status: Draft
 created: 2026-02-19
 author: AI Agent
+tags:
+  - レビュー返信有り
+  - 検討を加速
 ---
 # 提案-017: DDDアーキテクチャ設計 (AI連携編)
 
@@ -54,3 +57,7 @@ class GraphExpansionService:
 
 ## 5. 備考
 - Pythonの型ヒント (`typing`) と Pydantic をフル活用し、堅牢な開発を行う。
+
+
+# ユーザーレビュー
+少しpython側が実装されたので、それを見たうえで再度考えてほしい。
