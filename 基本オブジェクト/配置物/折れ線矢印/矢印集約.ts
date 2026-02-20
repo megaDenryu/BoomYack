@@ -1,6 +1,6 @@
 import { Drag中値, Drag終了値, Drag開始値, I描画空間, Px2DVector, 描画座標点, 配置物座標点 } from "SengenUI/index";
 
-import { I点と線のリポジトリ, I点ハンドル, I線分ハンドル, 接触判定可能な点, I接触点を教えてくれる人, I接続点, I接続点と接続可能, Iシリアライズ可能配置物, I折れ線矢印集約 } from "../../I配置物";
+import { I点と線のリポジトリ, I点ハンドル, I線分ハンドル, 接触判定可能な点, I接触点を教えてくれる人, I接続点, I接続点と接続可能, I折れ線矢印集約 } from "../../I配置物";
 import { 始点State, 終点State } from "./折れ線矢印state";
 import { 始点ハンドルView, 終点ハンドルView, 線分ハンドルView, 始点中心線分情報 } from "./折れ線矢印View";
 
