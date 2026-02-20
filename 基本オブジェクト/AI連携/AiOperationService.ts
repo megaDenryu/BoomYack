@@ -3,6 +3,7 @@ import { AiApiRepository } from "./AiApiRepository";
 import { CanvasGraphModel } from "../描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
 import { 矢印接続可能付箋Old } from "../配置物/付箋2/矢印接続可能付箋Old";
 import { 付箋選択状態 } from "../配置物/付箋2/自動リサイズ付箋View";
+import { Toast } from "../../../OneONetUIComponents/Toast/Toast";
 
 /**
  * キャンバス上のAI機能（テキスト生成・分解）のビジネスロジックを担うサービス
@@ -33,10 +34,12 @@ export class AiOperationService {
 
                 // 矢印で繋ぐ（内部でCanvasGraphModelに追加される）
                 起点付箋.別の付箋へ矢印を作る(新付箋);
+                Toast.success("AI生成が完了しました");
             } else {
-                console.error("AI Generate Error:", res.エラーメッセージ);
+                Toast.error(`AI生成エラー: ${res.エラーメッセージ}`);
             }
         } catch (e) {
+            Toast.error(`ネットワークエラー: ${String(e)}`);
             console.error("AI Generate Exception:", e);
         } finally {
             起点付箋.view.set選択状態(付箋選択状態.なし);
@@ -46,14 +49,14 @@ export class AiOperationService {
     /**
      * ノード分解を実行
      */
-    public async executeDecompose(対象付箋: 矢印接続可能付箋Old<描画座標点>): Promise<void> {
+    public async executeDecompose(対象付箋: 矢印接続可能付箋Old<描画座標点>, 戦略?: string): Promise<void> {
         const text = 対象付箋.text;
         if (!text) return;
 
         対象付箋.view.set選択状態(付箋選択状態.ホバー);
 
         try {
-            const res = await this._repository.decomposeText({ テキスト: text });
+            const res = await this._repository.decomposeText({ テキスト: text, 戦略: 戦略 });
             if (res.success && res.子ノードリスト) {
                 // 親のテキストを要約で上書き
                 if (res.親要約) {
@@ -73,10 +76,12 @@ export class AiOperationService {
 
                     currentYOffset = currentYOffset.plus(new Px長さ(200));
                 }
+                Toast.success("ノードの分解が完了しました");
             } else {
-                console.error("AI Decompose Error:", res.エラーメッセージ);
+                Toast.error(`分解エラー: ${res.エラーメッセージ}`);
             }
         } catch (e) {
+            Toast.error(`ネットワークエラー: ${String(e)}`);
             console.error("AI Decompose Exception:", e);
         } finally {
             対象付箋.view.set選択状態(付箋選択状態.なし);

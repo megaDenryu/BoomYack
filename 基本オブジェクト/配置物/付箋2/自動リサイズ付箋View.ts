@@ -43,7 +43,8 @@ export interface 自動リサイズ付箋用コンテキストメニュー依存
     on削除: () => void;
     on設定パネル表示: (現在位置: 描画座標点) => void;
     onAI生成?: () => void;
-    onAI分解?: () => void;
+    onAI分解_LLM?: () => void;
+    onAI分解_区切り文字?: () => void;
 }
 
 export class 自動リサイズ付箋View<座標点T extends 配置物座標点> extends LV2HtmlComponentBase implements I付箋View,I接続点親情報<座標点T> {
@@ -114,8 +115,9 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                     const 現在位置 = this._position.to描画座標点();
                     コンテキストメニュー依存関係.on設定パネル表示(現在位置); 
                 } },
-                { label: "✨生成", onClick: () => { コンテキストメニュー依存関係.onAI生成?.(); } },
-                { label: "✂️分解", onClick: () => { コンテキストメニュー依存関係.onAI分解?.(); } },
+                { label: "続き生成", onClick: () => { コンテキストメニュー依存関係.onAI生成?.(); } },
+                { label: "LLM分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_LLM?.(); } },
+                { label: "区切り分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_区切り文字?.(); } },
             ]).bind((menu) => { this._円状コンテキストメニュー = menu; })
         );
 
