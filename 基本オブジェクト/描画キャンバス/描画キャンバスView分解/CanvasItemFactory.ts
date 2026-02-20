@@ -11,9 +11,11 @@ import { コンテキストメニューコンテナ } from "../../キャンバ�
 import { 付箋データ, 矢印データ, 折れ線矢印データ, 配置物データ } from "../データクラス";
 import { 付箋設定パネル, 付箋設定状態 } from "../../配置物/設定パネル";
 import { 配置物衝突判定サービス } from "./配置物衝突判定サービス";
+import { AiOperationService } from "../../AI連携/AiOperationService";
 
 export class CanvasItemFactory implements ICanvasItemFactory {
     private 衝突判定サービス: 配置物衝突判定サービス;
+    private _aiOperation: AiOperationService;
 
     constructor(
         private model: CanvasGraphModel,
@@ -22,6 +24,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         private onDeleteItem: () => void // 削除コールバック
     ) {
         this.衝突判定サービス = new 配置物衝突判定サービス();
+        this._aiOperation = new AiOperationService(this.model);
     }
 
     public create付箋(pos: 描画座標点, text?: string): 矢印接続可能付箋Old<描画座標点> {
@@ -41,7 +44,9 @@ export class CanvasItemFactory implements ICanvasItemFactory {
             new 付箋ID(),
             {
                 on削除: this.onDeleteItem,
-                on設定パネル表示: (位置: 描画座標点) => this.設定パネルを表示する(付箋, 位置)
+                on設定パネル表示: (位置: 描画座標点) => this.設定パネルを表示する(付箋, 位置),
+                onAI生成: () => { this._aiOperation.executeGenerate(付箋); },
+                onAI分解: () => { this._aiOperation.executeDecompose(付箋); }
             }
         );
         return 付箋;
@@ -65,7 +70,9 @@ export class CanvasItemFactory implements ICanvasItemFactory {
             data.id,
             {
                 on削除: this.onDeleteItem,
-                on設定パネル表示: (位置: 描画座標点) => this.設定パネルを表示する(付箋, 位置)
+                on設定パネル表示: (位置: 描画座標点) => this.設定パネルを表示する(付箋, 位置),
+                onAI生成: () => { this._aiOperation.executeGenerate(付箋); },
+                onAI分解: () => { this._aiOperation.executeDecompose(付箋); }
             }
         );
         return 付箋;

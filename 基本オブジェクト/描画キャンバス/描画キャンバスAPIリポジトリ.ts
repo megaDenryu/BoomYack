@@ -16,7 +16,7 @@ export interface 描画キャンバスリポジトリ {api: 描画キャンバ�
  * ```
  */
 export class 描画キャンバスAPIリポジトリ {
-    private readonly _endpointBase: string = "canvas";
+    private readonly _endpointBase: string = "BoomYack/SaveLoad";
 
     /**
      * キャンバスデータをサーバーに保存する
