@@ -6,16 +6,18 @@ export type 格子メニュー配置位置 = 'left' | 'right' | 'top' | 'bottom'
 
 export interface 格子メニュー1層オプション {
     id: string; // e.g. 'L1-left'
-    label: string | string[];
+    label?: string | string[];
     iconUrl?: string;
+    backgroundColor?: string;
     Position: 格子メニュー配置位置;
     onClick?: (e: MouseEvent) => void;
 }
 
 export interface 格子メニュー2層オプション {
     parentId: string; // layer1 options id
-    label: string | string[];
+    label?: string | string[];
     iconUrl?: string;
+    backgroundColor?: string;
     onClick: (e: MouseEvent) => void;
 }
 
@@ -124,7 +126,7 @@ export class 多段格子コンテキストメニュー extends LV2HtmlComponent
             // 親行(posConf.row)を中心に上下に並べるため、count分だけずらす（雑な配置ロジック）
             const row = posConf.row + count + expandConf.rowOffset;
 
-            const cell = new GridCell(col, row, item.label, item.iconUrl, true, false, this._options.opacity);
+            const cell = new GridCell(col, row, item.label, item.iconUrl, true, false, this._options.opacity, item.backgroundColor);
             
             cell.onClick((e) => {
                 item.onClick(e);
@@ -144,7 +146,7 @@ export class 多段格子コンテキストメニュー extends LV2HtmlComponent
         // Layer 1 の描画
         layer1List.forEach(item => {
             const pos = 階層1位置マップ[item.Position];
-            const cell = new GridCell(pos.col, pos.row, item.label, item.iconUrl, false, false, this._options.opacity);
+            const cell = new GridCell(pos.col, pos.row, item.label, item.iconUrl, false, false, this._options.opacity, item.backgroundColor);
             cell.setStyleCSS({ pointerEvents: "auto" });
             
             cell.onClick((e) => {
@@ -273,21 +275,21 @@ class GridCell extends LV2HtmlComponentBase {
     private _baseOpacity: number;
     private _hoverOpacity: number;
 
-    constructor(col: number | string, row: number | string, text: string | string[], iconUrl: string | undefined, isLayer2: boolean, isCenter: boolean = false, opacity: number = 0.85) {
+    constructor(col: number | string, row: number | string, text: string | string[] | undefined, iconUrl: string | undefined, isLayer2: boolean, isCenter: boolean = false, opacity: number = 0.85, backgroundColor?: string) {
         super();
         this._baseOpacity = opacity ?? 0.85;
         this._hoverOpacity = Math.min(1, this._baseOpacity + 0.15); 
-        this._componentRoot = this.createComponentRoot(col, row, text, iconUrl, isLayer2, isCenter);
+        this._componentRoot = this.createComponentRoot(col, row, text, iconUrl, isLayer2, isCenter, backgroundColor);
     }
 
     public getRoot(): DivC {
         return this._componentRoot;
     }
 
-    protected createComponentRoot(col: number | string, row: number | string, text: string | string[], iconUrl: string | undefined, isLayer2: boolean, isCenter: boolean): DivC {
+    protected createComponentRoot(col: number | string, row: number | string, text: string | string[] | undefined, iconUrl: string | undefined, isLayer2: boolean, isCenter: boolean, backgroundColor?: string): DivC {
         const bgColors = {
-            layer1: { base: `rgba(52, 73, 94, ${this._baseOpacity})`, hover: `rgba(44, 62, 80, ${this._hoverOpacity})` },
-            layer2: { base: `rgba(41, 128, 185, ${this._baseOpacity})`, hover: `rgba(52, 152, 219, ${this._hoverOpacity})` }
+            layer1: { base: backgroundColor || `rgba(52, 73, 94, ${this._baseOpacity})`, hover: `rgba(44, 62, 80, ${this._hoverOpacity})` },
+            layer2: { base: backgroundColor || `rgba(41, 128, 185, ${this._baseOpacity})`, hover: `rgba(52, 152, 219, ${this._hoverOpacity})` }
         };
 
         const activeBg = isLayer2 ? bgColors.layer2 : bgColors.layer1;
@@ -300,7 +302,7 @@ class GridCell extends LV2HtmlComponentBase {
                 backdropFilter: "blur(4px)",
                 color: "white",
                 borderRadius: "6px",
-                padding: "4px 8px", // Padding adjusted to look better with multiple lines
+                padding: text ? "4px 8px" : "2px", // Use minimal padding for icon-only cells
                 display: "flex",
                 flexDirection: "column", // allow text to spawn on multiple lines
                 alignItems: "center",
@@ -317,7 +319,14 @@ class GridCell extends LV2HtmlComponentBase {
             })
             .addDivEventListener("mouseenter", () => {
                 if (!isCenter) {
-                    this._componentRoot.setStyleCSS({ backgroundColor: activeBg.hover });
+                    // If custom background is provided, we use it as base.
+                    // For hover, we either use the specialized hover color or a default highlight if it's white/transparent
+                    if (backgroundColor) {
+                        // Very simple hover effect for custom backgrounds: increase brightness/opacity
+                        this._componentRoot.setStyleCSS({ backgroundColor: "rgba(255, 255, 255, 0.8)" });
+                    } else {
+                        this._componentRoot.setStyleCSS({ backgroundColor: activeBg.hover });
+                    }
                 }
             })
             .addDivEventListener("mouseleave", () => {
@@ -336,8 +345,8 @@ class GridCell extends LV2HtmlComponentBase {
            root.child(
                 new DivC()
                     .setStyleCSS({
-                        width: '24px',
-                        height: '24px',
+                        width: '48px', // Increased from 32px
+                        height: '48px', // Increased from 32px
                         marginBottom: text ? '4px' : '0',
                         backgroundImage: `url("${iconUrl}")`,
                         backgroundSize: 'contain',
@@ -348,11 +357,15 @@ class GridCell extends LV2HtmlComponentBase {
            );
         }
 
-        if (text) {
-            const texts = Array.isArray(text) ? text : [text];
-            texts.forEach(t => {
-                root.child(new SpanC({text: t}).setStyleCSS({ pointerEvents: 'none', lineHeight: '1.2' }));
-            });
+        if (text && (!iconUrl || Array.isArray(text) || text.length > 0)) {
+            // If icon is present, only show text if explicitly provided and not empty
+            // User requested to not show labels for icons.
+            if (!iconUrl) {
+                const texts = Array.isArray(text) ? text : [text];
+                texts.forEach(t => {
+                    root.child(new SpanC({text: t}).setStyleCSS({ pointerEvents: 'none', lineHeight: '1.2' }));
+                });
+            }
         }
         
         return root;

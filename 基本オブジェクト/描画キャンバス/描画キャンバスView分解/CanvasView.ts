@@ -126,34 +126,42 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     }
 
     protected createComponentRoot(): DivC {
+        const imgBg = "rgba(255, 255, 255, 0.5)";
+
         const layer1Items: 格子メニュー1層オプション[] = [
-            { id: "L1-left", label: ["AI操作", "分解"], Position: 'left' },
-            { id: "L1-right", label: ["追加操作", "保存など"], Position: 'right' },
-            { id: "L1-top", label: ["キャンバス", "操作"], Position: 'top' },
-            { id: "L1-bottom", label: ["設定表示", "オプション"], Position: 'bottom' }
+            // メインアクション（アイコン系）を十字方向に配置
+            { id: "L1-sticky", iconUrl: 付箋Icon, backgroundColor: imgBg, Position: 'top', onClick: (e: MouseEvent) => this.onAddStickyNote(e) },
+            { id: "L1-delete", iconUrl: ゴミ箱Icon, backgroundColor: imgBg, Position: 'bottom', onClick: (e: MouseEvent) => this.deleteSelectedItem() },
+            { id: "L1-arrow", iconUrl: 折れ線矢印Icon, backgroundColor: imgBg, Position: 'left', onClick: (e: MouseEvent) => this.onAddArrow(e) },
+            { id: "L1-save", iconUrl: SaveIcon, backgroundColor: imgBg, Position: 'right', onClick: (e: MouseEvent) => this._options.onSaveClick?.() },
+
+            // カテゴリ（テキスト系）を斜め方向に配置
+            { id: "L1-ai", label: ["AI", "分解"], Position: 'lt' },
+            { id: "L1-file", label: ["外部", "出力"], Position: 'rt' },
+            { id: "L1-edit", label: ["編集", "操作"], Position: 'lb' },
+            { id: "L1-other", label: "その他", Position: 'rb' }
         ];
 
         const layer2Items: 格子メニュー2層オプション[] = [
-            // L1-top (キャンバス操作 等)
-            { parentId: "L1-top", label: "付箋追加", iconUrl: 付箋Icon, onClick: (e) => this.onAddStickyNote(e) },
-            { parentId: "L1-top", label: "矢印追加", iconUrl: 折れ線矢印Icon, onClick: (e) => this.onAddArrow(e) },
-            
-            // L1-right (追加操作 等)
-            { parentId: "L1-right", label: ["グラフをテキスト", "としてコピー"], onClick: (e: MouseEvent) => {
+            // AI (LT)
+            // TODO: 必要に応じてAI操作を追加
+
+            // 外部・出力 (RT)
+            { parentId: "L1-file", label: ["グラフをテキスト", "としてコピー"], onClick: (e: MouseEvent) => {
                 const 選択配置物 = this.selectionManager.選択中配置物[0];
                 if (選択配置物) { this.グラフ操作サービス.グラフをテキストとしてコピー(選択配置物); }
             }},
-            { parentId: "L1-right", label: ["グラフを", "Json出力"], onClick: (e: MouseEvent) => {
+            { parentId: "L1-file", label: ["グラフを", "JSON出力"], onClick: (e: MouseEvent) => {
                 const 選択配置物 = this.selectionManager.選択中配置物[0];
                 if (選択配置物) { this.グラフ操作サービス.グラフを選択してjsonファイル出力(選択配置物); }
             }},
-            { parentId: "L1-right", label: "保存", iconUrl: SaveIcon, onClick: (e: MouseEvent) => this._options.onSaveClick?.() },
 
-            // L1-bottom (各種設定操作等 - いったんDeleteやその他をここに)
-            { parentId: "L1-bottom", label: "グラフ選択", onClick: (e: MouseEvent) => this.executeGraphSelection() },
-            { parentId: "L1-bottom", label: "貼り付け", onClick: (e: MouseEvent) => this.グラフ操作サービス.クリップボードから貼り付け(e)},
-            { parentId: "L1-bottom", label: "削除", iconUrl: ゴミ箱Icon, onClick: (e: MouseEvent) => this.deleteSelectedItem() },
-            
+            // 編集・操作 (LB)
+            { parentId: "L1-edit", label: "貼り付け", onClick: (e: MouseEvent) => this.グラフ操作サービス.クリップボードから貼り付け(e)},
+            { parentId: "L1-edit", label: "範囲選択", onClick: (e: MouseEvent) => this.executeGraphSelection() },
+
+            // その他 (RB)
+            // 必要に応じて追加
         ];
 
         return new DivC({"class": "キャンバスコンテナ"}).childs([
