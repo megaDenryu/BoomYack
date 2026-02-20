@@ -90,6 +90,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             this.model, 
             this.selectionManager, 
             this.contextMenuContainer,
+            this.グラフ操作サービス,
             () => this.deleteSelectedItem()
         );
         this.model.setFactory(this.factory);

@@ -9,15 +9,19 @@ import { auto_resize_handle_left, auto_resize_handle_right, auto_resize_sticky_n
 import { テキストエリアサイズパラメータ, 自動リサイズテキストエリア } from "../付箋/付箋View/自動リサイズモード/自動リサイズテキストエリア";
 import { I付箋View, 配置物zIndex } from "../../I配置物";
 
-import { 絶対矢印上下左右Position, 矢印接続可能なもの, 矢印接続可能なもの依存関係, 矢印上下左右Position } from "../矢印接続可能なもの/矢印接続可能なもの";
+import { 多段格子コンテキストメニュー, 格子メニュー1層オプション, 格子メニュー2層オプション } from "../../キャンバス操作/多段格子コンテキストメニュー/多段格子コンテキストメニュー";
+import { 矢印接続可能なもの, 矢印接続可能なもの依存関係, 絶対矢印上下左右Position, 矢印上下左右Position } from "../矢印接続可能なもの/矢印接続可能なもの";
 import { 付箋ID } from "../../ID";
 import { Iコンテキストメニュー } from "../../キャンバス操作/円状コンテキストメニュー/円状コンテキストメニュー";
-import { 多段格子コンテキストメニュー } from "../../キャンバス操作/多段格子コンテキストメニュー/多段格子コンテキストメニュー";
 
 import { コンテキストメニューコンテナ } from "BoomYack/基本オブジェクト/キャンバス操作/円状コンテキストメニュー/コンテキストメニューコンテナ";
 import { 付箋設定状態 } from "../設定パネル";
 import { I接続点親情報 } from "../矢印接続可能なもの/接続点";
 import { テキストフォーマット適用 } from "./テキストフォーマッタサービス";
+import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?url';
+import SaveIcon from '../../../SVGImg/SaveIcon.svg?url';
+import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
+import 折れ線矢印Icon from '../../../SVGImg/折れ線矢印.svg?url';
 
 /** 付箋の選択線の状態 */
 export enum 付箋選択状態 {
@@ -46,6 +50,10 @@ export interface 自動リサイズ付箋用コンテキストメニュー依存
     onAI生成?: () => void;
     onAI分解_LLM?: () => void;
     onAI分解_区切り文字?: () => void;
+    onグラフをテキストとしてコピー?: () => void;
+    onグラフをJSON出力?: () => void;
+    onクリップボードから貼り付け?: (e: MouseEvent) => void;
+    onグラフ選択?: () => void;
 }
 
 export class 自動リサイズ付箋View<座標点T extends 配置物座標点> extends LV2HtmlComponentBase implements I付箋View,I接続点親情報<座標点T> {
@@ -109,30 +117,42 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
         this._onResize = option.onResize;
         this._onTextChange = option.onTextChange;
         this._componentRoot = this.createComponentRoot(option, 矢印接続可能なもの依存関係, コンテキストメニュー依存関係);
+        const imgBg = "rgba(255, 255, 255, 0.5)";
+
         this._コンテキストメニューコンテナ.コンテキストメニュー追加(
             new 多段格子コンテキストメニュー({
                 mode: "clickable",
                 opacity: 0.85,
                 showCenterButton: true,
                 layer1Items: [
-                    { id: 'L1-left', label: 'AI操作', Position: 'left' },
-                    { id: 'L1-right', label: '設定・操作', Position: 'right' },
-                    { id: 'L1-top', label: '上方向', Position: 'top' },
-                    { id: 'L1-bottom', label: '下方向', Position: 'bottom' },
-                    { id: 'L1-lt', label: '左上', Position: 'lt' },
-                    { id: 'L1-rt', label: '右上', Position: 'rt' },
-                    { id: 'L1-lb', label: '左下', Position: 'lb' },
-                    { id: 'L1-rb', label: '右下', Position: 'rb' },
+                    // アイコン系（1層目十字）
+                    { id: 'L1-save', iconUrl: SaveIcon, backgroundColor: imgBg, Position: 'right', onClick: () => { /* 保存処理があれば */ } },
+                    { id: 'L1-delete', iconUrl: ゴミ箱Icon, backgroundColor: imgBg, Position: 'bottom', onClick: () => { コンテキストメニュー依存関係.on削除(); } },
+                    // 未来への拡張用
+                    { id: 'L1-sticky', iconUrl: 付箋Icon, backgroundColor: imgBg, Position: 'top' },
+                    { id: 'L1-arrow', iconUrl: 折れ線矢印Icon, backgroundColor: imgBg, Position: 'left' },
+
+                    // カテゴリ系（1層目斜め）
+                    { id: 'L1-decomp', label: '分解', Position: 'lt' },
+                    { id: 'L1-gen', label: '生成', Position: 'rt' },
+                    { id: 'L1-graph', label: ['グラフ', '操作'], Position: 'lb' },
+                    { id: 'L1-other', label: 'その他', Position: 'rb' },
                 ],
                 layer2Items: [
-                    { parentId: 'L1-left', label: "続き生成", onClick: () => { コンテキストメニュー依存関係.onAI生成?.(); } },
-                    { parentId: 'L1-left', label: "LLM分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_LLM?.(); } },
-                    { parentId: 'L1-left', label: "区切り分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_区切り文字?.(); } },
-                    { parentId: 'L1-right', label: "背景設定(TODO)", onClick: () => { 
-                        const 現在位置 = this._position.to描画座標点();
-                        コンテキストメニュー依存関係.on設定パネル表示(現在位置); 
-                    } },
-                    { parentId: 'L1-right', label: "削除", onClick: () => { コンテキストメニュー依存関係.on削除(); } },
+                    // 分解 (LT)
+                    { parentId: 'L1-decomp', label: "LLM分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_LLM?.(); } },
+                    { parentId: 'L1-decomp', label: "区切り分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_区切り文字?.(); } },
+
+                    // 生成 (RT)
+                    { parentId: 'L1-gen', label: "続き生成", onClick: () => { コンテキストメニュー依存関係.onAI生成?.(); } },
+
+                    // グラフ操作 (LB)
+                    { parentId: 'L1-graph', label: "グラフ選択", onClick: () => { コンテキストメニュー依存関係.onグラフ選択?.(); } },
+                    { parentId: 'L1-graph', label: ["グラフをテキスト", "としてコピー"], onClick: () => { コンテキストメニュー依存関係.onグラフをテキストとしてコピー?.(); } },
+                    { parentId: 'L1-graph', label: ["グラフを", "JSON出力"], onClick: () => { コンテキストメニュー依存関係.onグラフをJSON出力?.(); } },
+
+                    // その他 (RB)
+                    { parentId: 'L1-other', label: "貼り付け", onClick: (e) => { コンテキストメニュー依存関係.onクリップボードから貼り付け?.(e); } },
                 ]
             }).bind((menu) => { this._コンテキストメニュー = menu; })
         );

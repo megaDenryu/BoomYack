@@ -12,6 +12,8 @@ import { 付箋データ, 矢印データ, 折れ線矢印データ, 配置物�
 import { 付箋設定パネル, 付箋設定状態 } from "../../配置物/設定パネル";
 import { 配置物衝突判定サービス } from "./配置物衝突判定サービス";
 import { AiOperationService } from "../../AI連携/AiOperationService";
+import { キャンバスグラフ操作サービス } from "./キャンバスグラフ操作サービス";
+import { I付箋View } from "../../I配置物";
 
 export class CanvasItemFactory implements ICanvasItemFactory {
     private 衝突判定サービス: 配置物衝突判定サービス;
@@ -21,6 +23,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         private model: CanvasGraphModel,
         private selectionManager: I配置物選択機能集約,
         private contextMenuContainer: コンテキストメニューコンテナ,
+        private graphService: キャンバスグラフ操作サービス,
         private onDeleteItem: () => void // 削除コールバック
     ) {
         this.衝突判定サービス = new 配置物衝突判定サービス();
@@ -47,7 +50,18 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 on設定パネル表示: (位置: 描画座標点) => this.設定パネルを表示する(付箋, 位置),
                 onAI生成: () => { this._aiOperation.executeGenerate(付箋); },
                 onAI分解_LLM: () => { this._aiOperation.executeDecompose(付箋, "意味クラスタ"); },
-                onAI分解_区切り文字: () => { this._aiOperation.executeDecompose(付箋, "文単位"); }
+                onAI分解_区切り文字: () => { this._aiOperation.executeDecompose(付箋, "文単位"); },
+                onグラフをテキストとしてコピー: () => { this.graphService.グラフをテキストとしてコピー(付箋); },
+                onグラフをJSON出力: () => { this.graphService.グラフを選択してjsonファイル出力(付箋); },
+                onクリップボードから貼り付け: (e: MouseEvent) => { this.graphService.クリップボードから貼り付け(e); },
+                onグラフ選択: () => {
+                    const グラフ = this.graphService.グラフを選択(付箋);
+                    if (グラフ) {
+                        for (const item of グラフ.配置物集約リスト) {
+                            this.selectionManager.追加選択(item);
+                        }
+                    }
+                }
             }
         );
         return 付箋;
@@ -74,7 +88,18 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 on設定パネル表示: (位置: 描画座標点) => this.設定パネルを表示する(付箋, 位置),
                 onAI生成: () => { this._aiOperation.executeGenerate(付箋); },
                 onAI分解_LLM: () => { this._aiOperation.executeDecompose(付箋, "意味クラスタ"); },
-                onAI分解_区切り文字: () => { this._aiOperation.executeDecompose(付箋, "文単位"); }
+                onAI分解_区切り文字: () => { this._aiOperation.executeDecompose(付箋, "文単位"); },
+                onグラフをテキストとしてコピー: () => { this.graphService.グラフをテキストとしてコピー(付箋); },
+                onグラフをJSON出力: () => { this.graphService.グラフを選択してjsonファイル出力(付箋); },
+                onクリップボードから貼り付け: (e: MouseEvent) => { this.graphService.クリップボードから貼り付け(e); },
+                onグラフ選択: () => {
+                    const グラフ = this.graphService.グラフを選択(付箋);
+                    if (グラフ) {
+                        for (const item of グラフ.配置物集約リスト) {
+                            this.selectionManager.追加選択(item);
+                        }
+                    }
+                }
             }
         );
         return 付箋;
