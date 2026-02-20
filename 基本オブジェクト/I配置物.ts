@@ -5,14 +5,20 @@ import { Drag中値, LV2HtmlComponentBase, Px2DVector, 描画座標点, 配置�
 import { I点state } from "./配置物/折れ線矢印/折れ線矢印state";
 import { I点ハンドルView } from "./配置物/折れ線矢印/折れ線矢印View";
 import { I接続点親情報, 接続点 } from "./配置物/矢印接続可能なもの/接続点";
-import { 接続参照データ, 接続点位置, 配置物データ } from "./描画キャンバス/データクラス";
+import { 接続参照データ, 接続点位置, 配置物データ, 付箋データ, 折れ線矢印データ } from "./描画キャンバス/データクラス";
 import { 付箋ID } from "./ID";
 
 export type 配置物type = "折れ線矢印" | "まっすぐ矢印" | "なめらか曲線矢印" | "付箋" | "自動リサイズ付箋" | "グループミニキャンバス";
 
-export interface Iシリアライズ可能配置物 {
-    toシリアライズデータ(): 配置物データ;
+export interface Iシリアライズ可能配置物<T extends 配置物データ = 配置物データ> {
+    toシリアライズデータ(): T;
 }
+
+/** 付箋データに特化したシリアライズインターフェース */
+export interface I付箋シリアライズ可能 extends Iシリアライズ可能配置物<付箋データ> {}
+
+/** 折れ線矢印データに特化したシリアライズインターフェース */
+export interface I折れ線矢印シリアライズ可能 extends Iシリアライズ可能配置物<折れ線矢印データ> {}
 
 export interface I選択可能配置物 {
     選択された時の処理(): void;

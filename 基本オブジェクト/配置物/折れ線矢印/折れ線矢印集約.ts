@@ -1,6 +1,6 @@
 import { Drag中値, Drag開始値, I描画空間, LV2HtmlComponentBase, Px2DVector, 描画座標点, 画面座標点, 配置物座標点 } from "SengenUI/index";
 
-import {  I折れ線矢印集約, I点ハンドル, I線分ハンドル, I点と線のリポジトリ, I接触点を教えてくれる人, Iシリアライズ可能配置物, I接触点登録先, Iドラッグ移動可能 } from "../../I配置物";
+import {  I折れ線矢印集約, I点ハンドル, I線分ハンドル, I点と線のリポジトリ, I接触点を教えてくれる人, I折れ線矢印シリアライズ可能, I接触点登録先, Iドラッグ移動可能 } from "../../I配置物";
 import { 中点ハンドルView, 折れ線矢印View } from "./折れ線矢印View";
 import { 中点State, 始点State, 終点State } from "./折れ線矢印state";
 import { 折れ線矢印VM } from "./折れ線矢印VM";
@@ -22,7 +22,7 @@ import { 矢印設定状態 } from "../設定パネル";
  *      1. 点kの前の線分k-1と点kの後の線分k+1を動かす
  */
 
-export class 折れ線矢印集約<座標点T extends 配置物座標点> implements I折れ線矢印集約<座標点T>, Iシリアライズ可能配置物 {
+export class 折れ線矢印集約<座標点T extends 配置物座標点> implements I折れ線矢印集約<座標点T>, I折れ線矢印シリアライズ可能 {
     public type: "折れ線矢印" = "折れ線矢印";
     public readonly view: 折れ線矢印View;
     public readonly 始点ハンドル: 始点ハンドル<座標点T>;
