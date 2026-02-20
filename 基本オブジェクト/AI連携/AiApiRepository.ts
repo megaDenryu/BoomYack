@@ -15,9 +15,11 @@ export interface IAIテキスト生成レスポンス {
     エラーメッセージ?: string;
 }
 
+export type 分解戦略 = "意味クラスタ" | "文単位";
+
 export interface Iノード分解リクエスト {
     テキスト: string;
-    戦略?: string; // "意味クラスタ" など
+    戦略?: 分解戦略;
 }
 
 export interface I分解結果ノード {
