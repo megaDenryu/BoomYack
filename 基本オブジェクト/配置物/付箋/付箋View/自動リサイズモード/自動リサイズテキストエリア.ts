@@ -90,15 +90,7 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
         .addTextAreaEventListener('click', (e) => {
             // クリックイベントの伝搬を停止してフォーカスを維持
             e.stopPropagation();
-        })
-        .addTextAreaEventListener('keydown', (e) => {
-            
-            if (e.key == 'Tab') {
-                this._text = this.tabKey(e);
-                this._onTextChange(this._text);
-                this.adjustHeight();
-            }
-        })
+        });
     }
     
     /**
@@ -142,6 +134,10 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
     // 現在のテキストを取得
     public getValue(): string {
         return this._componentRoot.getValue();
+    }
+
+    public get element(): HTMLTextAreaElement {
+        return this._componentRoot.dom.element as HTMLTextAreaElement;
     }
     
     // フォーカスを当てる
@@ -194,76 +190,7 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
         this._componentRoot.setStyleCSS({ color: 色 });
     }
 
-    private tabKey(e: KeyboardEvent): string {
-        e.preventDefault();
-        e.stopPropagation();
-        const ta = e.target as HTMLTextAreaElement;
 
-        const start = ta.selectionStart;
-        const end = ta.selectionEnd;
-        const value = ta.value;
-
-        // 単一カーソル（選択なし）
-        if (start === end) {
-            if (!e.shiftKey) {
-                const insert = '\t';
-                const newValue = value.slice(0, start) + insert + value.slice(end);
-                ta.value = newValue;
-                const pos = start + insert.length;
-                ta.selectionStart = ta.selectionEnd = pos;
-                return newValue;
-            } else {
-                // カーソル直前の行の先頭を探し、タブまたは最大4スペースを削除する
-                const before = value.slice(0, start);
-                const lineStart = before.lastIndexOf('\n') + 1;
-                const linePrefix = value.slice(lineStart, start);
-
-                // 先頭にタブがあればそれを削除
-                if (linePrefix.startsWith('\t')) {
-                    const newValue = value.slice(0, lineStart) + linePrefix.slice(1) + value.slice(start);
-                    const newPos = start - 1;
-                    ta.value = newValue;
-                    ta.selectionStart = ta.selectionEnd = newPos;
-                    return newValue;
-                }
-
-                // タブがなければ末尾の最大4スペースを削除（アンインデント）
-                const m = linePrefix.match(/ {1,4}$/);
-                if (m) {
-                    const remove = m[0].length;
-                    const newValue = value.slice(0, start - remove) + value.slice(start);
-                    const newPos = start - remove;
-                    ta.value = newValue;
-                    ta.selectionStart = ta.selectionEnd = newPos;
-                    return newValue;
-                }
-
-                // 何も削除できない場合は元の値を返す（何もしない）
-                return value;
-            }
-        }
-
-        // 範囲選択時：複数行インデント/アンインデント
-        const selected = value.slice(start, end);
-        if (!e.shiftKey) {
-            // インデント：各行先頭に'\t'を挿入
-            const replaced = selected.replace(/^/gm, '\t');
-            const newValue = value.slice(0, start) + replaced + value.slice(end);
-            ta.value = newValue;
-            ta.selectionStart = start;
-            ta.selectionEnd = end + (replaced.length - selected.length);
-            return newValue;
-        } else {
-            // アンインデント：各行の先頭のタブか最大4スペースを削除
-            const replaced = selected.replace(/(^|\n)(\t| {1,4})/g, (_, p1, p2) => p1);
-            const newValue = value.slice(0, start) + replaced + value.slice(end);
-            ta.value = newValue;
-            const removed = selected.length - replaced.length;
-            ta.selectionStart = start;
-            ta.selectionEnd = end - removed;
-            return newValue;
-        }
-    }
 
 
 }

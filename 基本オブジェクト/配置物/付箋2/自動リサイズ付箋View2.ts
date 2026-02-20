@@ -14,6 +14,7 @@ import { I配置物選択機能集約 } from "../../キャンバス操作/配置
 import { 付箋ID } from "../../ID";
 import { コンテキストメニューコンテナ } from "BoomYack/基本オブジェクト/キャンバス操作/円状コンテキストメニュー/コンテキストメニューコンテナ";
 import { 付箋設定状態 } from "../設定パネル";
+import { テキストフォーマット適用 } from "./テキストフォーマッタサービス";
 
 /** 付箋の選択線の状態 */
 export enum 付箋選択状態 {
@@ -39,6 +40,7 @@ export class 自動リサイズ付箋View2<座標点T extends 配置物座標点
     protected _componentRoot: DivC;
     private 付箋ホバー領域: DivC;
     private _textArea!: 自動リサイズテキストエリア;
+    private _formatterCleanup?: () => void;
     private _position: 座標点T;
     public get position(): 描画座標点|図形内座標点{ return this._position;}
     private _size: Px2DVector;
@@ -140,7 +142,7 @@ export class 自動リサイズ付箋View2<座標点T extends 配置物座標点
                                             this.update接続点座標();
                                             this._onResize?.();
                                         }
-                                    }).bind((textArea) => { this._textArea = textArea; })
+                                    }).bind((textArea) => { this._textArea = textArea; this._formatterCleanup = テキストフォーマット適用(textArea.element); })
                                 ]),
                             new リサイズハンドル("left").bind((handle) => { handle.mouseWife.ドラッグ連動登録({
                                                                                                 onドラッグ開始: (e: Drag開始値)=> {},
@@ -335,6 +337,11 @@ export class 自動リサイズ付箋View2<座標点T extends 配置物座標点
 
     public 通常状態のzIndexにする(): void {
         this._componentRoot.setStyleCSS({ zIndex: 配置物zIndex.選択状態.未選択 });
+    }
+
+    public delete(): void {
+        super.delete();
+        this._formatterCleanup?.();
     }
 
     public 設定を適用(設定: 付箋設定状態): void {
