@@ -46,8 +46,8 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 on削除: this.onDeleteItem,
                 on設定パネル表示: (位置: 描画座標点) => this.設定パネルを表示する(付箋, 位置),
                 onAI生成: () => { this._aiOperation.executeGenerate(付箋); },
-                onAI分解_LLM: () => { this._aiOperation.executeDecompose(付箋, "意味クラスタ分割戦略"); },
-                onAI分解_区切り文字: () => { this._aiOperation.executeDecompose(付箋, "文単位分割戦略"); }
+                onAI分解_LLM: () => { this._aiOperation.executeDecompose(付箋, "意味クラスタ"); },
+                onAI分解_区切り文字: () => { this._aiOperation.executeDecompose(付箋, "文単位"); }
             }
         );
         return 付箋;
@@ -73,8 +73,8 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 on削除: this.onDeleteItem,
                 on設定パネル表示: (位置: 描画座標点) => this.設定パネルを表示する(付箋, 位置),
                 onAI生成: () => { this._aiOperation.executeGenerate(付箋); },
-                onAI分解_LLM: () => { this._aiOperation.executeDecompose(付箋, "意味クラスタ分割戦略"); },
-                onAI分解_区切り文字: () => { this._aiOperation.executeDecompose(付箋, "文単位分割戦略"); }
+                onAI分解_LLM: () => { this._aiOperation.executeDecompose(付箋, "意味クラスタ"); },
+                onAI分解_区切り文字: () => { this._aiOperation.executeDecompose(付箋, "文単位"); }
             }
         );
         return 付箋;
