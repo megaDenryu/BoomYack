@@ -18,15 +18,13 @@ export interface 描画キャンバスリポジトリ {api: 描画キャンバ�
 export class 描画キャンバスAPIリポジトリ {
     private readonly _endpointBase: string = "BoomYack/SaveLoad";
 
-    /**
-     * キャンバスデータをサーバーに保存する
-     * @param data 保存するキャンバスデータ（id, nameを含む）
-     * @returns 保存結果のレスポンス
-     */
     public async 保存(data: 描画キャンバスデータ): Promise<キャンバス保存レスポンス> {
         return RequestAPI.postRequest2<キャンバス保存レスポンス>(
             `${this._endpointBase}/save`,
-            { canvasId: data.metadata.id, data }
+            { 
+                canvasId: typeof data.metadata.id === 'string' ? data.metadata.id : data.metadata.id.id, 
+                data: data.toJSON() 
+            }
         ).then(response => response)
          .catch(error => {
             console.error("キャンバス保存エラー:", error);
@@ -39,10 +37,11 @@ export class 描画キャンバスAPIリポジトリ {
      * @param canvasId キャンバスの識別子
      * @returns キャンバスデータのJSON形式、存在しない場合はnull
      */
-    public async 読み込み(canvasId: string): Promise<描画キャンバスJSON | null> {
+    public async 読み込み(canvasId: string | { id: string }): Promise<描画キャンバスJSON | null> {
+        const idStr = typeof canvasId === 'string' ? canvasId : canvasId.id;
         return RequestAPI.postRequest2<CanvasLoadResponse>(
             `${this._endpointBase}/load`,
-            { canvasId }
+            { canvasId: idStr }
         ).then(response => response.success ? response.data : null)
          .catch(error => {
             console.error("キャンバス読み込みエラー:", error);
@@ -70,10 +69,11 @@ export class 描画キャンバスAPIリポジトリ {
      * @param canvasId キャンバスの識別子
      * @returns 削除結果
      */
-    public async 削除(canvasId: string): Promise<{ success: boolean; message: string }> {
+    public async 削除(canvasId: string | { id: string }): Promise<{ success: boolean; message: string }> {
+        const idStr = typeof canvasId === 'string' ? canvasId : canvasId.id;
         return RequestAPI.postRequest2<CanvasDeleteResponse>(
             `${this._endpointBase}/delete`,
-            { canvasId }
+            { canvasId: idStr }
         ).then(response => response)
          .catch(error => {
             console.error("キャンバス削除エラー:", error);
