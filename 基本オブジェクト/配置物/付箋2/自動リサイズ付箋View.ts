@@ -153,6 +153,8 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
 
                     // その他 (RB)
                     { parentId: 'L1-other', label: "貼り付け", onClick: (e) => { コンテキストメニュー依存関係.onクリップボードから貼り付け?.(e); } },
+                    // 設定パネルを開く（文字サイズ・色の設定など）
+                    { parentId: 'L1-other', label: "設定", onClick: () => { コンテキストメニュー依存関係.on設定パネル表示?.(this._position as 描画座標点); } },
                 ]
             }).bind((menu) => { this._コンテキストメニュー = menu; })
         );
