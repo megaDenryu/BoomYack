@@ -102,6 +102,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 }
             }
         );
+        付箋.設定を適用(data.設定状態);
         return 付箋;
     }
 
@@ -129,7 +130,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 // console.warn("未対応の配置物タイプ: " + (data as 配置物データ).type); 
                 // data は 配置物データ型なので .type にアクセス可能だが、switchで網羅されていればneverになる可能性も。
                 // 安全に string として扱うなら以下。
-                console.warn(`未対応の配置物タイプ: ${(data as {type: string}).type}`);
+                console.warn(`未対応の配置物タイプ: ${(data as { type: string }).type}`);
                 return null;
         }
     }

@@ -1,6 +1,7 @@
 import { Px2DVector } from "SengenUI/index";
 
 import { 付箋ID, 矢印ID, 折れ線矢印ID, キャンバスID, 配置物ID } from "../ID";
+import { 付箋設定状態 } from "../配置物/設定パネル";
 
 // ============================================
 // JSON型定義 (interface)
@@ -31,6 +32,7 @@ export interface I付箋JSON {
     position: I座標JSON;
     size: IサイズJSON;
     text: string;
+    設定状態?: { 背景色?: string; 文字サイズ?: number; 文字色?: string };
 }
 
 /** 矢印データJSON */
@@ -207,42 +209,50 @@ export class 付箋データ {
     public readonly position: 座標データ;
     public readonly size: サイズデータ;
     public readonly text: string;
+    public readonly 設定状態: 付箋設定状態;
 
     private constructor(
         id: 付箋ID,
         position: 座標データ,
         size: サイズデータ,
-        text: string
+        text: string,
+        設定状態: 付箋設定状態
     ) {
         this.id = id;
         this.position = position;
         this.size = size;
         this.text = text;
+        this.設定状態 = 設定状態;
     }
 
     public static create(
         id: 付箋ID,
         position: 座標データ,
         size: サイズデータ,
-        text: string
+        text: string,
+        設定状態?: 付箋設定状態
     ): 付箋データ {
-        return new 付箋データ(id, position, size, text);
+        return new 付箋データ(id, position, size, text, 設定状態 ?? 付箋設定状態.create());
     }
 
     public withId(id: 付箋ID): 付箋データ {
-        return new 付箋データ(id, this.position, this.size, this.text);
+        return new 付箋データ(id, this.position, this.size, this.text, this.設定状態);
     }
 
     public withPosition(position: 座標データ): 付箋データ {
-        return new 付箋データ(this.id, position, this.size, this.text);
+        return new 付箋データ(this.id, position, this.size, this.text, this.設定状態);
     }
 
     public withSize(size: サイズデータ): 付箋データ {
-        return new 付箋データ(this.id, this.position, size, this.text);
+        return new 付箋データ(this.id, this.position, size, this.text, this.設定状態);
     }
 
     public withText(text: string): 付箋データ {
-        return new 付箋データ(this.id, this.position, this.size, text);
+        return new 付箋データ(this.id, this.position, this.size, text, this.設定状態);
+    }
+
+    public with設定状態(設定状態: 付箋設定状態): 付箋データ {
+        return new 付箋データ(this.id, this.position, this.size, this.text, 設定状態);
     }
 
     public toJSON(): I付箋JSON {
@@ -251,7 +261,8 @@ export class 付箋データ {
             id: this.id.id,
             position: this.position.toJSON(),
             size: this.size.toJSON(),
-            text: this.text
+            text: this.text,
+            設定状態: this.設定状態.toJson()
         };
     }
 
@@ -260,7 +271,8 @@ export class 付箋データ {
             new 付箋ID(json.id),
             座標データ.fromJSON(json.position),
             サイズデータ.fromJSON(json.size),
-            json.text
+            json.text,
+            付箋設定状態.fromJson(json.設定状態 ?? {})
         );
     }
 }

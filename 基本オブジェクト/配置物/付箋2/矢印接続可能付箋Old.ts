@@ -64,8 +64,8 @@ export class 矢印接続可能付箋Old<座標点T extends 配置物座標点> 
     private options強化(options: 自動リサイズ付箋Viewオプション<座標点T>): 自動リサイズ付箋Viewオプション<座標点T> {
         return {
             ...options,
-            onDragEnd: () => { this.矢印接続可能なもの.接続している矢印リスト().forEach(矢印 => {矢印.始点と終点の付箋の接続点を最短のものに切り替える();}); },
-            onDrag: (e, ドラッグしたコンポーネント) => {this._i配置物選択機能集約.まとめて移動(e, ドラッグしたコンポーネント);}
+            onDragEnd: () => { this.矢印接続可能なもの.接続している矢印リスト().forEach(矢印 => { 矢印.始点と終点の付箋の接続点を最短のものに切り替える(); }); },
+            onDrag: (e, ドラッグしたコンポーネント) => { this._i配置物選択機能集約.まとめて移動(e, ドラッグしたコンポーネント); }
         };
     }
 
@@ -150,7 +150,8 @@ export class 矢印接続可能付箋Old<座標点T extends 配置物座標点> 
             this.id,
             座標データ.fromPx2DVector(position),
             サイズデータ.create(size.x.値, size.y.値),
-            this.text
+            this.text,
+            this._設定状態
         );
     }
 

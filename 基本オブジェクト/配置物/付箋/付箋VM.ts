@@ -4,6 +4,7 @@ import { I配置物 } from "../../グラフモデル/グラフVM標準";
 import { I付箋VM } from "../../I配置物";
 
 import { 付箋データ, 座標データ, サイズデータ } from "../../描画キャンバス/データクラス";
+import { 付箋設定状態 } from "../設定パネル";
 
 export class 付箋VM implements I配置物, I付箋VM {
     public readonly id: 付箋ID;
@@ -12,18 +13,21 @@ export class 付箋VM implements I配置物, I付箋VM {
     public position: Px2DVector;
     public size: Px2DVector;
     public text: string;
-    
+    public 設定状態: 付箋設定状態;
+
     public constructor(
         id: 付箋ID,
         position: Px2DVector,
         size: Px2DVector,
-        text: string
+        text: string,
+        設定状態?: 付箋設定状態
     ) {
         this.id = id;
         this.配置物ID = id;
         this.position = position;
         this.size = size;
         this.text = text;
+        this.設定状態 = 設定状態 ?? 付箋設定状態.create();
     }
 
     /**
@@ -34,7 +38,8 @@ export class 付箋VM implements I配置物, I付箋VM {
             this.id,
             座標データ.fromPx2DVector(this.position),
             サイズデータ.fromPx2DVector(this.size),
-            this.text
+            this.text,
+            this.設定状態
         );
     }
 
@@ -46,7 +51,8 @@ export class 付箋VM implements I配置物, I付箋VM {
             data.id,
             data.position.toPx2DVector(),
             data.size.toPx2DVector(),
-            data.text
+            data.text,
+            data.設定状態
         );
     }
 }

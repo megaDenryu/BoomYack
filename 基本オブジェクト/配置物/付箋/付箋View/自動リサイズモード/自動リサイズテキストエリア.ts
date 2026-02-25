@@ -47,7 +47,8 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
         return new TextAreaC({
             value: this._text,
             placeholder: placeholder ?? "付箋のテキストを入力...",
-            class: sticky_note_textarea
+            class: sticky_note_textarea,
+            spellcheck: false
         })
         .setStyleCSS({
             width: "100%",
