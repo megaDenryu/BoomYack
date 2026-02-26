@@ -217,9 +217,12 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             },
             // 必要に応じて追加
         ];
+        
+        let canvasContainer: DivC | null = null;
 
         return new DivC({class: "キャンバスコンテナ"})
-            .bind(div => { div.dom.element.tabIndex = 0; })
+            .setTabIndex(0)
+            .bind(div => { canvasContainer = div; })
             .addDivEventListener('keydown', (e: KeyboardEvent) => this.onKeyDown(e))
             .childs([
                     new DivC({"class": "描画キャンバスView"}).setStyleCSS({
@@ -236,6 +239,9 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                                 this.menu.表示(new MouseEventData(e).position);
                             })
                             .addDivEventListener('click', (e: MouseEvent) => {
+                                if (canvasContainer) {
+                                    canvasContainer.focus({ preventScroll: true });
+                                }
                                 this.contextMenuContainer.すべてのコンテキストメニューを非表示にする();
                                 this.selectionManager.選択解除()
                                 this.selectionManager.ホバー解除();
