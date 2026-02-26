@@ -10,6 +10,7 @@ import { 自動リサイズ付箋View } from "../配置物/付箋2/自動リサ�
 export interface I配置物選択機能集約 {
     set選択中配置物(配置物: I配置物集約): void;
     追加選択(配置物: I配置物集約): void;
+    全て選択(全配置物: I配置物集約[]): void;
     setホバー中配置物(配置物: I配置物集約): void;
     選択解除(): void;
     ホバー解除(): void;
@@ -57,6 +58,16 @@ export class 配置物選択機能集約 implements I配置物選択機能集約
         this.選択中配置物.push(配置物);
         配置物.選択された時の処理();
         配置物.選択状態のzIndexにする();
+    }
+
+    public 全て選択(全配置物: I配置物集約[]): void {
+        this.選択解除();
+        if (全配置物.length === 0) return;
+        this.選択中配置物 = [...全配置物];
+        for (const 配置物 of this.選択中配置物) {
+            配置物.選択された時の処理();
+            配置物.選択状態のzIndexにする();
+        }
     }
 
     public setホバー中配置物(配置物: I配置物集約): void {

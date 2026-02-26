@@ -22,6 +22,8 @@ import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?ur
 import SaveIcon from '../../../SVGImg/SaveIcon.svg?url';
 import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
 import 折れ線矢印Icon from '../../../SVGImg/折れ線矢印.svg?url';
+import MicOnIcon from '../../../SVGImg/MicOn.svg?url';
+import MicOffIcon from '../../../SVGImg/MicOff.svg?url';
 
 /** 付箋の選択線の状態 */
 export enum 付箋選択状態 {
@@ -56,6 +58,9 @@ export interface 自動リサイズ付箋用コンテキストメニュー依存
     onグラフをJSON出力?: () => void;
     onクリップボードから貼り付け?: (e: MouseEvent) => void;
     onグラフ選択?: () => void;
+    onマイク入力トグル?: () => void;
+    getマイク入力状態?: () => boolean;
+    onマイク状態監視登録?: (callback: (isRecording: boolean) => void) => void;
 }
 
 export class 自動リサイズ付箋View<座標点T extends 配置物座標点> extends LV2HtmlComponentBase implements I付箋View,I接続点親情報<座標点T> {
@@ -154,12 +159,40 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                     { parentId: 'L1-graph', label: ["グラフを", "JSON出力"], onClick: () => { コンテキストメニュー依存関係.onグラフをJSON出力?.(); } },
 
                     // その他 (RB)
+                    { 
+                        id: 'L2-mic-toggle', 
+                        parentId: 'L1-other', 
+                        type: 'toggle',
+                        toggleSeed: {
+                            stateTrue: { label: "マイク入力", iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' },
+                            stateFalse: { label: "マイク入力", iconUrl: MicOffIcon }
+                        },
+                        onClick: (e) => { 
+                            e.stopPropagation();
+                            コンテキストメニュー依存関係.onマイク入力トグル?.();
+                        } 
+                    },
                     { parentId: 'L1-other', label: "貼り付け", onClick: (e) => { コンテキストメニュー依存関係.onクリップボードから貼り付け?.(e); } },
                     // 設定パネルを開く（文字サイズ・色の設定など）
                     { parentId: 'L1-other', label: "設定", onClick: () => { コンテキストメニュー依存関係.on設定パネル表示?.(this._position as 描画座標点); } },
                 ]
             }).bind((menu) => { this._コンテキストメニュー = menu; })
         );
+
+        if (コンテキストメニュー依存関係.onマイク状態監視登録) {
+            コンテキストメニュー依存関係.onマイク状態監視登録((isRecording) => {
+                if (this._コンテキストメニュー && (this._コンテキストメニュー as 多段格子コンテキストメニュー).selectItem) {
+                    const multiMenu = this._コンテキストメニュー as 多段格子コンテキストメニュー;
+                    multiMenu.selectItem("L2-mic-toggle", isRecording);
+                }
+            });
+            // 初期状態反映
+            if (コンテキストメニュー依存関係.getマイク入力状態 && コンテキストメニュー依存関係.getマイク入力状態()) {
+                 requestAnimationFrame(() => {
+                     (this._コンテキストメニュー as 多段格子コンテキストメニュー).selectItem?.("L2-mic-toggle", true);
+                 });
+            }
+        }
 
     }
 
@@ -219,6 +252,13 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                             this.set付箋ボードTransform({size:new Px2DVector(this._size.x, new Px長さ(newHeight))});
                                             this.update接続点座標();
                                             this.onResize();
+                                        },
+                                        onFocus: () => {
+                                            // フォーカス時に自身を選択状態にする（バグ修正）
+                                            if (this.選択する) {
+                                                const mockEvent = new MouseEvent('mousedown');
+                                                this.選択する(mockEvent as any);
+                                            }
                                         }
                                     }).bind((textArea) => { this._textArea = textArea; this._formatterCleanup = テキストフォーマット適用(textArea.element); })
                                 ]),
@@ -403,12 +443,11 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
         return this._text;
     }
 
-    /** 外部からテキストを設定する（Undo/Redo用） */
+    /** テキストを設定（音声認識など外部からの直接書き換え用） */
     public setText(text: string): void {
         this._text = text;
-        if (this._textArea) {
-            this._textArea.setValue(text);
-        }
+        this._textArea?.setValue(text);
+        this._onTextChange?.(text);
     }
 
     /** 状態に応じたアウトラインスタイルを取得 */

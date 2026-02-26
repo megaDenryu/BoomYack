@@ -16,6 +16,7 @@ import { キャンバスグラフ操作サービス } from "./キャンバスグ
 import { I付箋View } from "../../I配置物";
 import { Iキャンバスコマンド } from "../../キャンバス操作/コマンドリポジトリ/Iキャンバスコマンド";
 import { 配置物テキスト変更コマンド, 配置物移動コマンド, 配置物追加コマンド, 配置物矢印変更コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
+import { VoiceRecognitionService } from "../../キャンバス操作/音声認識サービス";
 
 export class CanvasItemFactory implements ICanvasItemFactory {
     private 衝突判定サービス: 配置物衝突判定サービス;
@@ -26,6 +27,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         private selectionManager: I配置物選択機能集約,
         private contextMenuContainer: コンテキストメニューコンテナ,
         private graphService: キャンバスグラフ操作サービス,
+        private voiceRecognitionService: VoiceRecognitionService,
         private onDeleteItem: () => void, // 削除コールバック
         private onCommandPush?: (cmd: Iキャンバスコマンド) => void
     ) {
@@ -86,7 +88,10 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                             this.selectionManager.追加選択(item);
                         }
                     }
-                }
+                },
+                onマイク入力トグル: () => { this.voiceRecognitionService.toggleRecording(); },
+                getマイク入力状態: () => this.voiceRecognitionService.getIsRecording(),
+                onマイク状態監視登録: (callback) => { this.voiceRecognitionService.onStateChange(callback); }
             }
         );
         return 付箋;
@@ -146,7 +151,10 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                             this.selectionManager.追加選択(item);
                         }
                     }
-                }
+                },
+                onマイク入力トグル: () => { this.voiceRecognitionService.toggleRecording(); },
+                getマイク入力状態: () => this.voiceRecognitionService.getIsRecording(),
+                onマイク状態監視登録: (callback) => { this.voiceRecognitionService.onStateChange(callback); }
             }
         );
         付箋.設定を適用(data.設定状態);

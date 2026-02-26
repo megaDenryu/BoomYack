@@ -24,6 +24,9 @@ export interface Iコンテキストメニュー {
     delete(): void;
     他のコンテキストメニューを全て非表示にする?: AsyncAction;
     onDestroy?: Action;
+    // updateItem, selectItemは将来的に抽象化するかもしれないが、今のところオプショナルで定義
+    updateItem?(id: string, opts: { label?: string|string[], iconUrl?: string, backgroundColor?: string }): void;
+    selectItem?(id: string, isSelected: boolean): void;
 }
 
 export class 円状コンテキストメニュー extends LV2HtmlComponentBase implements Iコンテキストメニュー {
@@ -112,6 +115,10 @@ export class 円状コンテキストメニュー extends LV2HtmlComponentBase i
 
     public get isVisible(): boolean {
         return this._isVisible;
+    }
+
+    public updateItem(id: string, opts: { label?: string|string[], iconUrl?: string, backgroundColor?: string }): void {
+        // 円状コンテキストメニューでは実装しない（必要に応じて拡充）
     }
 
     public delete(): void {

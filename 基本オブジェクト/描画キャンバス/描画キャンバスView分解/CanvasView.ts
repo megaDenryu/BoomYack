@@ -20,10 +20,13 @@ import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?ur
 import SaveIcon from '../../../SVGImg/SaveIcon.svg?url';
 import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
 import 折れ線矢印Icon from '../../../SVGImg/折れ線矢印.svg?url';
+import MicOnIcon from '../../../SVGImg/MicOn.svg?url';
+import MicOffIcon from '../../../SVGImg/MicOff.svg?url';
 import { キャンバスグラフ操作サービス } from "./キャンバスグラフ操作サービス";
 import { まとめて移動サービス } from "./まとめて移動サービス";
 import { キャンバスコマンドリポジトリ } from "../../キャンバス操作/コマンドリポジトリ/キャンバスコマンドリポジトリ";
 import { 配置物追加コマンド, 配置物削除コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
+import { VoiceRecognitionService } from "../../キャンバス操作/音声認識サービス";
 
 export interface 全ての接続点を表示非表示切り替え可能 {
     全ての接続点を表示非表示切り替え(表示する: boolean): void;
@@ -56,6 +59,8 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     private 選択物まとめて移動サービス: まとめて移動サービス = new まとめて移動サービス();
     public readonly グラフ操作サービス: キャンバスグラフ操作サービス;
     public readonly commandRepository: キャンバスコマンドリポジトリ = new キャンバスコマンドリポジトリ();
+    public readonly voiceRecognitionService: VoiceRecognitionService;
+    private _recordingIndicator: DivC | null = null;
     private _再描画予約済み = false;
     private _再描画リクエストID: number | null = null;
     
@@ -88,12 +93,23 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         this.model = new CanvasGraphModel();
         this.contextMenuContainer = new コンテキストメニューコンテナ();
         this.グラフ操作サービス = new キャンバスグラフ操作サービス(this.model, () => this.model.metadata.name);
+        this.voiceRecognitionService = new VoiceRecognitionService(this.selectionManager);
+        
+        this.voiceRecognitionService.onStateChange((isRecording) => {
+            if (this.menu && this.menu.selectItem) {
+                this.menu.selectItem("L2-mic-toggle", isRecording);
+            }
+            if (this._recordingIndicator) {
+                this._recordingIndicator.setStyleCSS({ display: isRecording ? 'flex' : 'none' });
+            }
+        });
 
         this.factory = new CanvasItemFactory(
             this.model, 
             this.selectionManager, 
             this.contextMenuContainer,
             this.グラフ操作サービス,
+            this.voiceRecognitionService,
             () => this.deleteSelectedItem(),
             (cmd) => this.commandRepository.push(cmd)
         );
@@ -105,10 +121,30 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         
         this.model.subscribe((e) => this.handleGraphEvent(e));
         
+        document.addEventListener('keydown', this.handleKeyDown);
+        
         // _mouseWifeの初期化はcreateComponentRoot内のbindで行われるため、ここではプロパティへの代入待ち、あるいは再度ラップする。
         // Original: bindで_mouseWife生成。
         // ここでは型定義上 _mouseWife!: MouseWife とするか、bind内で代入する。
     }
+
+    private handleKeyDown = (e: KeyboardEvent): void => {
+        const target = e.target as HTMLElement | null;
+        if (target) {
+            const tagName = target.tagName.toLowerCase();
+            const isContentEditable = target.isContentEditable;
+            if (tagName === 'input' || tagName === 'textarea' || isContentEditable) {
+                return;
+            }
+        }
+
+        if (e.key === 'Delete') {
+            this.deleteSelectedItem();
+        } else if (e.key === 'a' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            this.selectionManager.全て選択(this.model.配置物リスト);
+        }
+    };
 
     private handleGraphEvent(e: GraphEvent): void {
         if (e.type === 'ADDED' && e.item) {
@@ -166,6 +202,19 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             { parentId: "L1-edit", label: "貼り付け", onClick: (e: MouseEvent) => this.グラフ操作サービス.クリップボードから貼り付け(e)},
 
             // その他 (RB)
+            { 
+                id: "L2-mic-toggle", 
+                parentId: "L1-other", 
+                type: 'toggle',
+                toggleSeed: {
+                    stateTrue: { label: "マイク入力", iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' },
+                    stateFalse: { label: "マイク入力", iconUrl: MicOffIcon }
+                },
+                onClick: (e: MouseEvent) => { 
+                    e.stopPropagation(); 
+                    this.voiceRecognitionService.toggleRecording(); 
+                }
+            },
             // 必要に応じて追加
         ];
 
@@ -222,7 +271,25 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                                 layer2Items: layer2Items
                             }).bind((self: Iコンテキストメニュー) => this.menu = self))
                         })
-                        .zIndex(配置物zIndex.キャンバス.コンテキストメニューコンテナ)
+                        .zIndex(配置物zIndex.キャンバス.コンテキストメニューコンテナ),
+                    
+                    new DivC({ text: "🎤 録音中...", class: "recording-indicator" })
+                        .setStyleCSS({
+                            display: 'none',
+                            position: 'absolute',
+                            bottom: '20px',
+                            right: '20px',
+                            backgroundColor: 'rgba(231, 76, 60, 0.9)',
+                            color: 'white',
+                            padding: '8px 16px',
+                            borderRadius: '20px',
+                            fontWeight: 'bold',
+                            boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                            zIndex: 配置物zIndex.キャンバス.コンテキストメニューコンテナ,
+                            pointerEvents: 'none',
+                            animation: 'pulse 1.5s infinite' // cssアニメーションがあれば適用される
+                        })
+                        .bind(self => { this._recordingIndicator = self; })
         ]);
     }
     
@@ -326,6 +393,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     public delete(): void {
         super.delete();
         this.contextMenuContainer.delete(); 
+        document.removeEventListener('keydown', this.handleKeyDown);
     }
 
     private executeGraphSelection(): void {
