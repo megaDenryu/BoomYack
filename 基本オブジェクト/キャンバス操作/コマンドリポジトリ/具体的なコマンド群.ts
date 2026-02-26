@@ -18,6 +18,10 @@ export class 配置物追加コマンド implements Iキャンバスコマンド
     }
 }
 
+export interface I位置設定可能な配置物 {
+    位置を設定(pos: 描画座標点): void;
+}
+
 export class 配置物削除コマンド implements Iキャンバスコマンド {
     private removedItems: I配置物集約[] = [];
 
@@ -77,42 +81,36 @@ export class 配置物削除コマンド implements Iキャンバスコマンド
 
 export class 配置物移動コマンド implements Iキャンバスコマンド {
     constructor(
-        private readonly item: I配置物集約,
-        private readonly startPos: any,
-        private readonly endPos: any
+        private readonly item: I位置設定可能な配置物,
+        private readonly startPos: 描画座標点,
+        private readonly endPos: 描画座標点
     ) {}
 
     execute(): void {
-        const anyItem = this.item as any;
-        if (typeof anyItem.位置を設定 === 'function') {
-            anyItem.位置を設定(this.endPos);
-        }
+        this.item.位置を設定(this.endPos);
     }
 
     undo(): void {
-        const anyItem = this.item as any;
-        if (typeof anyItem.位置を設定 === 'function') {
-            anyItem.位置を設定(this.startPos);
-        }
+        this.item.位置を設定(this.startPos);
     }
+}
+
+export interface Iテキスト設定可能な配置物 {
+    setText(text: string): void;
 }
 
 export class 配置物テキスト変更コマンド implements Iキャンバスコマンド {
     constructor(
-        private readonly item: any, // テキストを持つ付箋など
+        private readonly item: Iテキスト設定可能な配置物,
         private readonly oldText: string,
         private readonly newText: string
     ) {}
 
     execute(): void {
-        if (typeof this.item.setText === "function") {
-            this.item.setText(this.newText);
-        }
+        this.item.setText(this.newText);
     }
 
     undo(): void {
-        if (typeof this.item.setText === "function") {
-            this.item.setText(this.oldText);
-        }
+        this.item.setText(this.oldText);
     }
 }

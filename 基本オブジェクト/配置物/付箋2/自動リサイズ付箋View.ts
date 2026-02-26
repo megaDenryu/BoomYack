@@ -41,6 +41,7 @@ export interface 自動リサイズ付箋Viewオプション<座標点T extends 
     onDrag?: (e: Drag中値, ドラッグしたコンポーネント: 自動リサイズ付箋View<座標点T>) => void;
     onResize?: () => void;
     onTextChange?: (text: string) => void;
+    onDragStart?: () => void;
     onDragEnd?: () => void;
     onTextCommit?: (oldText: string, newText: string) => void;
 }
@@ -172,7 +173,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                                                                             this.付箋ホバー領域 = self;
                                                                                             this.set付箋ボードTransform({position:this._position, size:this._size});
                                                                                             this._mouseWife = new MouseWife(self).ドラッグ連動登録({
-                                                                                                onドラッグ開始: (e: Drag開始値)=> {},
+                                                                                                onドラッグ開始: (e: Drag開始値)=> {option.onDragStart?.();},
                                                                                                 onドラッグ中: (e: Drag中値)=> {
                                                                                                     this.ドラッグ移動処理(e); 
                                                                                                     this.onDrag(e, this);
@@ -400,6 +401,14 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
     /** テキストを取得 */
     public get text(): string {
         return this._text;
+    }
+
+    /** 外部からテキストを設定する（Undo/Redo用） */
+    public setText(text: string): void {
+        this._text = text;
+        if (this._textArea) {
+            this._textArea.setValue(text);
+        }
     }
 
     /** 状態に応じたアウトラインスタイルを取得 */

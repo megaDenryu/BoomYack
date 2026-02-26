@@ -15,7 +15,7 @@ import { AiOperationService } from "../../AI連携/AiOperationService";
 import { キャンバスグラフ操作サービス } from "./キャンバスグラフ操作サービス";
 import { I付箋View } from "../../I配置物";
 import { Iキャンバスコマンド } from "../../キャンバス操作/コマンドリポジトリ/Iキャンバスコマンド";
-import { 配置物テキスト変更コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
+import { 配置物テキスト変更コマンド, 配置物移動コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
 
 export class CanvasItemFactory implements ICanvasItemFactory {
     private 衝突判定サービス: 配置物衝突判定サービス;
@@ -34,6 +34,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
     }
 
     public create付箋(pos: 描画座標点, text?: string): 矢印接続可能付箋Old<描画座標点> {
+        let dragStartPos: 描画座標点 | null = null;
         const 付箋 = new 矢印接続可能付箋Old<描画座標点>(
             {
                 position: pos,
@@ -43,6 +44,17 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 コンテキストメニューコンテナ: this.contextMenuContainer,
                 onTextCommit: (oldText: string, newText: string) => {
                     this.onCommandPush?.(new 配置物テキスト変更コマンド(付箋, oldText, newText));
+                },
+                onDragStart: () => {
+                    dragStartPos = 付箋.描画座標点;
+                },
+                onDragEnd: () => {
+                    if (dragStartPos) {
+                        const dragEndPos = 付箋.描画座標点;
+                        if (!dragStartPos.px2DVector.equals(dragEndPos.px2DVector)) {
+                            this.onCommandPush?.(new 配置物移動コマンド(付箋, dragStartPos, dragEndPos));
+                        }
+                    }
                 }
             }, 
             {
@@ -74,6 +86,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
     }
     
     public create付箋FromData(data: 付箋データ): 矢印接続可能付箋Old<描画座標点> {
+        let dragStartPos: 描画座標点 | null = null;
         const pos = 描画座標点.fromPx2DVector(data.position.toPx2DVector(), this.model.描画基準座標);
         const 付箋 = new 矢印接続可能付箋Old<描画座標点>(
             {
@@ -84,6 +97,17 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 コンテキストメニューコンテナ: this.contextMenuContainer,
                 onTextCommit: (oldText: string, newText: string) => {
                     this.onCommandPush?.(new 配置物テキスト変更コマンド(付箋, oldText, newText));
+                },
+                onDragStart: () => {
+                    dragStartPos = 付箋.描画座標点;
+                },
+                onDragEnd: () => {
+                    if (dragStartPos) {
+                        const dragEndPos = 付箋.描画座標点;
+                        if (!dragStartPos.px2DVector.equals(dragEndPos.px2DVector)) {
+                            this.onCommandPush?.(new 配置物移動コマンド(付箋, dragStartPos, dragEndPos));
+                        }
+                    }
                 }
             },
             {

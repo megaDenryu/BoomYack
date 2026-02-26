@@ -309,6 +309,14 @@ export class 自動リサイズ付箋View2<座標点T extends 配置物座標点
         return this._text;
     }
 
+    /** 外部からテキストを設定する（Undo/Redo用） */
+    public setText(text: string): void {
+        this._text = text;
+        if (this._textArea) {
+            this._textArea.setValue(text);
+        }
+    }
+
     /** 状態に応じたアウトラインスタイルを取得 */
     private getアウトラインスタイル(状態: 付箋選択状態): string {
         switch (状態) {

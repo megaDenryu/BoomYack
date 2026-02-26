@@ -50,7 +50,7 @@ export class キャンバスグラフ操作サービス {
             const data = new MouseEventData(e);
             pos = new 画面座標点(data.pos2DVector).to描画座標点(this.配置先.描画基準座標);
         } else {
-            const centerPx = Px2DVector.fromNumbers(300, 300); // 座標が取れない場合の仮配置座標
+            const centerPx = Px2DVector.fromNumbers(window.innerWidth / 2, window.innerHeight / 2); // 画面中央
             pos = new 画面座標点(centerPx).to描画座標点(this.配置先.描画基準座標);
         }
         console.log('[BoomYack貼り付け] クリップボードから取得したテキスト長:', text.length);

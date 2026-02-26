@@ -61,6 +61,7 @@ export function テキストフォーマット適用(element: HTMLTextAreaElemen
 
 function _handleTab(el: HTMLTextAreaElement, e: KeyboardEvent): void {
     e.preventDefault();
+    debugger;
     const { selectionStart, selectionEnd, value } = el;
 
     if (selectionStart === selectionEnd) {
