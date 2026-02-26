@@ -4,17 +4,25 @@ import { Px2DVector, 描画座標点 } from "SengenUI/index";
 import { I折れ線矢印集約, I配置物集約 } from "../../I配置物";
 
 export class 配置物追加コマンド implements Iキャンバスコマンド {
+    private readonly items: I配置物集約[];
+
     constructor(
         private readonly model: CanvasGraphModel,
-        private readonly item: I配置物集約
-    ) {}
+        itemOrItems: I配置物集約 | I配置物集約[]
+    ) {
+        this.items = Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems];
+    }
 
     execute(): void {
-        this.model.add配置物(this.item);
+        for (const item of this.items) {
+            this.model.add配置物(item);
+        }
     }
 
     undo(): void {
-        this.model.remove配置物(this.item);
+        for (const item of this.items) {
+            this.model.remove配置物(item);
+        }
     }
 }
 

@@ -12,6 +12,7 @@ import { I前処理位置調整Strategy, I後処理位置調整Strategy } from "
 import { 何もしない後処理Strategy } from "./レイアウトStrategy/何もしない後処理Strategy";
 import { ForceDirectedLayoutStrategy } from "./レイアウトStrategy/ForceDirectedLayoutStrategy";
 import { サイズ考慮ツリーレイアウトStrategy } from "./レイアウトStrategy/サイズ考慮ツリーレイアウトStrategy";
+import { I配置物集約 } from "../I配置物";
 
 
 // ========================================
@@ -25,6 +26,7 @@ export class テキスト用グラフからキャンバスに配置するサー�
     private readonly 先行位置調整サービス: I前処理位置調整Strategy;
     private readonly 後処理位置調整サービス: I後処理位置調整Strategy;
     private readonly nodeID別node付箋pairMap: Map<string, node付箋pair> = new Map();
+    private readonly addedArrows: I配置物集約[] = [];
 
     public constructor(
         配置先: Iグラフ配置先,
@@ -43,12 +45,19 @@ export class テキスト用グラフからキャンバスに配置するサー�
             new サイズ考慮ツリーレイアウトStrategy(設定);
     }
 
-    public グラフを配置する(): void {
+    public グラフを配置する(): I配置物集約[] {
         // ルートノードから再帰的に配置
         this.グラフ.nodes[0].exec(node => {
             this.テキスト用グラフノードに対して作業を実行する(node);
         });
         this.後処理による位置調整();
+
+        const addedItems: I配置物集約[] = [];
+        for (const pair of this.node付箋pairMap.values()) {
+            addedItems.push(pair.付箋 as unknown as I配置物集約);
+        }
+        addedItems.push(...this.addedArrows);
+        return addedItems;
     }
 
     private テキスト用グラフノードに対して作業を実行する(node: テキスト用グラフノード<付箋text>): node付箋pair {
@@ -69,7 +78,8 @@ export class テキスト用グラフからキャンバスに配置するサー�
             const nextノード = this.グラフ.nodes.find(n => n.id === ノードID);
             const nextNodePair = nextノード?.exec(this.テキスト用グラフノードに対して作業を実行する.bind(this));
             if (nextNodePair === undefined) return;
-            node付箋.付箋.別の付箋へ矢印を作る(nextNodePair.付箋);
+            const arrow = node付箋.付箋.別の付箋へ矢印を作る(nextNodePair.付箋);
+            this.addedArrows.push(arrow as unknown as I配置物集約);
         });
 
         // 前ノードからの矢印接続

@@ -32,7 +32,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         private onCommandPush?: (cmd: Iキャンバスコマンド) => void
     ) {
         this.衝突判定サービス = new 配置物衝突判定サービス();
-        this._aiOperation = new AiOperationService(this.model);
+        this._aiOperation = new AiOperationService(this.model, this.onCommandPush);
     }
 
     public create付箋(pos: 描画座標点, text?: string): 矢印接続可能付箋Old<描画座標点> {
@@ -80,7 +80,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 onAI分解_区切り文字: () => { this._aiOperation.executeDecompose(付箋, "文単位"); },
                 onグラフをテキストとしてコピー: () => { this.graphService.グラフをテキストとしてコピー(付箋); },
                 onグラフをJSON出力: () => { this.graphService.グラフを選択してjsonファイル出力(付箋); },
-                onクリップボードから貼り付け: (e: MouseEvent) => { this.graphService.クリップボードから貼り付け(e); },
+                onクリップボードから貼り付け: (e: MouseEvent) => { this.graphService.クリップボードから貼り付け(e, this.onCommandPush); },
                 onグラフ選択: () => {
                     const グラフ = this.graphService.グラフを選択(付箋);
                     if (グラフ) {
@@ -143,7 +143,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 onAI分解_区切り文字: () => { this._aiOperation.executeDecompose(付箋, "文単位"); },
                 onグラフをテキストとしてコピー: () => { this.graphService.グラフをテキストとしてコピー(付箋); },
                 onグラフをJSON出力: () => { this.graphService.グラフを選択してjsonファイル出力(付箋); },
-                onクリップボードから貼り付け: (e: MouseEvent) => { this.graphService.クリップボードから貼り付け(e); },
+                onクリップボードから貼り付け: (e: MouseEvent) => { this.graphService.クリップボードから貼り付け(e, this.onCommandPush); },
                 onグラフ選択: () => {
                     const グラフ = this.graphService.グラフを選択(付箋);
                     if (グラフ) {

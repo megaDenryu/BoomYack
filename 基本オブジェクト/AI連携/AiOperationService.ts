@@ -4,6 +4,9 @@ import { CanvasGraphModel } from "../描画キャンバス/描画キャンバス
 import { 矢印接続可能付箋Old } from "../配置物/付箋2/矢印接続可能付箋Old";
 import { 付箋選択状態 } from "../配置物/付箋2/自動リサイズ付箋View";
 import { Toast } from "../../../OneONetUIComponents/Toast/Toast";
+import { Iキャンバスコマンド } from "../キャンバス操作/コマンドリポジトリ/Iキャンバスコマンド";
+import { 配置物追加コマンド } from "../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
+import { I配置物集約 } from "../I配置物";
 
 /**
  * キャンバス上のAI機能（テキスト生成・分解）のビジネスロジックを担うサービス
@@ -11,7 +14,10 @@ import { Toast } from "../../../OneONetUIComponents/Toast/Toast";
 export class AiOperationService {
     private _repository: AiApiRepository;
 
-    constructor(private _model: CanvasGraphModel) {
+    constructor(
+        private _model: CanvasGraphModel,
+        private _onCommandPush?: (cmd: Iキャンバスコマンド) => void
+    ) {
         this._repository = new AiApiRepository();
     }
 
@@ -33,7 +39,10 @@ export class AiOperationService {
                 const 新付箋 = this._model.描画座標点でadd付箋(newPos, res.生成テキスト);
 
                 // 矢印で繋ぐ（内部でCanvasGraphModelに追加される）
-                起点付箋.別の付箋へ矢印を作る(新付箋);
+                const 矢印 = 起点付箋.別の付箋へ矢印を作る(新付箋);
+                if (this._onCommandPush) {
+                    this._onCommandPush(new 配置物追加コマンド(this._model, [新付箋 as unknown as I配置物集約, 矢印 as unknown as I配置物集約]));
+                }
                 Toast.success("AI生成が完了しました");
             } else {
                 Toast.error(`AI生成エラー: ${res.エラーメッセージ}`);
@@ -66,15 +75,20 @@ export class AiOperationService {
                     // 今回はひとまず子ノードの展開だけ行う
                 }
 
+                const addedItems: I配置物集約[] = [];
                 let currentYOffset = new Px長さ(150);
                 for (const child of res.子ノードリスト) {
                     const newPos = 対象付箋.描画座標点.plus(new Px2DVector(new Px長さ(300), currentYOffset));
                     const 新付箋 = this._model.描画座標点でadd付箋(newPos, child.テキスト);
                     
                     // 矢印で繋ぐ（内部でCanvasGraphModelに追加される）
-                    対象付箋.別の付箋へ矢印を作る(新付箋);
+                    const 矢印 = 対象付箋.別の付箋へ矢印を作る(新付箋);
 
+                    addedItems.push(新付箋 as unknown as I配置物集約, 矢印 as unknown as I配置物集約);
                     currentYOffset = currentYOffset.plus(new Px長さ(200));
+                }
+                if (this._onCommandPush && addedItems.length > 0) {
+                    this._onCommandPush(new 配置物追加コマンド(this._model, addedItems));
                 }
                 Toast.success("ノードの分解が完了しました");
             } else {

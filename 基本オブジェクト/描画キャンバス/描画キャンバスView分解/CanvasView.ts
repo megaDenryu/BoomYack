@@ -199,7 +199,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             }},
 
             // 編集・操作 (LB)
-            { parentId: "L1-edit", label: "貼り付け", onClick: (e: MouseEvent) => this.グラフ操作サービス.クリップボードから貼り付け(e)},
+            { parentId: "L1-edit", label: "貼り付け", onClick: (e: MouseEvent) => this.グラフ操作サービス.クリップボードから貼り付け(e, (cmd) => this.commandRepository.push(cmd))},
 
             // その他 (RB)
             { 
@@ -415,7 +415,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
 
     private async onKeyDown(e: KeyboardEvent): Promise<void> {
         if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'v') {
-            await this.グラフ操作サービス.クリップボードから貼り付け();
+            await this.グラフ操作サービス.クリップボードから貼り付け(undefined, (cmd) => this.commandRepository.push(cmd));
         } else if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'z') {
             e.preventDefault();
             this.commandRepository.undo();
