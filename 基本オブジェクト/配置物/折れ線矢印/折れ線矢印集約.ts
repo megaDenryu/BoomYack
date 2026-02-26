@@ -1,4 +1,4 @@
-import { Drag中値, Drag開始値, I描画空間, LV2HtmlComponentBase, Px2DVector, 描画座標点, 画面座標点, 配置物座標点 } from "SengenUI/index";
+import { Drag中値, Drag開始値, I描画空間, LV2HtmlComponentBase, Px2DVector, 描画基準座標, 描画座標点, 画面座標点, 配置物座標点 } from "SengenUI/index";
 
 import {  I折れ線矢印集約, I点ハンドル, I線分ハンドル, I点と線のリポジトリ, I接触点を教えてくれる人, I折れ線矢印シリアライズ可能, I接触点登録先, Iドラッグ移動可能 } from "../../I配置物";
 import { 中点ハンドルView, 折れ線矢印View } from "./折れ線矢印View";
@@ -34,6 +34,9 @@ export class 折れ線矢印集約<座標点T extends 配置物座標点> implem
     private _i配置物選択機能集約:I配置物選択機能集約;
     private _id: 折れ線矢印ID;
     private _設定状態: 矢印設定状態;
+
+    public onハンドルドラッグ開始?: () => void;
+    public onハンドルドラッグ終了?: () => void;
 
     public constructor(
         vm: 折れ線矢印VM<座標点T>,
@@ -312,6 +315,23 @@ export class 折れ線矢印集約<座標点T extends 配置物座標点> implem
         );
     }
 
+    public updateStateFromData(data: 折れ線矢印データ, モデルの描画基準座標: 描画基準座標): void {
+        // 中点を一旦すべて削除
+        while (this.点ハンドルリスト.length > 2) {
+            this.delete中点(1);
+        }
+
+        // 新しい中点を挿入
+        data.中点リスト.forEach((中点, index) => {
+            const 中点pos = 描画座標点.fromPx2DVector(中点.toPx2DVector(), モデルの描画基準座標) as 座標点T;
+            this.insert中点(index, 中点pos);
+        });
+
+        // 始点と終点の位置を更新
+        this.始点ハンドル.setPosition(描画座標点.fromPx2DVector(data.start.toPx2DVector(), モデルの描画基準座標) as 座標点T);
+        this.終点ハンドル.setPosition(描画座標点.fromPx2DVector(data.end.toPx2DVector(), モデルの描画基準座標) as 座標点T);
+    }
+
     /** ID取得 */
     public get id(): 折れ線矢印ID { return this._id; }
 
@@ -383,10 +403,15 @@ export class 中点ハンドル<座標点T extends 配置物座標点> implement
         this.親の折れ線矢印集約 = i折れ線矢印集約;
         this._view = new 中点ハンドルView([
             {
+                onハンドルドラッグ開始: (e: Drag開始値): void => {
+                    this.親の折れ線矢印集約.onハンドルドラッグ開始?.();
+                },
                 onハンドルドラッグ中: (e: Drag中値): void => {
                     this.ドラッグ移動処理(e);
                 },
-                onハンドルドラッグ終了: (e: Drag中値): void => {},
+                onハンドルドラッグ終了: (e: Drag中値): void => {
+                    this.親の折れ線矢印集約.onハンドルドラッグ終了?.();
+                },
                 on右クリック: (e: MouseEvent): void => {
                     e.preventDefault();// ブラウザのコンテキストメニューを抑制
                     this.親の折れ線矢印集約.delete中点(this.index);

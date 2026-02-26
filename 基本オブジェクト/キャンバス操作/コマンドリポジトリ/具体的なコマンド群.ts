@@ -114,3 +114,21 @@ export class 配置物テキスト変更コマンド implements Iキャンバス
         this.item.setText(this.oldText);
     }
 }
+
+export class 配置物矢印変更コマンド implements Iキャンバスコマンド {
+    constructor(
+        private readonly arrow: I折れ線矢印集約<描画座標点>,
+        private readonly oldData: any, // 折れ線矢印データ
+        private readonly newData: any, // 折れ線矢印データ
+        private readonly model: CanvasGraphModel
+    ) {}
+
+    execute(): void {
+        this.arrow.updateStateFromData(this.newData, this.model.描画基準座標);
+        // 接続状態の更新が必要な場合は、ここで行う
+    }
+
+    undo(): void {
+        this.arrow.updateStateFromData(this.oldData, this.model.描画基準座標);
+    }
+}

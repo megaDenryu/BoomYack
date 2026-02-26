@@ -15,7 +15,7 @@ import { AiOperationService } from "../../AI連携/AiOperationService";
 import { キャンバスグラフ操作サービス } from "./キャンバスグラフ操作サービス";
 import { I付箋View } from "../../I配置物";
 import { Iキャンバスコマンド } from "../../キャンバス操作/コマンドリポジトリ/Iキャンバスコマンド";
-import { 配置物テキスト変更コマンド, 配置物移動コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
+import { 配置物テキスト変更コマンド, 配置物移動コマンド, 配置物追加コマンド, 配置物矢印変更コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
 
 export class CanvasItemFactory implements ICanvasItemFactory {
     private 衝突判定サービス: 配置物衝突判定サービス;
@@ -58,7 +58,14 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 }
             }, 
             {
-                i矢印生成先: this.model,
+                i矢印生成先: {
+                    add折れ線矢印: (vm) => {
+                        const arrow = this.model.add折れ線矢印(vm);
+                        this.onCommandPush?.(new 配置物追加コマンド(this.model, arrow));
+                        return arrow;
+                    },
+                    未接続の点ハンドルを接続点と接続をtryする: (接続点) => this.model.未接続の点ハンドルを接続点と接続をtryする(接続点)
+                },
                 i描画空間: this.model,
                 i配置物選択機能集約: this.selectionManager
             },
@@ -111,7 +118,14 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 }
             },
             {
-                i矢印生成先: this.model,
+                i矢印生成先: {
+                    add折れ線矢印: (vm) => {
+                        const arrow = this.model.add折れ線矢印(vm);
+                        this.onCommandPush?.(new 配置物追加コマンド(this.model, arrow));
+                        return arrow;
+                    },
+                    未接続の点ハンドルを接続点と接続をtryする: (接続点) => this.model.未接続の点ハンドルを接続点と接続をtryする(接続点)
+                },
                 i描画空間: this.model,
                 i配置物選択機能集約: this.selectionManager
             },
@@ -140,7 +154,25 @@ export class CanvasItemFactory implements ICanvasItemFactory {
     }
 
     public create折れ線矢印(折れ線矢印vm: 折れ線矢印VM<描画座標点>): 折れ線矢印集約<描画座標点> {
-         return new 折れ線矢印集約(折れ線矢印vm, this.model, this.model , this.selectionManager);
+         const arrow = new 折れ線矢印集約(折れ線矢印vm, this.model, this.model , this.selectionManager);
+         let startData: 折れ線矢印データ | null = null;
+         
+         arrow.onハンドルドラッグ開始 = () => {
+             startData = arrow.toシリアライズデータ();
+         };
+         
+         arrow.onハンドルドラッグ終了 = () => {
+             if (startData) {
+                 const endData = arrow.toシリアライズデータ();
+                 const startJson = JSON.stringify(startData);
+                 const endJson = JSON.stringify(endData);
+                 if (startJson !== endJson) {
+                     this.onCommandPush?.(new 配置物矢印変更コマンド(arrow, startData, endData, this.model));
+                 }
+                 startData = null;
+             }
+         };
+         return arrow;
     }
     
     public create折れ線矢印FromData(data: 折れ線矢印データ): 折れ線矢印集約<描画座標点> {

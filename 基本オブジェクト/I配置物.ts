@@ -1,4 +1,4 @@
-import { Drag中値, LV2HtmlComponentBase, Px2DVector, 描画座標点, 配置物座標点 } from "SengenUI/index";
+import { Drag中値, LV2HtmlComponentBase, Px2DVector, 描画座標点, 配置物座標点, 描画基準座標 } from "SengenUI/index";
 
 
 
@@ -169,6 +169,9 @@ export interface I折れ線矢印集約<座標点T extends 配置物座標点> e
     get始点接続付箋ID(): 付箋ID | null;
     /** 終点に接続している付箋のID。未接続のnull */
     get終点接続付箋ID(): 付箋ID | null;
+    onハンドルドラッグ開始?: () => void;
+    onハンドルドラッグ終了?: () => void;
+    updateStateFromData(data: 折れ線矢印データ, モデルの描画基準座標: 描画基準座標): void;
 }
 
 

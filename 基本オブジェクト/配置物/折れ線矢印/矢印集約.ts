@@ -76,9 +76,15 @@ export class 始点ハンドル<座標点T extends 配置物座標点> implement
         this._i配置物選択機能集約 = i配置物選択機能集約;
         this._view = new 始点ハンドルView([
             {
-                onハンドルドラッグ開始: (e: Drag開始値): void => {this.移動開始(e);},
+                onハンドルドラッグ開始: (e: Drag開始値): void => {
+                    this.移動開始(e);
+                    this.親の折れ線矢印集約.onハンドルドラッグ開始?.();
+                },
                 onハンドルドラッグ中: (e: Drag中値): void => {this.ドラッグ移動処理(e);},
-                onハンドルドラッグ終了: (e: Drag中値): void => {this.移動終了(e);}
+                onハンドルドラッグ終了: (e: Drag中値): void => {
+                    this.移動終了(e);
+                    this.親の折れ線矢印集約.onハンドルドラッグ終了?.();
+                }
             }
         ]);
         
@@ -196,14 +202,14 @@ export class 終点ハンドル<座標点T extends 配置物座標点> implement
         this._view = new 終点ハンドルView([{
             onハンドルドラッグ開始: (e: Drag開始値): void => {
                 this.移動開始(e);
-                
+                this.親の折れ線矢印集約.onハンドルドラッグ開始?.();
             },
             onハンドルドラッグ中: (e: Drag中値): void => {
                 this.ドラッグ移動処理(e);
             },
             onハンドルドラッグ終了: (e: Drag中値): void => {
                 this.移動終了(e);
-                
+                this.親の折れ線矢印集約.onハンドルドラッグ終了?.();
             }
         }]);
         this._state = state;
@@ -307,9 +313,15 @@ export class 線分ハンドル<座標点T extends 配置物座標点> implement
         this.終点 = 終点;
         this._i描画基準座標を持つ = i描画基準座標を持つ;
         this._view = new 線分ハンドルView([{
-            onハンドルドラッグ開始: (e: Drag開始値): void => {this.移動開始(e);},
+            onハンドルドラッグ開始: (e: Drag開始値): void => {
+                this.移動開始(e);
+                (this._親の集約 as unknown as I折れ線矢印集約<座標点T>)?.onハンドルドラッグ開始?.();
+            },
             onハンドルドラッグ中: (e: Drag中値): void => {this.ドラッグ移動処理(e);},
-            onハンドルドラッグ終了: (e: Drag終了値): void => {this.移動終了(e);},
+            onハンドルドラッグ終了: (e: Drag終了値): void => {
+                this.移動終了(e);
+                (this._親の集約 as unknown as I折れ線矢印集約<座標点T>)?.onハンドルドラッグ終了?.();
+            },
             on右クリック: (e: MouseEvent): void => {
                 this.線分ハンドルを右クリックしたときの処理(e);
             }
