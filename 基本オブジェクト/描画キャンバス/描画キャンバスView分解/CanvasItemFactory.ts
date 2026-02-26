@@ -14,6 +14,8 @@ import { 配置物衝突判定サービス } from "./配置物衝突判定サー
 import { AiOperationService } from "../../AI連携/AiOperationService";
 import { キャンバスグラフ操作サービス } from "./キャンバスグラフ操作サービス";
 import { I付箋View } from "../../I配置物";
+import { Iキャンバスコマンド } from "../../キャンバス操作/コマンドリポジトリ/Iキャンバスコマンド";
+import { 配置物テキスト変更コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
 
 export class CanvasItemFactory implements ICanvasItemFactory {
     private 衝突判定サービス: 配置物衝突判定サービス;
@@ -24,7 +26,8 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         private selectionManager: I配置物選択機能集約,
         private contextMenuContainer: コンテキストメニューコンテナ,
         private graphService: キャンバスグラフ操作サービス,
-        private onDeleteItem: () => void // 削除コールバック
+        private onDeleteItem: () => void, // 削除コールバック
+        private onCommandPush?: (cmd: Iキャンバスコマンド) => void
     ) {
         this.衝突判定サービス = new 配置物衝突判定サービス();
         this._aiOperation = new AiOperationService(this.model);
@@ -38,6 +41,9 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 minHeight: new Px長さ(50),
                 text: text ?? "",
                 コンテキストメニューコンテナ: this.contextMenuContainer,
+                onTextCommit: (oldText: string, newText: string) => {
+                    this.onCommandPush?.(new 配置物テキスト変更コマンド(付箋, oldText, newText));
+                }
             }, 
             {
                 i矢印生成先: this.model,
@@ -76,6 +82,9 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 minHeight: new Px長さ(50),
                 text: data.text,
                 コンテキストメニューコンテナ: this.contextMenuContainer,
+                onTextCommit: (oldText: string, newText: string) => {
+                    this.onCommandPush?.(new 配置物テキスト変更コマンド(付箋, oldText, newText));
+                }
             },
             {
                 i矢印生成先: this.model,

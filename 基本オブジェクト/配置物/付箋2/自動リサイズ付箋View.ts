@@ -42,6 +42,7 @@ export interface 自動リサイズ付箋Viewオプション<座標点T extends 
     onResize?: () => void;
     onTextChange?: (text: string) => void;
     onDragEnd?: () => void;
+    onTextCommit?: (oldText: string, newText: string) => void;
 }
 
 export interface 自動リサイズ付箋用コンテキストメニュー依存関係 {
@@ -209,6 +210,9 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                         onTextChange: (text: string) => { 
                                             this._text = text;
                                             this._onTextChange?.(text);
+                                        },
+                                        onBlurTextCommit: (oldText: string, newText: string) => {
+                                            option.onTextCommit?.(oldText, newText);
                                         },
                                         onHeightChange: (newHeight: number) => {
                                             this.set付箋ボードTransform({size:new Px2DVector(this._size.x, new Px長さ(newHeight))});

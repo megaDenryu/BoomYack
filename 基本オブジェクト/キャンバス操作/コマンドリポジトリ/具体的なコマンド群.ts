@@ -1,7 +1,7 @@
 import { Iキャンバスコマンド } from "./Iキャンバスコマンド";
 import { CanvasGraphModel } from "../../描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
-import { I配置物集約, I折れ線矢印集約 } from "../../../I配置物";
 import { Px2DVector, 描画座標点 } from "SengenUI/index";
+import { I折れ線矢印集約, I配置物集約 } from "../../I配置物";
 
 export class 配置物追加コマンド implements Iキャンバスコマンド {
     constructor(
@@ -78,16 +78,22 @@ export class 配置物削除コマンド implements Iキャンバスコマンド
 export class 配置物移動コマンド implements Iキャンバスコマンド {
     constructor(
         private readonly item: I配置物集約,
-        private readonly startPos: Px2DVector,
-        private readonly endPos: Px2DVector
+        private readonly startPos: any,
+        private readonly endPos: any
     ) {}
 
     execute(): void {
-        this.item.Px2DVector座標を更新し再描画する(this.endPos);
+        const anyItem = this.item as any;
+        if (typeof anyItem.位置を設定 === 'function') {
+            anyItem.位置を設定(this.endPos);
+        }
     }
 
     undo(): void {
-        this.item.Px2DVector座標を更新し再描画する(this.startPos);
+        const anyItem = this.item as any;
+        if (typeof anyItem.位置を設定 === 'function') {
+            anyItem.位置を設定(this.startPos);
+        }
     }
 }
 

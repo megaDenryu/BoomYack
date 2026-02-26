@@ -22,6 +22,8 @@ import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
 import 折れ線矢印Icon from '../../../SVGImg/折れ線矢印.svg?url';
 import { キャンバスグラフ操作サービス } from "./キャンバスグラフ操作サービス";
 import { まとめて移動サービス } from "./まとめて移動サービス";
+import { キャンバスコマンドリポジトリ } from "../../キャンバス操作/コマンドリポジトリ/キャンバスコマンドリポジトリ";
+import { 配置物追加コマンド, 配置物削除コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
 
 export interface 全ての接続点を表示非表示切り替え可能 {
     全ての接続点を表示非表示切り替え(表示する: boolean): void;
@@ -53,6 +55,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     private selectionManager: 配置物選択機能集約;
     private 選択物まとめて移動サービス: まとめて移動サービス = new まとめて移動サービス();
     public readonly グラフ操作サービス: キャンバスグラフ操作サービス;
+    public readonly commandRepository: キャンバスコマンドリポジトリ = new キャンバスコマンドリポジトリ();
     private _再描画予約済み = false;
     private _再描画リクエストID: number | null = null;
     
@@ -91,7 +94,8 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             this.selectionManager, 
             this.contextMenuContainer,
             this.グラフ操作サービス,
-            () => this.deleteSelectedItem()
+            () => this.deleteSelectedItem(),
+            (cmd) => this.commandRepository.push(cmd)
         );
         this.model.setFactory(this.factory);
         
@@ -165,7 +169,10 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             // 必要に応じて追加
         ];
 
-        return new DivC({"class": "キャンバスコンテナ"}).childs([
+        return new DivC({class: "キャンバスコンテナ"})
+            .bind(div => { div.dom.element.tabIndex = 0; })
+            .addDivEventListener('keydown', (e: KeyboardEvent) => this.onKeyDown(e))
+            .childs([
                     new DivC({"class": "描画キャンバスView"}).setStyleCSS({
                                 position: 'absolute',top: '0',left: '0',width: '100%',height: '100%',
                                 zIndex: 配置物zIndex.キャンバス.描画キャンバス,
@@ -220,20 +227,19 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     }
     
     private deleteSelectedItem(): void {
-        const items = this.selectionManager.選択中配置物;
+        const items = [...this.selectionManager.選択中配置物];
         if (items.length === 0) {
             return;
         }
-        for (const item of items) {
-            this.model.remove配置物(item);
-            this.selectionManager.選択解除();
-        }
+        this.commandRepository.executeAndPush(new 配置物削除コマンド(this.model, items));
+        this.selectionManager.選択解除();
     }
     
     private onAddStickyNote(e: MouseEvent): void { 
          const data = new MouseEventData(e);
          const pos = new 画面座標点(data.pos2DVector).to描画座標点(this.model.描画基準座標);
-         this.model.描画座標点でadd付箋(pos);
+         const item = this.model.描画座標点でadd付箋(pos);
+         this.commandRepository.push(new 配置物追加コマンド(this.model, item));
     }
     
     private onAddArrow(e: MouseEvent): void {
@@ -247,7 +253,8 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                 [],
                 終点
             );
-        this.model.add折れ線矢印(vm);
+        const item = this.model.add折れ線矢印(vm);
+        this.commandRepository.push(new 配置物追加コマンド(this.model, item));
     }
     
     private onCanvasDrag(e: Drag中値): void {
@@ -329,6 +336,21 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             for (const 配置物 of グラフ.配置物集約リスト) {
                 this.selectionManager.追加選択(配置物);
             }
+        }
+    }
+
+    private async onKeyDown(e: KeyboardEvent): Promise<void> {
+        if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'v') {
+            await this.グラフ操作サービス.クリップボードから貼り付け();
+        } else if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'z') {
+            e.preventDefault();
+            this.commandRepository.undo();
+        } else if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'z') {
+            e.preventDefault();
+            this.commandRepository.redo();
+        } else if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'y') {
+            e.preventDefault();
+            this.commandRepository.redo();
         }
     }
 }

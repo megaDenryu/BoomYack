@@ -18,6 +18,8 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
     private _onHeightChange: (newHeight: number) => void;
     private _onFocus: () => void;
     private _onBlur: () => void;
+    private _onBlurTextCommit?: (oldText: string, newText: string) => void;
+    private _textOnFocus: string = "";
 
     constructor(options: {
         initialText?: string;
@@ -27,6 +29,7 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
         onHeightChange: (newHeight: number) => void;
         onFocus?: () => void;
         onBlur?: () => void;
+        onBlurTextCommit?: (oldText: string, newText: string) => void;
     }) {
         super();
         this._text = options.initialText ?? "";
@@ -34,6 +37,7 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
         this._onHeightChange = options.onHeightChange;
         this._onFocus = options.onFocus ?? (() => {});
         this._onBlur = options.onBlur ?? (() => {});
+        this._onBlurTextCommit = options.onBlurTextCommit;
         this._テキストエリアサイズパラメータ管理 = new テキストエリアサイズパラメータ管理(
             options.初期テキストエリアサイズパラメータ ?? new テキストエリアサイズパラメータ()
         );
@@ -73,12 +77,19 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
         .addTextAreaEventListener('focus', (e) => {
             const target = e.target as HTMLTextAreaElement;
             target.style.outline = "2px solid #2196f3";
+            this._textOnFocus = target.value;
             this._onFocus();
         })
         .addTextAreaEventListener('blur', (e) => {
             const target = e.target as HTMLTextAreaElement;
             target.style.outline = "none";
             this._onBlur();
+            if (this._onBlurTextCommit && this._textOnFocus !== target.value) {
+                this._onBlurTextCommit(this._textOnFocus, target.value);
+            }
+        })
+        .addTextAreaEventListener('keydown', (e) => {
+            e.stopPropagation(); // Undoショートカット等がCanvasに伝播するのを防ぐ
         })
         .addTextAreaEventListener('mousedown', (e) => {
             // ドラッグ・リサイズとの競合を回避し、フォーカス取得を確実にする

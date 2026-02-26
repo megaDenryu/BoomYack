@@ -1,4 +1,4 @@
-import { MouseEventData, 画面座標点 } from "SengenUI/index";
+import { MouseEventData, 画面座標点, 描画座標点, Px2DVector } from "SengenUI/index";
 import { I配置物集約 } from "../../I配置物";
 import { Iグラフ配置先 } from "../../配置物リポジトリ";
 import { 配置物連結グラフ, 配置物連結グラフをすべて抽出, 配置物連結グラフ群 } from "../配置物グラフ/配置物連結グラフ";
@@ -42,16 +42,22 @@ export class キャンバスグラフ操作サービス {
 
     public グラフJson出力(_選択配置物: I配置物集約): void {}
 
-    public async クリップボードから貼り付け(e: MouseEvent): Promise<void> {
+    public async クリップボードから貼り付け(e?: MouseEvent): Promise<void> {
         console.log('[BoomYack貼り付け] 貼り付け処理開始');
-        const data = new MouseEventData(e);
-        const pos = new 画面座標点(data.pos2DVector).to描画座標点(this.配置先.描画基準座標);
         const text = await this.クリップボードサービス.貼り付け();
+        let pos: 描画座標点;
+        if (e) {
+            const data = new MouseEventData(e);
+            pos = new 画面座標点(data.pos2DVector).to描画座標点(this.配置先.描画基準座標);
+        } else {
+            const centerPx = Px2DVector.fromNumbers(300, 300); // 座標が取れない場合の仮配置座標
+            pos = new 画面座標点(centerPx).to描画座標点(this.配置先.描画基準座標);
+        }
         console.log('[BoomYack貼り付け] クリップボードから取得したテキスト長:', text.length);
         const グラフ: テキスト用グラフ<付箋text> | null = テキスト用グラフ_付箋textfromJson(text);
         if (グラフ === null) {
-            console.error('[BoomYack貼り付け] ✗ グラフのパースに失敗しました');
-            console.error('[BoomYack貼り付け] 受け取ったテキスト(最初300文字):', text.substring(0, 300));
+            console.warn('[BoomYack貼り付け] グラフ情報のパースに失敗しました。通常のテキストとして付箋に貼り付けます。');
+            this.配置先.描画座標点でadd付箋(pos, text);
             return;
         }
         try {
