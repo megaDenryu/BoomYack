@@ -80,6 +80,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 onAI分解_区切り文字: () => { this._aiOperation.executeDecompose(付箋, "文単位"); },
                 onグラフをテキストとしてコピー: () => { this.graphService.グラフをテキストとしてコピー(付箋); },
                 onグラフをJSON出力: () => { this.graphService.グラフを選択してjsonファイル出力(付箋); },
+                on選択配置物をコピー: () => { this.graphService.選択中の配置物をコピー(this.selectionManager.選択中配置物); },
                 onクリップボードから貼り付け: (e: MouseEvent) => { this.graphService.クリップボードから貼り付け(e, this.onCommandPush); },
                 onグラフ選択: () => {
                     const グラフ = this.graphService.グラフを選択(付箋);
@@ -143,6 +144,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 onAI分解_区切り文字: () => { this._aiOperation.executeDecompose(付箋, "文単位"); },
                 onグラフをテキストとしてコピー: () => { this.graphService.グラフをテキストとしてコピー(付箋); },
                 onグラフをJSON出力: () => { this.graphService.グラフを選択してjsonファイル出力(付箋); },
+                on選択配置物をコピー: () => { this.graphService.選択中の配置物をコピー(this.selectionManager.選択中配置物); },
                 onクリップボードから貼り付け: (e: MouseEvent) => { this.graphService.クリップボードから貼り付け(e, this.onCommandPush); },
                 onグラフ選択: () => {
                     const グラフ = this.graphService.グラフを選択(付箋);

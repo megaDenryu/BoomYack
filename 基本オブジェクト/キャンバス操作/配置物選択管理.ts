@@ -8,6 +8,7 @@ import { まとめて移動サービス } from "../描画キャンバス/描画�
 import { 自動リサイズ付箋View } from "../配置物/付箋2/自動リサイズ付箋View";
 
 export interface I配置物選択機能集約 {
+    readonly 選択中配置物: I配置物集約[];
     set選択中配置物(配置物: I配置物集約): void;
     追加選択(配置物: I配置物集約): void;
     全て選択(全配置物: I配置物集約[]): void;
