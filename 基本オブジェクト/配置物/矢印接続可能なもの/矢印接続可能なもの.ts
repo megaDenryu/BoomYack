@@ -4,7 +4,7 @@ import { DivC, HtmlComponentBase, I描画空間, LV2HtmlComponentBase, Px2DVecto
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 import { I矢印生成先 } from "../../配置物リポジトリ";
 import { I接続点親情報, I矢印接続可能なもの中央PositionState, 接続点, 接続点State } from "./接続点";
-import { I折れ線矢印集約 } from "BoomYack/基本オブジェクト/I配置物";
+import { I接続点, I折れ線矢印集約 } from "BoomYack/基本オブジェクト/I配置物";
 
 export interface 絶対矢印上下左右Position<座標点T extends 配置物座標点> {
     上: 座標点T;
@@ -110,20 +110,20 @@ export class 矢印接続可能なもの<座標点T extends 配置物座標点> 
         }
     }
 
-    public ほかの矢印接続可能な物と最も近い接続点のペアを取得する(other: this): {
+    public ほかの矢印接続可能な物と最も近い接続点のペアを取得する(other: this, オプション?: { 自分の現在の接続点?: I接続点<座標点T>, 相手の現在の接続点?: I接続点<座標点T> }): {
         自分の接続点: 接続点<座標点T>;
         相手の接続点: 接続点<座標点T>;
     }{
         const 自分to相手ベクトル = other.中央pos.px2DVector.minus(this.中央pos.px2DVector);
         const 相手へのベクトル = 自分to相手ベクトル.times(-1);
         return {
-            自分の接続点: this.対象方向へもっとも成す角が小さい接続点を取得する(自分to相手ベクトル),
-            相手の接続点: other.対象方向へもっとも成す角が小さい接続点を取得する(相手へのベクトル)
+            自分の接続点: this.対象方向へもっとも成す角が小さい接続点を取得する(自分to相手ベクトル, オプション?.自分の現在の接続点),
+            相手の接続点: other.対象方向へもっとも成す角が小さい接続点を取得する(相手へのベクトル, オプション?.相手の現在の接続点)
         };
         
     }
 
-    public 対象方向へもっとも成す角が小さい接続点を取得する(対象方向: VectorNと見なせる<any>): 接続点<座標点T> {
+    public 対象方向へもっとも成す角が小さい接続点を取得する(対象方向: VectorNと見なせる<any>, 現在の接続点?: I接続点<座標点T>): 接続点<座標点T> {
         // 方向ベクトルと接続点のマッピング
         const 方向pair = [
             { ベクトル: new VectorN([0, 1]), 接続点:  this.接続点_上 },
@@ -133,12 +133,19 @@ export class 矢印接続可能なもの<座標点T extends 配置物座標点> 
         ];
 
         // 各方向との内積を計算し、最大の内積を持つ方向を選択
+        // 現在の接続点にはわずかなボーナス（遊び）を与えて、チャタリング（激しい切り替え）を防止する
+        const 慣性ゲイン = 0.1; 
+        
         return 方向pair
-            .map(pair => ({ 
-                接続点: pair.接続点, 
-                内積: dotVectorN(対象方向, pair.ベクトル) 
-            }))
-            .reduce((max, current) => current.内積 > max.内積 ? current : max)
+            .map(pair => {
+                const 内積 = dotVectorN(対象方向, pair.ベクトル);
+                const ボーナス = (pair.接続点 === 現在の接続点) ? 慣性ゲイン : 0;
+                return { 
+                    接続点: pair.接続点, 
+                    スコア: 内積 + ボーナス 
+                };
+            })
+            .reduce((max, current) => current.スコア > max.スコア ? current : max)
             .接続点;
     }
 }
