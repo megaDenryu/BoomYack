@@ -1,4 +1,4 @@
-import { DivC, Drag中値, LV2HtmlComponentBase, MouseEventData, MouseWife, Px2DVector, Px長さ, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
+import { DivC, Drag中値, LV2HtmlComponentBase, MouseEventData, MouseWife, Px2DVector, Px長さ, SpanC, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
 import { I配置物集約, 配置物zIndex } from "../../I配置物";
 
 
@@ -22,6 +22,7 @@ import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
 import 折れ線矢印Icon from '../../../SVGImg/折れ線矢印.svg?url';
 import MicOnIcon from '../../../SVGImg/MicOn.svg?url';
 import MicOffIcon from '../../../SVGImg/MicOff.svg?url';
+import * as Icons from "AppPage/ProjectDesignAgent/Icons";
 import { キャンバスグラフ操作サービス } from "./キャンバスグラフ操作サービス";
 import { まとめて移動サービス } from "./まとめて移動サービス";
 import { キャンバスコマンドリポジトリ } from "../../キャンバス操作/コマンドリポジトリ/キャンバスコマンドリポジトリ";
@@ -279,9 +280,15 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                         })
                         .zIndex(配置物zIndex.キャンバス.コンテキストメニューコンテナ),
                     
-                    new DivC({ text: "🎤 録音中...", class: "recording-indicator" })
+                    new DivC({ class: "recording-indicator" })
+                        .childs([
+                            Icons.micIcon(16, "white"),
+                            new SpanC({ text: "録音中..." })
+                        ])
                         .setStyleCSS({
                             display: 'none',
+                            alignItems: 'center',
+                            gap: '8px',
                             position: 'absolute',
                             bottom: '20px',
                             right: '20px',
