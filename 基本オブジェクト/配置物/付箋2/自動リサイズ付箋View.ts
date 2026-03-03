@@ -56,6 +56,7 @@ export interface 自動リサイズ付箋用コンテキストメニュー依存
     onAI分解_区切り文字?: () => void;
     onグラフをテキストとしてコピー?: () => void;
     onグラフをJSON出力?: () => void;
+    on選択配置物をコピー?: () => void;
     onクリップボードから貼り付け?: (e: MouseEvent) => void;
     onグラフ選択?: () => void;
     onマイク入力トグル?: () => void;
@@ -157,6 +158,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                     { parentId: 'L1-graph', label: "グラフ選択", onClick: () => { コンテキストメニュー依存関係.onグラフ選択?.(); } },
                     { parentId: 'L1-graph', label: ["グラフをテキスト", "としてコピー"], onClick: () => { コンテキストメニュー依存関係.onグラフをテキストとしてコピー?.(); } },
                     { parentId: 'L1-graph', label: ["グラフを", "JSON出力"], onClick: () => { コンテキストメニュー依存関係.onグラフをJSON出力?.(); } },
+                    { parentId: 'L1-graph', label: "コピー", onClick: () => { コンテキストメニュー依存関係.on選択配置物をコピー?.(); } },
 
                     // その他 (RB)
                     { 

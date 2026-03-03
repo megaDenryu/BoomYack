@@ -2,7 +2,7 @@ import { MouseEventData, 画面座標点, 描画座標点, Px2DVector } from "Se
 import { I配置物集約 } from "../../I配置物";
 import { Iグラフ配置先 } from "../../配置物リポジトリ";
 import { 配置物連結グラフ, 配置物連結グラフをすべて抽出, 配置物連結グラフ群 } from "../配置物グラフ/配置物連結グラフ";
-import { テキスト用グラフ, テキスト用グラフ_付箋textfromJson, 付箋text, 配置物連結グラフtoテキスト用グラフノード } from "../配置物グラフ/テキスト化情報";
+import { テキスト用グラフ, テキスト用グラフノード, テキスト用グラフ_付箋textfromJson, 付箋text, 配置物連結グラフtoテキスト用グラフノード } from "../配置物グラフ/テキスト化情報";
 import { JSONファイル出力サービス } from "BoomYack/基本オブジェクト/ファイル入出力/JSONファイル出力サービス";
 import { クリップボードサービス } from "BoomYack/基本オブジェクト/ファイル入出力/クリップボードサービス";
 import { テキスト用グラフからキャンバスに配置するサービス } from "BoomYack/基本オブジェクト/グラフ計算サービス/グラフ計算サービス";
@@ -41,6 +41,26 @@ export class キャンバスグラフ操作サービス {
         });
         if (!テキスト用グラフ) return;
         this.クリップボードサービス.コピー(テキスト用グラフ.toJson());
+    }
+
+    /**
+     * 選択中の配置物のみをコピーする（接続グラフを辿らない）。
+     * 付箋のテキストをリンクなしのグラフノードとしてシリアライズし、クリップボードに書き込む。
+     */
+    public 選択中の配置物をコピー(選択配置物リスト: I配置物集約[]): void {
+        // 付箋のみを対象とする（矢印は単独コピーの意味がないため除外）
+        const 付箋リスト = 選択配置物リスト.filter(item => item.type === "付箋");
+        if (付箋リスト.length === 0) return;
+
+        const ノードリスト = 付箋リスト.map(付箋 => {
+            const データ = 付箋.toシリアライズデータ() as any;
+            const text: string = データ.text ?? "";
+            const id: string = 付箋.idString;
+            return new テキスト用グラフノード<付箋text>({ text }, id, [], []);
+        });
+
+        const グラフ = new テキスト用グラフ<付箋text>(ノードリスト, "interface 付箋text{text:string;}");
+        this.クリップボードサービス.コピー(グラフ.toJson());
     }
 
     public グラフJson出力(_選択配置物: I配置物集約): void {}
