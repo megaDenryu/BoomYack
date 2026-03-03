@@ -54,7 +54,7 @@ export class テキスト用グラフノード<T> implements GraphNode<T> {
 export interface 付箋text {
     readonly text : string;
 }
-const 付箋text型説明 = "interface 付箋text{text:string;}";
+const 付箋text型説明 = "interface 付箋text{text:string;} です。textは付箋に書かれたテキストで、必ずマークダウン形式の文字列を埋め込むこと。メタ情報やコードもマークダウンの文字列の中に埋め込むこと。";
 
 export class テキスト用グラフ<T> implements Graph<T> {
     public readonly jsonTypeDecriptionForAI:string;
