@@ -200,6 +200,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             }},
 
             // 編集・操作 (LB)
+            { parentId: "L1-edit", label: "コピー", onClick: (e: MouseEvent) => this.選択中配置物をコピー() },
             { parentId: "L1-edit", label: "貼り付け", onClick: (e: MouseEvent) => this.グラフ操作サービス.クリップボードから貼り付け(e, (cmd) => this.commandRepository.push(cmd))},
 
             // その他 (RB)
@@ -409,6 +410,12 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         document.removeEventListener('keydown', this.handleKeyDown);
     }
 
+    private 選択中配置物をコピー(): void {
+        const 選択中 = this.selectionManager.選択中配置物;
+        if (選択中.length === 0) return;
+        this.グラフ操作サービス.選択中の配置物をコピー(選択中);
+    }
+
     private executeGraphSelection(): void {
         const 選択中配置物リスト = this.selectionManager.選択中配置物;
         const 選択中配置物グラフリスト: 配置物連結グラフ[] = 選択中配置物リスト.map(配置物 => this.グラフ操作サービス.グラフを選択(配置物))
@@ -421,7 +428,10 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     }
 
     private async onKeyDown(e: KeyboardEvent): Promise<void> {
-        if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'v') {
+        if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'c') {
+            e.preventDefault();
+            this.選択中配置物をコピー();
+        } else if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'v') {
             await this.グラフ操作サービス.クリップボードから貼り付け(undefined, (cmd) => this.commandRepository.push(cmd));
         } else if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === 'z') {
             e.preventDefault();
