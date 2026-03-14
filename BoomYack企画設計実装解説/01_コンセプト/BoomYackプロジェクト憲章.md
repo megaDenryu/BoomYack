@@ -26,3 +26,9 @@ BoomYackは、Miroのような無限キャンバス上でノード（付箋）�
 - 複雑な物語構造を管理したいシナリオライター
 - AIエージェントの思考プロセスを可視化・デバッグしたい開発者
 - マインドマップを超えた自由な発想整理を行いたいクリエイター
+
+# git submoduleとしての活用
+このリポジトリは以下のリポジトリに依存しています。
+- SengenUI
+- TypeScriptBenriKakuchou — TypeScriptユーティリティライブラリ
+- OneONetUIComponents — Toast/通知コンポーネント

@@ -22,12 +22,12 @@ import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
 import 折れ線矢印Icon from '../../../SVGImg/折れ線矢印.svg?url';
 import MicOnIcon from '../../../SVGImg/MicOn.svg?url';
 import MicOffIcon from '../../../SVGImg/MicOff.svg?url';
-import * as Icons from "AppPage/ProjectDesignAgent/Icons";
 import { キャンバスグラフ操作サービス } from "./キャンバスグラフ操作サービス";
 import { まとめて移動サービス } from "./まとめて移動サービス";
 import { キャンバスコマンドリポジトリ } from "../../キャンバス操作/コマンドリポジトリ/キャンバスコマンドリポジトリ";
 import { 配置物追加コマンド, 配置物削除コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
 import { VoiceRecognitionService } from "../../キャンバス操作/音声認識サービス";
+import { micIcon } from "OneONetUIComponents/Svg/Icons";
 
 export interface 全ての接続点を表示非表示切り替え可能 {
     全ての接続点を表示非表示切り替え(表示する: boolean): void;
@@ -283,7 +283,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                     
                     new DivC({ class: "recording-indicator" })
                         .childs([
-                            Icons.micIcon(16, "white"),
+                            micIcon(16, "white"),
                             new SpanC({ text: "録音中..." })
                         ])
                         .setStyleCSS({
