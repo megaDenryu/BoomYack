@@ -187,14 +187,16 @@ export class セーブパネル extends LV2HtmlComponentBase {
             .childs([
                 new SpanC({ text: "保存先", class: inputLabel }),
                 new DivC({ class: modeSelector })
-                    .childs([
+                    .child(
                         new ButtonC({ text: "ローカル", class: [modeButton, modeButtonActive] })
                             .bind(self => this._localModeBtn = self)
-                            .addTypedEventListener('click', () => this.switchMode("local")),
-                        new ButtonC({ text: "サーバー", class: modeButton })
+                            .addTypedEventListener('click', () => this.switchMode("local"))
+                    ).childIf({
+                        If: this._events.onIsServerModeAvailable(),
+                        True: new ButtonC({ text: "サーバー", class: modeButton })
                             .bind(self => this._serverModeBtn = self)
                             .addTypedEventListener('click', () => this.switchMode("server"))
-                    ])
+                    })
             ]);
     }
 
