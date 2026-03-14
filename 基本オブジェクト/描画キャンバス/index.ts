@@ -5,4 +5,4 @@
 // State管理とシリアライズ
 
 // APIリポジトリ
-export * from "./描画キャンバスAPIリポジトリ";
+export * from "../API/描画キャンバスAPIリポジトリ";

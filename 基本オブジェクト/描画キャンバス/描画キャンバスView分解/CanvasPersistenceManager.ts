@@ -1,7 +1,7 @@
 import { 描画座標点, 画面座標点 } from "SengenUI/index";
 import { CanvasGraphModel } from "./CanvasGraphModel";
 import { CanvasItemFactory } from "./CanvasItemFactory";
-import { 描画キャンバスリポジトリ } from "../描画キャンバスAPIリポジトリ";
+import { 描画キャンバスリポジトリ } from "../../API/描画キャンバスAPIリポジトリ";
 import { 描画キャンバスデータ, 配置物データ, 接続参照データ, 描画キャンバスJSON, 座標データ, キャンバスメタデータ } from "../データクラス";
 
 import { 矢印接続可能付箋Old } from "../../配置物/付箋2/矢印接続可能付箋Old";

@@ -6,7 +6,7 @@ import { Iコンテキストメニュー } from "../../キャンバス操作/円
 import { 多段格子コンテキストメニュー, 格子メニュー1層オプション, 格子メニュー2層オプション } from "../../キャンバス操作/多段格子コンテキストメニュー/多段格子コンテキストメニュー";
 import { コンテキストメニューコンテナ } from "../../キャンバス操作/円状コンテキストメニュー/コンテキストメニューコンテナ";
 import { 配置物選択機能集約, I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
-import { 描画キャンバスリポジトリ } from "../描画キャンバスAPIリポジトリ";
+import { 描画キャンバスリポジトリ } from "../../API/描画キャンバスAPIリポジトリ";
 import { CanvasGraphModel, GraphEvent } from "./CanvasGraphModel";
 import { CanvasItemFactory } from "./CanvasItemFactory";
 import { CanvasPersistenceManager } from "./CanvasPersistenceManager";

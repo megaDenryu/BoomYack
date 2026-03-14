@@ -1,9 +1,9 @@
 import { RequestAPI } from "TypeScriptBenriKakuchou/Web/RequestApi";
-import { キャンバスメタデータ, 描画キャンバスデータ, 描画キャンバスデータからメタデータ抽出, 描画キャンバスJSON, I描画キャンバスJSON } from "./データクラス";
-import { CanvasDeleteResponse, CanvasListResponse, CanvasLoadResponse, キャンバス保存レスポンス } from "./CanvasResponse";
+import { キャンバスメタデータ, 描画キャンバスデータ, 描画キャンバスデータからメタデータ抽出, 描画キャンバスJSON, I描画キャンバスJSON } from "../描画キャンバス/データクラス";
+import { CanvasDeleteResponse, CanvasListResponse, CanvasLoadResponse, キャンバス保存レスポンス } from "../描画キャンバス/CanvasResponse";
+import { I描画キャンバスAPIリポジトリ, I描画キャンバスローカルリポジトリ } from "./I描画キャンバスAPIリポジトリ";
 
 
-export interface 描画キャンバスリポジトリ {api: 描画キャンバスAPIリポジトリ, local: 描画キャンバスローカルリポジトリ}
 
 /**
  * 描画キャンバスのデータをサーバーと同期するためのAPIリポジトリ
@@ -15,8 +15,13 @@ export interface 描画キャンバスリポジトリ {api: 描画キャンバ�
  * const loadedData = await repo.読み込み("my-canvas-id");
  * ```
  */
-export class 描画キャンバスAPIリポジトリ {
+export class 描画キャンバスAPIリポジトリ implements I描画キャンバスAPIリポジトリ {
     private readonly _endpointBase: string = "BoomYack/SaveLoad";
+    public readonly isAvailable: boolean;
+
+    public constructor(isServerAvailable: boolean) {
+        this.isAvailable = isServerAvailable;
+    }
 
     public async 保存(data: 描画キャンバスデータ): Promise<キャンバス保存レスポンス> {
         return RequestAPI.postRequest2<キャンバス保存レスポンス>(
@@ -86,7 +91,7 @@ export class 描画キャンバスAPIリポジトリ {
  * ローカルストレージを使用したキャンバスデータの一時保存リポジトリ
  * サーバーが利用できない場合のフォールバック用
  */
-export class 描画キャンバスローカルリポジトリ {
+export class 描画キャンバスローカルリポジトリ implements I描画キャンバスローカルリポジトリ {
     private readonly _storageKeyPrefix: string = "canvas_data_";
 
     /**

@@ -1,24 +1,17 @@
 import { CanvasC, DivC, DocumentBodyC, LV2HtmlComponentBase, MouseEventData, Px2DVector, Px長さ, 描画座標点, 画面座標点 } from "SengenUI/index";
-
-
 import { sticky_graph_board_container } from './style.css';
 import { 自動リサイズ付箋View2 } from 'BoomYack/基本オブジェクト/配置物/付箋2/自動リサイズ付箋View2';
-
-
 import { CanvasView, CanvasViewOptions } from 'BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasView';
-
-
 import { 配置物zIndex } from 'BoomYack/基本オブジェクト/I配置物';
-
 import { Action } from 'TypeScriptBenriKakuchou/アーキテクチャBase';
 import { セーブパネル, ISavePanelEvents, SaveMode } from 'BoomYack/基本オブジェクト/キャンバス操作/セーブパネル';
-import { 描画キャンバスAPIリポジトリ, 描画キャンバスリポジトリ, 描画キャンバスローカルリポジトリ } from 'BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスAPIリポジトリ';
-import { 円状メニューアイテムオプション } from 'BoomYack/基本オブジェクト/キャンバス操作/円状コンテキストメニュー/円状コンテキストメニュー';
+import { 描画キャンバスローカルリポジトリ } from 'BoomYack/基本オブジェクト/API/描画キャンバスAPIリポジトリ';
 import { キャンバスメタデータ, 描画キャンバスデータ } from 'BoomYack/基本オブジェクト/描画キャンバス/データクラス';
 import { 自動リサイズ付箋View } from 'BoomYack/基本オブジェクト/配置物/付箋2/自動リサイズ付箋View';
 import { JSON読み込みサービス } from 'BoomYack/基本オブジェクト/ファイル入出力/JSON読み込みサービス';
 import { 描画キャンバスデータバリデーター } from 'BoomYack/基本オブジェクト/ファイル入出力/描画キャンバスデータバリデーター';
 import { DropFileLoader } from 'TypeScriptBenriKakuchou/FileSystem/ローダー/DropFileLoader';
+import { I描画キャンバスAPIリポジトリ } from "BoomYack/基本オブジェクト/API/I描画キャンバスAPIリポジトリ";
 
 /**
  * Miroのような付箋グラフボードページ
@@ -36,15 +29,17 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
     private _描画キャンバスView: CanvasView;
     private testCanvas: CanvasC;
     private _セーブパネル: セーブパネル;
-    private _apiリポジトリ: 描画キャンバスAPIリポジトリ;
+    private _apiリポジトリ: I描画キャンバスAPIリポジトリ;
     private _ローカルリポジトリ: 描画キャンバスローカルリポジトリ;
     private _json読み込みサービス: JSON読み込みサービス;
 
-    constructor() {
+        constructor(props: {
+            apiリポジトリ: I描画キャンバスAPIリポジトリ, // デフォルトでサーバーモード利用可能
+        }) {
         super();
         
         // リポジトリ初期化
-        this._apiリポジトリ = new 描画キャンバスAPIリポジトリ();
+        this._apiリポジトリ = props.apiリポジトリ;
         this._ローカルリポジトリ = new 描画キャンバスローカルリポジトリ();
         
         this._windowSizeScaleObserver = new WindowSizeScaleObserver();
@@ -114,6 +109,11 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
             onSaveCanvasData: async (canvasData: 描画キャンバスデータ): Promise<void> => {
                 // 渡されたキャンバスデータで現在のキャンバスを復元
                 this._ローカルリポジトリ.保存(canvasData);
+            },
+            onIsServerModeAvailable: () => {
+                // サーバーモードが利用可能かどうかを判定するロジック
+                // ここでは単純にAPIリポジトリのエンドポイントが設定されているかで判定する例を示す
+                return this._apiリポジトリ.isAvailable;
             }
         };
     }

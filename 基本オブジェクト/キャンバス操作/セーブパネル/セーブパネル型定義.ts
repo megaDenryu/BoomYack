@@ -49,4 +49,7 @@ export interface ISavePanelEvents {
      * @param canvasData セットする描画キャンバスデータ
      */
     onSaveCanvasData: (canvasData: 描画キャンバスデータ) => Promise<void>;
+
+    // サーバーモードが利用可能かどうかを非同期に判定するコールバック
+    onIsServerModeAvailable: () => boolean;
 }
