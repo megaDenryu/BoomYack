@@ -11,6 +11,7 @@ export const 線分ハンドルコンテナ = style({
 export const 線分ハンドル基本 = style({
     width: "100%",
     height: "20px",// 当たり判定拡大分を含む
+    boxSizing: "border-box", // paddingによる細線表現がホスト環境のbox-sizing設定に依存しないよう明示
     padding: "8px 0px", // 上下に8pxずつpaddingを追加し、実際には中央4px分だけ色をぬって見えるようにする。ホバーの当たり判定は20pxになる。
     borderRadius: "2px",
     transition: "all 200ms ease-in-out"
