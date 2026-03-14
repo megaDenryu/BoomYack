@@ -1,12 +1,11 @@
 import { DivC, Drag中値, LV2HtmlComponentBase, MouseEventData, MouseWife, Px2DVector, Px長さ, SpanC, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
-import { I配置物集約, 配置物zIndex } from "../../I配置物";
+import { 配置物zIndex } from "../../I配置物";
 
 
 import { Iコンテキストメニュー } from "../../キャンバス操作/円状コンテキストメニュー/円状コンテキストメニュー";
 import { 多段格子コンテキストメニュー, 格子メニュー1層オプション, 格子メニュー2層オプション } from "../../キャンバス操作/多段格子コンテキストメニュー/多段格子コンテキストメニュー";
 import { コンテキストメニューコンテナ } from "../../キャンバス操作/円状コンテキストメニュー/コンテキストメニューコンテナ";
-import { 配置物選択機能集約, I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
-import { 描画キャンバスリポジトリ } from "../../API/描画キャンバスAPIリポジトリ";
+import { 配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 import { CanvasGraphModel, GraphEvent } from "./CanvasGraphModel";
 import { CanvasItemFactory } from "./CanvasItemFactory";
 import { CanvasPersistenceManager } from "./CanvasPersistenceManager";
@@ -15,7 +14,7 @@ import { CanvasPersistenceManager } from "./CanvasPersistenceManager";
 import { キャンバスメタデータ } from "../データクラス";
 import { 折れ線矢印VM } from "../../配置物"; // export確認要
 import { 折れ線矢印ID, キャンバスID } from "../../ID";
-import { 配置物連結グラフ, 配置物連結グラフをすべて抽出 } from "../配置物グラフ/配置物連結グラフ";
+import { 配置物連結グラフ } from "../配置物グラフ/配置物連結グラフ";
 import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?url';
 import SaveIcon from '../../../SVGImg/SaveIcon.svg?url';
 import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
@@ -28,6 +27,7 @@ import { キャンバスコマンドリポジトリ } from "../../キャンバ�
 import { 配置物追加コマンド, 配置物削除コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
 import { VoiceRecognitionService } from "../../キャンバス操作/音声認識サービス";
 import { micIcon } from "OneONetUIComponents/Svg/Icons";
+import { 描画キャンバスリポジトリ } from "../../API/I描画キャンバスAPIリポジトリ";
 
 export interface 全ての接続点を表示非表示切り替え可能 {
     全ての接続点を表示非表示切り替え(表示する: boolean): void;

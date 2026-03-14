@@ -1,7 +1,6 @@
 import { 描画座標点, 画面座標点 } from "SengenUI/index";
 import { CanvasGraphModel } from "./CanvasGraphModel";
 import { CanvasItemFactory } from "./CanvasItemFactory";
-import { 描画キャンバスリポジトリ } from "../../API/描画キャンバスAPIリポジトリ";
 import { 描画キャンバスデータ, 配置物データ, 接続参照データ, 描画キャンバスJSON, 座標データ, キャンバスメタデータ } from "../データクラス";
 
 import { 矢印接続可能付箋Old } from "../../配置物/付箋2/矢印接続可能付箋Old";
@@ -9,6 +8,7 @@ import { 折れ線矢印集約 } from "../../配置物";
 
 import { 接続点 } from "../../配置物/矢印接続可能なもの/接続点";
 import { キャンバスID } from "../../ID";
+import { 描画キャンバスリポジトリ } from "../../API/I描画キャンバスAPIリポジトリ";
 
 export class CanvasPersistenceManager {
     constructor(
