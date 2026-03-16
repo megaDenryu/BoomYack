@@ -5,7 +5,7 @@ import { div, DivC, Drag中値, Drag終了値, Drag開始値, HtmlComponentBase,
 
 
 
-import { auto_resize_handle_left, auto_resize_handle_right, auto_resize_sticky_note, 付箋ホバー領域 } from "../付箋/付箋View/style.css";
+import { auto_resize_handle_left, auto_resize_handle_right, auto_resize_sticky_note, 付箋ホバー領域, 付箋コンテンツコンテナ } from "../付箋/付箋View/style.css";
 import { テキストエリアサイズパラメータ, 自動リサイズテキストエリア } from "../付箋/付箋View/自動リサイズモード/自動リサイズテキストエリア";
 import { I付箋View, 配置物zIndex } from "../../I配置物";
 
@@ -216,7 +216,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                                                                 this.選択する?.(e);
                                                                             })
                                                                             .childs([
-                            div({class:"コンテナ"})
+                            div({class: 付箋コンテンツコンテナ})
                                 .setStyleCSS({
                                     flex: "1",
                                     display: "flex",

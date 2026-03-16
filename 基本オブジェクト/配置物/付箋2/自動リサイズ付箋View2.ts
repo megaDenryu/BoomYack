@@ -5,7 +5,7 @@ import { div, DivC, Drag中値, Drag終了値, Drag開始値, HtmlComponentBase,
 
 
 
-import { auto_resize_handle_left, auto_resize_handle_right, auto_resize_sticky_note, sticky_note_close_button, sticky_note_container, 付箋ホバー領域, sticky_note_header, sticky_note_title } from "../付箋/付箋View/style.css";
+import { auto_resize_handle_left, auto_resize_handle_right, auto_resize_sticky_note, sticky_note_close_button, sticky_note_container, 付箋ホバー領域, sticky_note_header, sticky_note_title, 付箋コンテンツコンテナ } from "../付箋/付箋View/style.css";
 import { テキストエリアサイズパラメータ, 自動リサイズテキストエリア } from "../付箋/付箋View/自動リサイズモード/自動リサイズテキストエリア";
 import { I付箋View, 配置物zIndex } from "../../I配置物";
 
@@ -121,7 +121,7 @@ export class 自動リサイズ付箋View2<座標点T extends 配置物座標点
                                                                                                     onドラッグ中: (e: Drag中値)=> { this.ドラッグ移動処理(e);},
                                                                                                     onドラッグ終了: (e: Drag終了値)=> {}
                                                                                                 })}).setStyleCSS({zIndex: 配置物zIndex.付箋内部構造.ヘッダー}),
-                            div({class:"コンテナ"})
+                            div({class: 付箋コンテンツコンテナ})
                                 .setStyleCSS({
                                     flex: "1",
                                     display: "flex",

@@ -11,6 +11,9 @@ export const panelFadeOut = keyframes({
     '100%': { opacity: 0, transform: 'translate(-50%, -50%) scale(0.9)' }
 });
 
+// セーブパネルラッパー
+export const savePanelWrapper = style({});
+
 // オーバーレイ背景
 export const overlayBackdrop = style({
     position: 'fixed',

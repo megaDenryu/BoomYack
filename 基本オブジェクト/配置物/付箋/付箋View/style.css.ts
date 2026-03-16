@@ -17,6 +17,9 @@ export const 付箋ホバー領域 = style({
     backgroundColor: "transparent"
 });
 
+// 付箋コンテンツコンテナ
+export const 付箋コンテンツコンテナ = style({});
+
 // ドラッグハンドルのスタイル
 export const drag_handle = style({
     position: "absolute",

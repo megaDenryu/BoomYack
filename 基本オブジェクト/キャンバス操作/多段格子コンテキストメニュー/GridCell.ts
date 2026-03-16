@@ -1,4 +1,5 @@
 import { div, span, DivC, LV2HtmlComponentBase } from "SengenUI/index";
+import { 多段格子メニューセル } from "../style.css";
 
 export interface IGridMenuItemStyle {
     label?: string | string[];
@@ -48,7 +49,7 @@ export class GridCell extends LV2HtmlComponentBase {
         this._originalBaseBg = activeBg.base;
         this._currentBaseBg = activeBg.base;
 
-        const root = div({class: `grid-cell`})
+        const root = div({class: 多段格子メニューセル})
             .setStyleCSS({
                 gridColumn: typeof options.col === "number" ? options.col.toString() : options.col,
                 gridRow: typeof options.row === "number" ? options.row.toString() : options.row,

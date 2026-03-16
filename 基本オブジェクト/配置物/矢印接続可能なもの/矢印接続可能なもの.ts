@@ -1,6 +1,6 @@
 import { div, DivC, HtmlComponentBase, I描画空間, LV2HtmlComponentBase, Px2DVector, VectorN, VectorNと見なせる, dotVectorN, 配置物座標点 } from "SengenUI/index";
 
-
+import { 矢印ホバー用四角形 } from "./style.css";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 import { I矢印生成先 } from "../../配置物リポジトリ";
 import { I接続点親情報, I矢印接続可能なもの中央PositionState, 接続点, 接続点State } from "./接続点";
@@ -72,7 +72,7 @@ export class 矢印接続可能なもの<座標点T extends 配置物座標点> 
 
     protected createComponentRoot(): HtmlComponentBase {
         return (
-          div({class:"矢印ホバー用四角形"}).setStyleCSS({
+          div({class: 矢印ホバー用四角形}).setStyleCSS({
               position: "absolute",
               opacity: "0",
               transition: "opacity 0.2s ease-in-out"

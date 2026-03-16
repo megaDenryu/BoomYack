@@ -28,6 +28,7 @@ import { 配置物追加コマンド, 配置物削除コマンド } from "../../
 import { VoiceRecognitionService } from "../../キャンバス操作/音声認識サービス";
 import { micIcon } from "OneONetUIComponents/Svg/Icons";
 import { 描画キャンバスリポジトリ } from "../../API/I描画キャンバスAPIリポジトリ";
+import { キャンバスコンテナ, 描画キャンバスView as 描画キャンバスViewcss, 配置物コンテナ as 配置物コンテナcss, 録音インジケータ } from "./style.css";
 
 export interface 全ての接続点を表示非表示切り替え可能 {
     全ての接続点を表示非表示切り替え(表示する: boolean): void;
@@ -209,12 +210,12 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         let canvasContainer: DivC | null = null;
 
         return (
-          div({class: "キャンバスコンテナ"})
+          div({class: キャンバスコンテナ})
             .setTabIndex(0)
             .bind(div => { canvasContainer = div; })
             .addDivEventListener('keydown', (e: KeyboardEvent) => this.onKeyDown(e))
             .childs([
-                    div({"class": "描画キャンバスView"}).setStyleCSS({
+                    div({class: 描画キャンバスViewcss}).setStyleCSS({
                                 position: 'absolute',top: '0',left: '0',width: '100%',height: '100%',
                                 zIndex: 配置物zIndex.キャンバス.描画キャンバス,
                             }).bind((self) => {this._mouseWife = new MouseWife(self).ドラッグ連動登録({
@@ -249,7 +250,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                                 console.log("CanvasView drop detected", e);
                                 if (this.onDropFile) await this.onDropFile(e);
                             }),
-                    div({"class": "配置物コンテナ"})
+                    div({class: 配置物コンテナcss})
                             .setStyleCSS({
                                 zIndex: 配置物zIndex.キャンバス.配置物コンテナ,
                                 position: 'absolute', top: '0',left: '0',width: '10px',height: '10px',
@@ -268,7 +269,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                         })
                         .zIndex(配置物zIndex.キャンバス.コンテキストメニューコンテナ),
 
-                    div({ class: "recording-indicator" })
+                    div({ class: 録音インジケータ })
                         .childs([
                             micIcon(16, "white"),
                             span({ text: "録音中..." })

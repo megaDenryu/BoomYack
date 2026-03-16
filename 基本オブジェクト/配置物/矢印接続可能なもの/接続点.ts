@@ -1,7 +1,6 @@
 import { circle, div, DivC, I描画空間, LV2HtmlComponentBase, Px2DVector, svg, 図形内座標点, 描画座標点, 配置物座標点 } from "SengenUI/index";
 
-
-
+import { 矢印接続可能なもの接続点View as 矢印接続可能なもの接続点Viewcss } from "./style.css";
 
 import { 矢印ID, 折れ線矢印ID, 配置物ID, 付箋ID } from "../../ID";
 import {  接触判定可能な点, I点ハンドル, I接続点, 配置物zIndex, I折れ線矢印集約 } from "../../I配置物";
@@ -78,7 +77,7 @@ export class 接続点<座標点T extends 配置物座標点> extends LV2HtmlCom
         // SVG: setStyleCSSでtranslate(-50%, -50%)を適用して中心配置
         
         return (
-          div({class:"矢印接続可能なもの接続点View"})
+          div({class: 矢印接続可能なもの接続点Viewcss})
               .setStyleCSS({
                   position: "absolute",
                   width: "0px",

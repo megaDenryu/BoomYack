@@ -23,7 +23,8 @@ import {
     panelFadeIn,
     panelFadeOut,
     trashToggleButton,
-    trashBadge
+    trashBadge,
+    savePanelWrapper
 } from "./style.css";
 
 import { SaveMode, ISavePanelEvents } from "./セーブパネル型定義";
@@ -146,7 +147,7 @@ export class セーブパネル extends LV2HtmlComponentBase {
                 }
             });
         return (
-            div({ class: "save-panel-wrapper" })
+            div({ class: savePanelWrapper })
                 .setStyleCSS({ display: 'none' })
                 .childs([
                     div({ class: overlayBackdrop })

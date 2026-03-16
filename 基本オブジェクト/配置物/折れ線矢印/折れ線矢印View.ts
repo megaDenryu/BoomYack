@@ -9,6 +9,7 @@ import { I折れ線矢印View, 配置物zIndex } from "../../I配置物";
 
 
 
+import { 矢印コンテナ } from "./style.css";
 import { 線分ハンドルコンテナ, 線分ハンドル基本, 線分ハンドル状態 } from "./線分ハンドル.style.css";
 
 /**
@@ -168,7 +169,7 @@ export class 矢印View extends LV2HtmlComponentBase {
     }
     protected createComponentRoot(): DivC {
         return (
-            div({class:"矢印"}).setStyleCSS({
+            div({class: 矢印コンテナ}).setStyleCSS({
                         position: "absolute",
                         width: "100%",
                         height: "100%",

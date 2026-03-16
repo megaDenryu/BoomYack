@@ -14,6 +14,12 @@ export const fadeOutKeyframes = keyframes({
     '100%': { opacity: 0, transform: 'translate(-50%, -50%) scale(0.5)' }
 });
 
+export const 円状コンテキストメニューコンテナ = style({});
+
+export const 多段格子メニューコンテナ = style({});
+
+export const 多段格子メニューセル = style({});
+
 export const 円状メニューコンテナ = style({
     position: 'fixed',
     width: '200px',
