@@ -240,7 +240,9 @@ export class GlobalMouseManager {
         if (!this._activePointers.has(e.pointerId)) return;
         this._activePointers.set(e.pointerId, e);
 
-        if (this._activePointers.size === 2) {
+        if (this._activePointers.size >= 2) {
+            // Why: 2本指操作中はブラウザのデフォルトジェスチャ（ピンチズーム等）を確実に抑制する
+            e.preventDefault();
             const pointers = [...this._activePointers.values()];
             const 距離 = Math.hypot(
                 pointers[0].clientX - pointers[1].clientX,
