@@ -19,7 +19,7 @@ import { 付箋設定状態 } from "../設定パネル";
  * ✅ 3. リサイズ時（leftHandleドラッグ中、rightHandleドラッグ中、onHeightChange）にも接続点座標を更新
  * ✅ 4. 矢印接続可能なものViewの再レンダリングメソッドを実装
  */
-export class 矢印接続可能付箋Old<座標点T extends 配置物座標点> implements I付箋集約, I選択可能配置物, I付箋シリアライズ可能, I接続点親情報<座標点T> {
+export class 付箋集約<座標点T extends 配置物座標点> implements I付箋集約, I選択可能配置物, I付箋シリアライズ可能, I接続点親情報<座標点T> {
     public type: "付箋" = "付箋";
     public readonly view: 自動リサイズ付箋View<座標点T> | 自動リサイズ付箋View2<座標点T>;
     public readonly vm: I付箋VM;
@@ -179,7 +179,7 @@ export class 矢印接続可能付箋Old<座標点T extends 配置物座標点> 
         return point.矢印作成()
     }
 
-    public 別の付箋へ矢印を作る(対象付箋: 矢印接続可能付箋Old<座標点T>): 折れ線矢印集約<座標点T> {
+    public 別の付箋へ矢印を作る(対象付箋: 付箋集約<座標点T>): 折れ線矢印集約<座標点T> {
         const 対象への方向ベクトル = 対象付箋.描画座標点.minus(this.描画座標点);
         // 各方向との内積を計算し、最大の内積を持つ方向を選択
         const 自分の接続点 = this.矢印接続可能なもの.対象方向へもっとも成す角が小さい接続点を取得する(対象への方向ベクトル);

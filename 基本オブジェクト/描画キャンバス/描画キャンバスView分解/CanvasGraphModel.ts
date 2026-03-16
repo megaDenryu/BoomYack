@@ -3,7 +3,7 @@ import { I接触点を教えてくれる人, I配置物集約, リスト配置�
 
 import { 無分割管理 } from "../../接触点を教えてくれる人/無分割管理";
 import { I配置物リポジトリ, Iグラフ配置先 } from "../../配置物リポジトリ";
-import { 矢印接続可能付箋Old } from "../../配置物/付箋2/矢印接続可能付箋Old";
+import { 付箋集約 } from "../../配置物/付箋2/付箋集約";
 import { 折れ線矢印VM, 折れ線矢印集約 } from "../../配置物";
 import { 接続点 } from "../../配置物/矢印接続可能なもの/接続点";
 import { キャンバスメタデータ } from "../データクラス";
@@ -17,7 +17,7 @@ export type GraphEvent =
     | { type: 'UPDATED' }; 
 
 export interface ICanvasItemFactory {
-    create付箋(pos: 描画座標点, text?: string): 矢印接続可能付箋Old<描画座標点>;
+    create付箋(pos: 描画座標点, text?: string): 付箋集約<描画座標点>;
     create折れ線矢印(折れ線矢印vm: 折れ線矢印VM<描画座標点>): 折れ線矢印集約<描画座標点>;
 }
 
@@ -60,11 +60,11 @@ export class CanvasGraphModel implements I描画空間, I配置物リポジト�
 
     // --- I配置物リポジトリ の実装 ---
     
-    public add付箋(pos: Px2DVector, text?: string): 矢印接続可能付箋Old<描画座標点> {
+    public add付箋(pos: Px2DVector, text?: string): 付箋集約<描画座標点> {
         return this.描画座標点でadd付箋(描画座標点.fromPx2DVector(pos, this.描画基準座標), text);
     }
 
-    public 描画座標点でadd付箋(pos: 描画座標点, text?: string): 矢印接続可能付箋Old<描画座標点> {
+    public 描画座標点でadd付箋(pos: 描画座標点, text?: string): 付箋集約<描画座標点> {
         if (!this._factory) throw new Error("Factory not set");
         const item = this._factory.create付箋(pos, text);
         this.add配置物(item);

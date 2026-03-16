@@ -3,7 +3,7 @@ import { CanvasGraphModel } from "./CanvasGraphModel";
 import { CanvasItemFactory } from "./CanvasItemFactory";
 import { 描画キャンバスデータ, 配置物データ, 接続参照データ, 描画キャンバスJSON, 座標データ, キャンバスメタデータ } from "../データクラス";
 
-import { 矢印接続可能付箋Old } from "../../配置物/付箋2/矢印接続可能付箋Old";
+import { 付箋集約 } from "../../配置物/付箋2/付箋集約";
 import { 折れ線矢印集約 } from "../../配置物";
 
 import { 接続点 } from "../../配置物/矢印接続可能なもの/接続点";
@@ -92,7 +92,7 @@ export class CanvasPersistenceManager {
         const 新描画原点 = 画面座標点.fromPx2DVector(data.描画原点.toPx2DVector());
         this.model.update描画基準座標原点(新描画原点);
 
-        const 付箋マップ = new Map<string, 矢印接続可能付箋Old<描画座標点>>();
+        const 付箋マップ = new Map<string, 付箋集約<描画座標点>>();
         const 折れ線矢印マップ = new Map<string, 折れ線矢印集約<描画座標点>>();
 
         // 第1フェーズ: 配置物を生成
@@ -102,7 +102,7 @@ export class CanvasPersistenceManager {
                     this.model.add配置物(item);
                     
                     // マップ登録
-                    if (itemData.type === "付箋") 付箋マップ.set(itemData.id.id, item as 矢印接続可能付箋Old<描画座標点>);
+                    if (itemData.type === "付箋") 付箋マップ.set(itemData.id.id, item as 付箋集約<描画座標点>);
                     else if (itemData.type === "折れ線矢印") 折れ線矢印マップ.set(itemData.id.id, item as 折れ線矢印集約<描画座標点>);
             }
         }
@@ -115,7 +115,7 @@ export class CanvasPersistenceManager {
 
     private restoreConnections(
         配置物リスト: ReadonlyArray<配置物データ>,
-        付箋マップ: Map<string, 矢印接続可能付箋Old<描画座標点>>,
+        付箋マップ: Map<string, 付箋集約<描画座標点>>,
         折れ線矢印マップ: Map<string, 折れ線矢印集約<描画座標点>>
     ): void {
         for (const data of 配置物リスト) {
@@ -137,7 +137,7 @@ export class CanvasPersistenceManager {
 
     private getConnectionPointByRef(
         ref: 接続参照データ,
-        付箋マップ: Map<string, 矢印接続可能付箋Old<描画座標点>>
+        付箋マップ: Map<string, 付箋集約<描画座標点>>
     ): 接続点<描画座標点> | null {
         const 付箋 = 付箋マップ.get(ref.配置物ID.id);
         if (!付箋) return null;

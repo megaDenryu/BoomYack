@@ -1,7 +1,7 @@
 import { Px2DVector, Px長さ, 描画座標点 } from "SengenUI/index";
 import { AiApiRepository, 分解戦略 } from "./AiApiRepository";
 import { CanvasGraphModel } from "../描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
-import { 矢印接続可能付箋Old } from "../配置物/付箋2/矢印接続可能付箋Old";
+import { 付箋集約 } from "../配置物/付箋2/付箋集約";
 import { 付箋選択状態 } from "../配置物/付箋2/自動リサイズ付箋View";
 import { Toast } from "../../../OneONetUIComponents/Toast/Toast";
 import { Iキャンバスコマンド } from "../キャンバス操作/コマンドリポジトリ/Iキャンバスコマンド";
@@ -24,7 +24,7 @@ export class AiOperationService {
     /**
      * AIテキスト生成（続きを生成）を実行
      */
-    public async executeGenerate(起点付箋: 矢印接続可能付箋Old<描画座標点>): Promise<void> {
+    public async executeGenerate(起点付箋: 付箋集約<描画座標点>): Promise<void> {
         const prompt = 起点付箋.text;
         if (!prompt) return;
 
@@ -58,7 +58,7 @@ export class AiOperationService {
     /**
      * ノード分解を実行
      */
-    public async executeDecompose(対象付箋: 矢印接続可能付箋Old<描画座標点>, 戦略?: 分解戦略): Promise<void> {
+    public async executeDecompose(対象付箋: 付箋集約<描画座標点>, 戦略?: 分解戦略): Promise<void> {
         const text = 対象付箋.text;
         if (!text) return;
 

@@ -1,5 +1,5 @@
 import { Px2DVector, Px長さ, ビューポート座標値, 描画座標点 } from "SengenUI/index";
-import { 矢印接続可能付箋Old } from "../../配置物/付箋2/矢印接続可能付箋Old";
+import { 付箋集約 } from "../../配置物/付箋2/付箋集約";
 import { 矢印VM } from "../../配置物/折れ線矢印/矢印集約";
 import { 折れ線矢印VM, 折れ線矢印集約 } from "../../配置物";
 
@@ -35,9 +35,9 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         this._aiOperation = new AiOperationService(this.model, this.onCommandPush);
     }
 
-    public create付箋(pos: 描画座標点, text?: string): 矢印接続可能付箋Old<描画座標点> {
+    public create付箋(pos: 描画座標点, text?: string): 付箋集約<描画座標点> {
         let dragStartPos: 描画座標点 | null = null;
-        const 付箋 = new 矢印接続可能付箋Old<描画座標点>(
+        const 付箋 = new 付箋集約<描画座標点>(
             {
                 position: pos,
                 size: new Px2DVector(new Px長さ(200), new Px長さ(50)),
@@ -98,10 +98,10 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         return 付箋;
     }
     
-    public create付箋FromData(data: 付箋データ): 矢印接続可能付箋Old<描画座標点> {
+    public create付箋FromData(data: 付箋データ): 付箋集約<描画座標点> {
         let dragStartPos: 描画座標点 | null = null;
         const pos = 描画座標点.fromPx2DVector(data.position.toPx2DVector(), this.model.描画基準座標);
-        const 付箋 = new 矢印接続可能付箋Old<描画座標点>(
+        const 付箋 = new 付箋集約<描画座標点>(
             {
                 position: pos,
                 size: data.size.toPx2DVector(),
@@ -210,7 +210,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         }
     }
 
-    private 設定パネルを表示する(付箋: 矢印接続可能付箋Old<描画座標点>, 中心位置: 描画座標点): void {
+    private 設定パネルを表示する(付箋: 付箋集約<描画座標点>, 中心位置: 描画座標点): void {
         // 設定パネルのサイズ（画面座標系で固定）
         const パネル画面幅 = 220;
         const パネル画面高さ = 250;
