@@ -12,11 +12,6 @@ export class エッジID extends IDBase自動採番<"エッジID",エッジID> {
     }
 }
 
-export class ビュー内部ID extends IDBase自動採番<"ビュー内部ID",ビュー内部ID> {
-    constructor(id?:string) {
-        super(id);
-    }
-}
 export class 中点ID extends IDBase自動採番<"中点ID",中点ID> {
     constructor(id?:string) {
         super(id);

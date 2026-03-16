@@ -18,9 +18,6 @@ export { StickyNoteTextArea } from "./スクロール可能モード/StickyNoteT
 export type { I付箋View操作 } from "./スクロール可能モード/I付箋View操作";
 export type { I自動リサイズ付箋View操作 } from "./自動リサイズモード/I自動リサイズ付箋View操作";
 
-// 使用例
-export { 自動リサイズ付箋Example } from "./自動リサイズモード/自動リサイズ付箋Example";
-
 /**
  * 使用方法:
  * 
