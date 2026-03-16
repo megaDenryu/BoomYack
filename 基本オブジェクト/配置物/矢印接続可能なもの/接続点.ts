@@ -1,4 +1,4 @@
-import { CircleC, DivC, I描画空間, LV2HtmlComponentBase, Px2DVector, SvgC, 図形内座標点, 描画座標点, 配置物座標点 } from "SengenUI/index";
+import { circle, div, DivC, I描画空間, LV2HtmlComponentBase, Px2DVector, svg, 図形内座標点, 描画座標点, 配置物座標点 } from "SengenUI/index";
 
 
 
@@ -77,44 +77,45 @@ export class 接続点<座標点T extends 配置物座標点> extends LV2HtmlCom
         // 外側Div: ビューポート座標で位置管理（0px×0pxの基準点）
         // SVG: setStyleCSSでtranslate(-50%, -50%)を適用して中心配置
         
-        return new DivC({class:"矢印接続可能なもの接続点View"})
-            .setStyleCSS({
-                position: "absolute",
-                width: "0px",
-                height: "0px",
-                pointerEvents: "none",
-            })
-            .addDivEventListener("mouseover", () => {
-                this.setStyleCSS({opacity: "1"});
-            })
-            .addDivEventListener("mouseout", () => {
-                this.setStyleCSS({opacity: ""});
-            })
-            .setViewportPositionByTransform(this._接続点state.pos.toビューポート座標値())
-            .child(
-                new SvgC({ 
-                    width: 40, 
-                    height: 40,
-                    viewBox: "0 0 40 40"
-                })
-                .setStyleCSS({
-                    position: "absolute",
-                    transform: "translate(-50%, -50%)",
-                    pointerEvents: "auto",
-                    cursor: "pointer"
-                })
-                .child(
-                    new CircleC({
-                        cx: 20,
-                        cy: 20, 
-                        r: 7,
-                        fill: "rgba(100, 201, 255, 0.8)",
-                        stroke: "blue",
-                        strokeWidth: 3
-                    })
-                    .addSvgEventListener("click", () => this.onClick())
-                )
-            );
+        return (
+          div({class:"矢印接続可能なもの接続点View"})
+              .setStyleCSS({
+                  position: "absolute",
+                  width: "0px",
+                  height: "0px",
+                  pointerEvents: "none",
+              })
+              .addDivEventListener("mouseover", () => {
+                  this.setStyleCSS({opacity: "1"});
+              })
+              .addDivEventListener("mouseout", () => {
+                  this.setStyleCSS({opacity: ""});
+              })
+              .setViewportPositionByTransform(this._接続点state.pos.toビューポート座標値())
+              .child(
+                  svg({
+                      width: 40,
+                      height: 40,
+                      viewBox: "0 0 40 40"
+                  })
+                  .setStyleCSS({
+                      position: "absolute",
+                      transform: "translate(-50%, -50%)",
+                      pointerEvents: "auto",
+                      cursor: "pointer"
+                  })
+                  .child(
+                      circle({
+                          cx: 20,
+                          cy: 20,
+                          r: 7,
+                          fill: "rgba(100, 201, 255, 0.8)",
+                          stroke: "blue",
+                          strokeWidth: 3
+                      })
+                      .addSvgEventListener("click", () => this.onClick())
+                  ))
+        );
     }
 
     public onClick(): this {

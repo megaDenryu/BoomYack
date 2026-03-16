@@ -1,4 +1,4 @@
-import { DivC, Drag中値, Drag終了値, Drag開始値, HtmlComponentBase, LV2HtmlComponentBase, MouseEventData, MouseWife, Px2DVector, Px長さ, TypedEventListener, 図形内座標点, 描画座標点, 配置物座標点 } from "SengenUI/index";
+import { div, DivC, Drag中値, Drag終了値, Drag開始値, HtmlComponentBase, LV2HtmlComponentBase, MouseEventData, MouseWife, Px2DVector, Px長さ, TypedEventListener, 図形内座標点, 描画座標点, 配置物座標点 } from "SengenUI/index";
 
 
 
@@ -189,13 +189,14 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
         コンテキストメニュー依存関係: 自動リサイズ付箋用コンテキストメニュー依存関係
     ): DivC {
         const 矢印上下左右Position = this.calculate矢印接続ポイント(this._padding);
-        return new DivC({ class : [付箋ホバー領域, auto_resize_sticky_note]}).bind(self => {
+        return (
+            div({ class : [付箋ホバー領域, auto_resize_sticky_note]}).bind(self => {
                                                                                             this.付箋ホバー領域 = self;
                                                                                             this.set付箋ボードTransform({position:this._position, size:this._size});
                                                                                             this._mouseWife = new MouseWife(self).ドラッグ連動登録({
                                                                                                 onドラッグ開始: (e: Drag開始値)=> {option.onDragStart?.();},
                                                                                                 onドラッグ中: (e: Drag中値)=> {
-                                                                                                    this.ドラッグ移動処理(e); 
+                                                                                                    this.ドラッグ移動処理(e);
                                                                                                     this.onDrag(e, this);
                                                                                                 },
                                                                                                 onドラッグ終了: (e: Drag終了値)=> {option.onDragEnd?.();}
@@ -215,7 +216,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                                                                 this.選択する?.(e);
                                                                             })
                                                                             .childs([
-                            new DivC({class:"コンテナ"})
+                            div({class:"コンテナ"})
                                 .setStyleCSS({
                                     flex: "1",
                                     display: "flex",
@@ -228,7 +229,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                         initialText: this._text,
                                         placeholder: "付箋の内容を入力...",
                                         初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(this._minHeight),
-                                        onTextChange: (text: string) => { 
+                                        onTextChange: (text: string) => {
                                             this._text = text;
                                             this._onTextChange?.(text);
                                         },
@@ -263,8 +264,9 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                                                                             .setStyleCSS({zIndex: 配置物zIndex.付箋内部構造.リサイズハンドル}),
                             new 矢印接続可能なもの<座標点T>( 矢印上下左右Position, 矢印接続可能なもの依存関係, this )
                                                         .bind((self)=>{this._矢印接続可能なもの = self;}),
-                                                                                            
-                        ]);
+
+                        ])
+        );
     }
 
     public ドラッグ移動処理(e: Drag中値): this {
@@ -495,7 +497,9 @@ class リサイズハンドル extends LV2HtmlComponentBase{
     }
 
     protected createComponentRoot(左右: 'left' | 'right'): HtmlComponentBase {
-        return new DivC({ class: 左右 == 'left' ? auto_resize_handle_left : auto_resize_handle_right })
-            .bind((handle) => {this._mouseWife = new MouseWife(handle) });
+        return (
+            div({ class: 左右 == 'left' ? auto_resize_handle_left : auto_resize_handle_right })
+                .bind((handle) => {this._mouseWife = new MouseWife(handle) })
+        );
     }
 }

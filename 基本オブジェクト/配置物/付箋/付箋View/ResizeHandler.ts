@@ -1,4 +1,4 @@
-import { DivC, LV2HtmlComponentBase } from "SengenUI/index";
+import { div, DivC, LV2HtmlComponentBase } from "SengenUI/index";
 
 
 import { resize_handle, resize_handle_top, resize_handle_bottom, resize_handle_left, resize_handle_right, resize_handle_top_left, resize_handle_top_right, resize_handle_bottom_left, resize_handle_bottom_right } from "./style.css";
@@ -69,16 +69,18 @@ export class ResizeHandler extends LV2HtmlComponentBase {
     }
 
     protected createComponentRoot(): DivC {
-        return new DivC().childs(this.createResizeHandles());
+        return (
+            div().childs(this.createResizeHandles())
+        );
     }
 
     private createResizeHandles(): DivC[] {
         const handleSize = 8;
         const cornerSize = 12;
         
-        return [
+        return ([
             // 上辺
-            new DivC({ class: [resize_handle, resize_handle_top] })
+            div({ class: [resize_handle, resize_handle_top] })
                 .setStyleCSS({
                     top: "-4px",
                     left: "10px",
@@ -89,7 +91,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, top: handle }; }),
             
             // 下辺
-            new DivC({ class: [resize_handle, resize_handle_bottom] })
+            div({ class: [resize_handle, resize_handle_bottom] })
                 .setStyleCSS({
                     bottom: "-4px",
                     left: "10px",
@@ -100,7 +102,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, bottom: handle }; }),
             
             // 左辺
-            new DivC({ class: [resize_handle, resize_handle_left] })
+            div({ class: [resize_handle, resize_handle_left] })
                 .setStyleCSS({
                     left: "-4px",
                     top: "10px",
@@ -111,7 +113,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, left: handle }; }),
             
             // 右辺
-            new DivC({ class: [resize_handle, resize_handle_right] })
+            div({ class: [resize_handle, resize_handle_right] })
                 .setStyleCSS({
                     right: "-4px",
                     top: "10px",
@@ -122,7 +124,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, right: handle }; }),
             
             // 左上角
-            new DivC({ class: [resize_handle, resize_handle_top_left] })
+            div({ class: [resize_handle, resize_handle_top_left] })
                 .setStyleCSS({
                     top: "-6px",
                     left: "-6px",
@@ -133,7 +135,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, topLeft: handle }; }),
             
             // 右上角
-            new DivC({ class: [resize_handle, resize_handle_top_right] })
+            div({ class: [resize_handle, resize_handle_top_right] })
                 .setStyleCSS({
                     top: "-6px",
                     right: "-6px",
@@ -144,7 +146,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, topRight: handle }; }),
             
             // 左下角
-            new DivC({ class: [resize_handle, resize_handle_bottom_left] })
+            div({ class: [resize_handle, resize_handle_bottom_left] })
                 .setStyleCSS({
                     bottom: "-6px",
                     left: "-6px",
@@ -155,7 +157,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, bottomLeft: handle }; }),
             
             // 右下角
-            new DivC({ class: [resize_handle, resize_handle_bottom_right] })
+            div({ class: [resize_handle, resize_handle_bottom_right] })
                 .setStyleCSS({
                     bottom: "-6px",
                     right: "-6px",
@@ -164,9 +166,9 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                 })
                 .addDivEventListener('mousedown', (e) => this.startResize(e, 'bottomRight'))
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, bottomRight: handle }; })
-        ];
+        ]);
     }
-    
+
     private startResize(e: MouseEvent, resizeType: ResizeType): void {
         e.preventDefault();
         e.stopPropagation();

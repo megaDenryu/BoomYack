@@ -1,4 +1,4 @@
-import { DivC, LV2HtmlComponentBase, TextAreaC } from "SengenUI/index";
+import { div, textarea, DivC, LV2HtmlComponentBase, TextAreaC } from "SengenUI/index";
 
 
 import { I付箋View } from "../../I配置物";
@@ -74,7 +74,8 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
 
     protected createComponentRoot(): DivC {
         // 直接returnするように努めることで、宣言的になり、可読性が極大化される
-        return new DivC({ class: sticky_note_container })
+        return (
+            div({ class: sticky_note_container })
                 .setStyleCSS({
                     position: 'fixed',
                     left: '0px',
@@ -86,7 +87,7 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                 })
                 .childs([
                     // ドラッグハンドル（ヘッダー部分）
-                    new DivC({ class: drag_handle })
+                    div({ class: drag_handle })
                         .addDivEventListener('mousedown', (e) => {
                             e.preventDefault();
                             this._isDragging = true;
@@ -96,13 +97,13 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                             this._initialY = this._y;
                         })
                         .bind((handle) => { this._dragHandle = handle; }),
-                    
+
                     // メインコンテナ
-                    new DivC({ class: main_container })
+                    div({ class: main_container })
                         .bind((container) => { this._mainContainer = container; })
                         .childs([
                             // テキストエリア
-                            new TextAreaC({
+                            textarea({
                                 value: this._text,
                                 placeholder: "付箋のテキストを入力...",
                                 class: sticky_note_textarea
@@ -110,13 +111,14 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                             .addTextAreaEventListener('input', () => { this._text = this.getText(); })
                             .addTextAreaEventListener('focus', (e) => { (e.target as HTMLTextAreaElement).style.outline = "2px solid #2196f3"; })
                             .addTextAreaEventListener('blur', (e) => {(e.target as HTMLTextAreaElement).style.outline = "none";})
-                            .addTextAreaEventListener('mousedown', (e) => { e.stopPropagation(); })// ドラッグとの競合を回避 
+                            .addTextAreaEventListener('mousedown', (e) => { e.stopPropagation(); })// ドラッグとの競合を回避
                             .bind((textarea) => { this._textArea = textarea; })
                         ]),
-                    
+
                     // リサイズハンドル群
                     ...this.createResizeHandles()
-                ]);
+                ])
+        );
     }
 
     private createResizeHandles(): DivC[] {
@@ -124,9 +126,9 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
         const cornerSize = 12;
         
         // 直接returnするように努めることで、宣言的になり、可読性が極大化される
-        return [
+        return ([
             // 上辺
-            new DivC({ class: [resize_handle, resize_handle_top] })
+            div({ class: [resize_handle, resize_handle_top] })
                 .setStyleCSS({
                     top: "-4px",
                     left: "10px",
@@ -148,7 +150,7 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, top: handle }; }),
             
             // 下辺
-            new DivC({ class: [resize_handle, resize_handle_bottom] })
+            div({ class: [resize_handle, resize_handle_bottom] })
                 .setStyleCSS({
                     bottom: "-4px",
                     left: "10px",
@@ -170,7 +172,7 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, bottom: handle }; }),
             
             // 左辺
-            new DivC({ class: [resize_handle, resize_handle_left] })
+            div({ class: [resize_handle, resize_handle_left] })
                 .setStyleCSS({
                     left: "-4px",
                     top: "10px",
@@ -192,7 +194,7 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, left: handle }; }),
             
             // 右辺
-            new DivC({ class: [resize_handle, resize_handle_right] })
+            div({ class: [resize_handle, resize_handle_right] })
                 .setStyleCSS({
                     right: "-4px",
                     top: "10px",
@@ -214,7 +216,7 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, right: handle }; }),
             
             // 左上角
-            new DivC({ class: [resize_handle, resize_handle_top_left] })
+            div({ class: [resize_handle, resize_handle_top_left] })
                 .setStyleCSS({
                     top: "-6px",
                     left: "-6px",
@@ -236,7 +238,7 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, topLeft: handle }; }),
             
             // 右上角
-            new DivC({ class: [resize_handle, resize_handle_top_right] })
+            div({ class: [resize_handle, resize_handle_top_right] })
                 .setStyleCSS({
                     top: "-6px",
                     right: "-6px",
@@ -258,7 +260,7 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, topRight: handle }; }),
             
             // 左下角
-            new DivC({ class: [resize_handle, resize_handle_bottom_left] })
+            div({ class: [resize_handle, resize_handle_bottom_left] })
                 .setStyleCSS({
                     bottom: "-6px",
                     left: "-6px",
@@ -280,7 +282,7 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, bottomLeft: handle }; }),
             
             // 右下角
-            new DivC({ class: [resize_handle, resize_handle_bottom_right] })
+            div({ class: [resize_handle, resize_handle_bottom_right] })
                 .setStyleCSS({
                     bottom: "-6px",
                     right: "-6px",
@@ -300,7 +302,7 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                     this._initialY = this._y;
                 })
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, bottomRight: handle }; })
-        ];
+        ]);
     }
     
     private handleMouseMove(e: MouseEvent): void {

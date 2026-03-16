@@ -1,4 +1,4 @@
-import { DivC, Drag中値, LV2HtmlComponentBase, MouseEventData, MouseWife, Px2DVector, Px長さ, SpanC, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
+import { div, span, DivC, Drag中値, LV2HtmlComponentBase, MouseEventData, MouseWife, Px2DVector, Px長さ, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
 import { 配置物zIndex } from "../../I配置物";
 
 
@@ -208,12 +208,13 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         
         let canvasContainer: DivC | null = null;
 
-        return new DivC({class: "キャンバスコンテナ"})
+        return (
+          div({class: "キャンバスコンテナ"})
             .setTabIndex(0)
             .bind(div => { canvasContainer = div; })
             .addDivEventListener('keydown', (e: KeyboardEvent) => this.onKeyDown(e))
             .childs([
-                    new DivC({"class": "描画キャンバスView"}).setStyleCSS({
+                    div({"class": "描画キャンバスView"}).setStyleCSS({
                                 position: 'absolute',top: '0',left: '0',width: '100%',height: '100%',
                                 zIndex: 配置物zIndex.キャンバス.描画キャンバス,
                             }).bind((self) => {this._mouseWife = new MouseWife(self).ドラッグ連動登録({
@@ -221,7 +222,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                                     onドラッグ中: (e: Drag中値) => this.onCanvasDrag(e),
                                     onドラッグ終了: (e) => this.onCanvasDragEnd(e),
                                 });
-                            }) 
+                            })
                             .addDivEventListener('contextmenu', (e: MouseEvent) => {
                                 e.preventDefault();
                                 this.menu.表示(new MouseEventData(e).position);
@@ -235,26 +236,26 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                                 this.selectionManager.ホバー解除();
                             })
                             .addDivEventListener('dragenter', (e: DragEvent) => {
-                                e.preventDefault(); 
+                                e.preventDefault();
                             })
                             .addDivEventListener('dragover', (e: DragEvent) => {
-                                e.preventDefault(); 
+                                e.preventDefault();
                             })
                             .addDivEventListener('dragleave', (e: DragEvent) => {
-                                e.preventDefault(); 
+                                e.preventDefault();
                             })
                             .addDivEventListener('drop', async (e: DragEvent) => {
-                                e.preventDefault(); 
+                                e.preventDefault();
                                 console.log("CanvasView drop detected", e);
                                 if (this.onDropFile) await this.onDropFile(e);
                             }),
-                    new DivC({"class": "配置物コンテナ"})
+                    div({"class": "配置物コンテナ"})
                             .setStyleCSS({
                                 zIndex: 配置物zIndex.キャンバス.配置物コンテナ,
                                 position: 'absolute', top: '0',left: '0',width: '10px',height: '10px',
                             })
                             .bind(self => {this._配置物コンテナ = self;}),
-                    
+
                     this.contextMenuContainer
                         .bind(self => {
                             self.コンテキストメニュー追加(new 多段格子コンテキストメニュー({
@@ -266,11 +267,11 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                             }).bind((self: Iコンテキストメニュー) => this.menu = self))
                         })
                         .zIndex(配置物zIndex.キャンバス.コンテキストメニューコンテナ),
-                    
-                    new DivC({ class: "recording-indicator" })
+
+                    div({ class: "recording-indicator" })
                         .childs([
                             micIcon(16, "white"),
-                            new SpanC({ text: "録音中..." })
+                            span({ text: "録音中..." })
                         ])
                         .setStyleCSS({
                             display: 'none',
@@ -290,7 +291,8 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                             animation: 'pulse 1.5s infinite' // cssアニメーションがあれば適用される
                         })
                         .bind(self => { this._recordingIndicator = self; })
-        ]);
+        ])
+        );
     }
     
     private deleteSelectedItem(): void {

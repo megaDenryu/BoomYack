@@ -1,4 +1,4 @@
-import { CanvasC, DivC, DocumentBodyC, LV2HtmlComponentBase, MouseEventData, Px2DVector, Px長さ, 描画座標点, 画面座標点 } from "SengenUI/index";
+import { canvas, div, DivC, DocumentBodyC, LV2HtmlComponentBase, MouseEventData, Px2DVector, Px長さ, CanvasC, 描画座標点, 画面座標点 } from "SengenUI/index";
 import { sticky_graph_board_container } from './style.css';
 import { 自動リサイズ付箋View2 } from 'BoomYack/基本オブジェクト/配置物/付箋2/自動リサイズ付箋View2';
 import { CanvasView, CanvasViewOptions } from 'BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasView';
@@ -149,28 +149,30 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
             onSaveClick: () => this._セーブパネル.開く()
         };
 
-        return new DivC({ class: sticky_graph_board_container }).childs([
-                new CanvasView(canvasOptions, {api: this._apiリポジトリ, local: this._ローカルリポジトリ})
-                    .bind(self => {
-                        this._描画キャンバスView = self;
-                        self.onDropFile = this.onDropFile;
+        return (
+            div({ class: sticky_graph_board_container }).childs([
+                    new CanvasView(canvasOptions, {api: this._apiリポジトリ, local: this._ローカルリポジトリ})
+                        .bind(self => {
+                            this._描画キャンバスView = self;
+                            self.onDropFile = this.onDropFile;
+                        }).setStyleCSS({
+                            zIndex:配置物zIndex.キャンバス.描画キャンバス
+                        }),
+                    canvas().bind(self => {
+                        this.testCanvas = self;
+                        self.setWidth(window.innerWidth);
+                        self.setHeight(window.innerHeight);
                     }).setStyleCSS({
-                        zIndex:配置物zIndex.キャンバス.描画キャンバス
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        top: '0',
+                        left: '0',
+                        zIndex: 配置物zIndex.お絵描きキャンバス
                     }),
-                new CanvasC().bind(self => {
-                    this.testCanvas = self;
-                    self.setWidth(window.innerWidth);
-                    self.setHeight(window.innerHeight);
-                }).setStyleCSS({
-                    position: 'absolute',
-                    width: '100%',
-                    height: '100%',
-                    top: '0',
-                    left: '0',
-                    zIndex: 配置物zIndex.お絵描きキャンバス
-                }),
-                this._セーブパネル
-            ]);
+                    this._セーブパネル
+                ])
+        );
     }
 
     public delete(): void {

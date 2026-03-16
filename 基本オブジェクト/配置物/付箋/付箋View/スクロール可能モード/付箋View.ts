@@ -1,4 +1,4 @@
-import { DivC, LV2HtmlComponentBase } from "SengenUI/index";
+import { div, DivC, LV2HtmlComponentBase } from "SengenUI/index";
 
 
 import { I付箋View } from "../../../../I配置物";
@@ -56,7 +56,8 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
 
     protected createComponentRoot(): DivC {
         // 直接returnするように努めることで、宣言的になり、可読性が極大化される
-        return new DivC({ class: sticky_note_container })
+        return (
+            div({ class: sticky_note_container })
                 .setStyleCSS({
                     left: `${this._x}px`,
                     top: `${this._y}px`,
@@ -81,7 +82,7 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                     }).bind((dragHandler) => { this._dragHandler = dragHandler; }),
                     
                     // メインコンテナ
-                    new DivC({ class: main_container })
+                    div({ class: main_container })
                         .bind((container) => { this._mainContainer = container; })
                         .childs([
                             // テキストエリアコンポーネント
@@ -109,7 +110,8 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                             this._resizeHandler.setInitialValues(this._width, this._height, this._x, this._y);
                         }
                     }).bind((resizeHandler) => { this._resizeHandler = resizeHandler; })
-                ]);
+                ])
+        );
     }
     
     private updatePosition(): void {

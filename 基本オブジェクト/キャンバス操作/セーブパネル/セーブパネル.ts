@@ -1,5 +1,5 @@
 import { Toast } from "OneONetUIComponents/index";
-import { ButtonC, DivC, HtmlComponentBase, InputC, LV2HtmlComponentBase, SpanC } from "SengenUI/index";
+import { button, div, input, span, ButtonC, DivC, HtmlComponentBase, InputC, LV2HtmlComponentBase, SpanC } from "SengenUI/index";
 import {
     savePanelContainer,
     panelHeader,
@@ -145,151 +145,169 @@ export class セーブパネル extends LV2HtmlComponentBase {
                     
                 }
             });
-        return new DivC({ class: "save-panel-wrapper" })
-            .setStyleCSS({ display: 'none' })
-            .childs([
-                new DivC({ class: overlayBackdrop })
-                    .bind(self => this._backdrop = self)
-                    .addDivEventListener('click', () => this.閉じる()),
-                new DivC({ class: savePanelContainer })
-                    .bind(self => this._panel = self)
-                    .childs([
-                        this.Header(),
-                        this.Content()
-                    ])
-            ]);
+        return (
+            div({ class: "save-panel-wrapper" })
+                .setStyleCSS({ display: 'none' })
+                .childs([
+                    div({ class: overlayBackdrop })
+                        .bind(self => this._backdrop = self)
+                        .addDivEventListener('click', () => this.閉じる()),
+                    div({ class: savePanelContainer })
+                        .bind(self => this._panel = self)
+                        .childs([
+                            this.Header(),
+                            this.Content()
+                        ])
+                ])
+        );
     }
 
     private Header(): DivC {
-        return new DivC({ class: panelHeader })
-            .childs([
-                new SpanC({ text: "セーブ/ロード", class: panelTitle }),
-                new ButtonC({ text: "×", class: closeButton })
-                    .addTypedEventListener('click', () => this.閉じる())
-            ]);
+        return (
+            div({ class: panelHeader })
+                .childs([
+                    span({ text: "セーブ/ロード", class: panelTitle }),
+                    button({ text: "×", class: closeButton })
+                        .addTypedEventListener('click', () => this.閉じる())
+                ])
+        );
     }
 
     private Content(): DivC {
-        return new DivC({ class: panelContent })
-            .setStyleCSS({ position: 'relative' })
-            .childs([
-                this.モード選択(),
-                this.現在のキャンバス名と上書き保存(),
-                this.新規保存入力(),
-                this.セーブリスト(),
-                this.読み込みボタン(),
-                this.仮ゴミ箱ボタン()
-            ]);
+        return (
+            div({ class: panelContent })
+                .setStyleCSS({ position: 'relative' })
+                .childs([
+                    this.モード選択(),
+                    this.現在のキャンバス名と上書き保存(),
+                    this.新規保存入力(),
+                    this.セーブリスト(),
+                    this.読み込みボタン(),
+                    this.仮ゴミ箱ボタン()
+                ])
+        );
     }
 
     private モード選択(): DivC {
-        return new DivC({ class: inputGroup })
-            .childs([
-                new SpanC({ text: "保存先", class: inputLabel }),
-                new DivC({ class: modeSelector })
-                    .child(
-                        new ButtonC({ text: "ローカル", class: [modeButton, modeButtonActive] })
-                            .bind(self => this._localModeBtn = self)
-                            .addTypedEventListener('click', () => this.switchMode("local"))
-                    ).childIf({
-                        If: this._events.onIsServerModeAvailable(),
-                        True: new ButtonC({ text: "サーバー", class: modeButton })
-                            .bind(self => this._serverModeBtn = self)
-                            .addTypedEventListener('click', () => this.switchMode("server"))
-                    })
-            ]);
+        return (
+            div({ class: inputGroup })
+                .childs([
+                    span({ text: "保存先", class: inputLabel }),
+                    div({ class: modeSelector })
+                        .child(
+                            button({ text: "ローカル", class: [modeButton, modeButtonActive] })
+                                .bind(self => this._localModeBtn = self)
+                                .addTypedEventListener('click', () => this.switchMode("local"))
+                        ).childIf({
+                            If: this._events.onIsServerModeAvailable(),
+                            True: button({ text: "サーバー", class: modeButton })
+                                .bind(self => this._serverModeBtn = self)
+                                .addTypedEventListener('click', () => this.switchMode("server"))
+                        })
+                ])
+        );
     }
 
     private 現在のキャンバス名と上書き保存(): DivC {
-        return new DivC({ class: inputGroup })
-            .childs([
-                new SpanC({ text: "現在のキャンバス名", class: inputLabel }),
-                new DivC().setStyleCSS({ display: 'flex', gap: '8px', alignItems: 'center' })
-                    .childs([
-                        new DivC().setStyleCSS({ flex: '1', position: 'relative' })
-                            .childs([
-                                new SpanC({ text: this._currentCanvasName ?? "（未保存）" })
-                                    .bind(self => this._currentCanvasNameSpan = self)
-                                    .setStyleCSS({ 
-                                        display: 'block',
-                                        padding: '8px', 
-                                        backgroundColor: '#f5f5f5', 
-                                        borderRadius: '4px', 
-                                        color: '#333', 
-                                        fontSize: '14px',
-                                        cursor: this._currentCanvasName ? 'pointer' : 'default',
-                                        userSelect: 'none'
-                                    })
-                                    .addTypedEventListener('dblclick', () => this.startRenaming()),
-                                new InputC({ type: 'text', class: textInput })
-                                    .bind(self => this._currentCanvasNameInput = self)
-                                    .setStyleCSS({ 
-                                        display: 'none',
-                                        width: '100%',
-                                        padding: '8px',
-                                        fontSize: '14px'
-                                    })
-                                    .addTypedEventListener('keydown', (e) => this.handleRenameKeydown(e))
-                                    .addTypedEventListener('blur', () => this.confirmRenaming())
-                            ]),
-                        new ButtonC({ text: "上書き保存", class: primaryButton })
-                            .bind(self => this._overwriteSaveButton = self)
-                            .setStyleCSS({ display: this._currentCanvasName ? 'block' : 'none' })
-                            .addTypedEventListener('click', () => this.handleOverwriteSave())
-                    ])
-            ]);
+        return (
+            div({ class: inputGroup })
+                .childs([
+                    span({ text: "現在のキャンバス名", class: inputLabel }),
+                    div().setStyleCSS({ display: 'flex', gap: '8px', alignItems: 'center' })
+                        .childs([
+                            div().setStyleCSS({ flex: '1', position: 'relative' })
+                                .childs([
+                                    span({ text: this._currentCanvasName ?? "（未保存）" })
+                                        .bind(self => this._currentCanvasNameSpan = self)
+                                        .setStyleCSS({
+                                            display: 'block',
+                                            padding: '8px',
+                                            backgroundColor: '#f5f5f5',
+                                            borderRadius: '4px',
+                                            color: '#333',
+                                            fontSize: '14px',
+                                            cursor: this._currentCanvasName ? 'pointer' : 'default',
+                                            userSelect: 'none'
+                                        })
+                                        .addTypedEventListener('dblclick', () => this.startRenaming()),
+                                    input({ type: 'text', class: textInput })
+                                        .bind(self => this._currentCanvasNameInput = self)
+                                        .setStyleCSS({
+                                            display: 'none',
+                                            width: '100%',
+                                            padding: '8px',
+                                            fontSize: '14px'
+                                        })
+                                        .addTypedEventListener('keydown', (e) => this.handleRenameKeydown(e))
+                                        .addTypedEventListener('blur', () => this.confirmRenaming())
+                                ]),
+                            button({ text: "上書き保存", class: primaryButton })
+                                .bind(self => this._overwriteSaveButton = self)
+                                .setStyleCSS({ display: this._currentCanvasName ? 'block' : 'none' })
+                                .addTypedEventListener('click', () => this.handleOverwriteSave())
+                        ])
+                ])
+        );
     }
 
     private 新規保存入力(): DivC {
-        return new DivC({ class: inputGroup })
-            .childs([
-                new SpanC({ text: "新規保存", class: inputLabel }),
-                new DivC().setStyleCSS({ display: 'flex', gap: '8px' })
-                    .childs([
-                        new InputC({ type: 'text', placeholder: 'キャンバスの名前を入力...', class: textInput })
-                            .bind(self => this._newSaveNameInput = self)
-                            .setStyleCSS({ flex: '1' }),
-                        new ButtonC({ text: "新規保存", class: primaryButton })
-                            .bind(self => this._newSaveButton = self)
-                            .addTypedEventListener('click', () => this.handleNewSave())
-                    ])
-            ]);
+        return (
+            div({ class: inputGroup })
+                .childs([
+                    span({ text: "新規保存", class: inputLabel }),
+                    div().setStyleCSS({ display: 'flex', gap: '8px' })
+                        .childs([
+                            input({ type: 'text', placeholder: 'キャンバスの名前を入力...', class: textInput })
+                                .bind(self => this._newSaveNameInput = self)
+                                .setStyleCSS({ flex: '1' }),
+                            button({ text: "新規保存", class: primaryButton })
+                                .bind(self => this._newSaveButton = self)
+                                .addTypedEventListener('click', () => this.handleNewSave())
+                        ])
+                ])
+        );
     }
 
     private セーブリスト(): HtmlComponentBase {
-        return new DivC({ class: inputGroup })
-            .childs([
-                new SpanC({ text: "保存データ一覧", class: inputLabel }),
-                this._list
-            ]);
+        return (
+            div({ class: inputGroup })
+                .childs([
+                    span({ text: "保存データ一覧", class: inputLabel }),
+                    this._list
+                ])
+        );
     }
 
     private 読み込みボタン(): HtmlComponentBase {
-        return new DivC({ class: actionButtonGroup })
-            .childs([
-                new ButtonC({ text: "読込", class: secondaryButton })
-                    .bind(self => this._loadButton = self)
-                    .addTypedEventListener('click', () => this.handleLoad())
-            ]);
+        return (
+            div({ class: actionButtonGroup })
+                .childs([
+                    button({ text: "読込", class: secondaryButton })
+                        .bind(self => this._loadButton = self)
+                        .addTypedEventListener('click', () => this.handleLoad())
+                ])
+        );
     }
 
     private 仮ゴミ箱ボタン(): HtmlComponentBase {
-        return new ButtonC({ text: "", class: trashToggleButton })
-            .setStyleCSS({ 
-                display: 'none',
-                backgroundImage: `url(${ゴミ箱Icon})`,
-                backgroundSize: 'contain',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center',
-                width: '48px',
-                height: '48px'
-            })
-            .bind(self => this._trashToggleBtn = self)
-            .addTypedEventListener('click', () => this.toggleTrashView())
-            .child(
-                new SpanC({ text: "0", class: trashBadge })
-                    .bind(self => this._trashBadgeSpan = self)
-            );
+        return (
+            button({ text: "", class: trashToggleButton })
+                .setStyleCSS({
+                    display: 'none',
+                    backgroundImage: `url(${ゴミ箱Icon})`,
+                    backgroundSize: 'contain',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    width: '48px',
+                    height: '48px'
+                })
+                .bind(self => this._trashToggleBtn = self)
+                .addTypedEventListener('click', () => this.toggleTrashView())
+                .child(
+                    span({ text: "0", class: trashBadge })
+                        .bind(self => this._trashBadgeSpan = self)
+                )
+        );
     }
 
     // ====== パネル表示制御 ======

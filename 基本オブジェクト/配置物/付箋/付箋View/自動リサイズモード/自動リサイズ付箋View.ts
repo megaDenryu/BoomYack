@@ -1,4 +1,4 @@
-import { DivC, LV2HtmlComponentBase, MouseStateManager, Px長さ } from "SengenUI/index";
+import { div, DivC, LV2HtmlComponentBase, MouseStateManager, Px長さ } from "SengenUI/index";
 
 
 import { テキストエリアサイズパラメータ, 自動リサイズテキストエリア } from "./自動リサイズテキストエリア";
@@ -70,17 +70,18 @@ export class 自動リサイズ付箋View extends LV2HtmlComponentBase implement
     }
 
     protected createComponentRoot(): DivC {
-        return new DivC({ class: [sticky_note_container, auto_resize_sticky_note] })
+        return (
+            div({ class: [sticky_note_container, auto_resize_sticky_note] })
             .setStyleCSS({
                 position: "absolute",
                 width: `${this._size.width}px`,
                 minHeight: `${this._minHeight}px`
             })
             .childs([
-                new DivC({ class: sticky_note_header })
+                div({ class: sticky_note_header })
                     .childs([
-                        new DivC({ class: sticky_note_title }).setTextContent("付箋"),
-                        new DivC({ class: sticky_note_close_button })
+                        div({ class: sticky_note_title }).setTextContent("付箋"),
+                        div({ class: sticky_note_close_button })
                             .setTextContent("×")
                             .addDivEventListener("click", (e) => {
                                 e.stopPropagation();
@@ -89,7 +90,7 @@ export class 自動リサイズ付箋View extends LV2HtmlComponentBase implement
                     ])
                     .bind((header) => { this.setupDragHandling(header); }),
                 
-                new DivC()
+                div()
                     .setStyleCSS({
                         flex: "1",
                         display: "flex",
@@ -110,12 +111,13 @@ export class 自動リサイズ付箋View extends LV2HtmlComponentBase implement
                         }).bind((textArea) => { this._textArea = textArea; })
                     ]),
                 
-                new DivC({ class: auto_resize_handle_left })
+                div({ class: auto_resize_handle_left })
                     .bind((leftHandle) => { this.setupResizeHandling(leftHandle, 'left'); }),
                 
-                new DivC({ class: auto_resize_handle_right })
+                div({ class: auto_resize_handle_right })
                     .bind((rightHandle) => { this.setupResizeHandling(rightHandle, 'right'); })
-            ]);
+            ])
+        );
     }
     
     private setupDragHandling(header: DivC): void {

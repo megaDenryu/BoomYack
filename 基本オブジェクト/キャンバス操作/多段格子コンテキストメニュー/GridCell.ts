@@ -1,4 +1,4 @@
-import { DivC, LV2HtmlComponentBase, SpanC } from "SengenUI/index";
+import { div, span, DivC, LV2HtmlComponentBase } from "SengenUI/index";
 
 export interface IGridMenuItemStyle {
     label?: string | string[];
@@ -48,7 +48,7 @@ export class GridCell extends LV2HtmlComponentBase {
         this._originalBaseBg = activeBg.base;
         this._currentBaseBg = activeBg.base;
 
-        const root = new DivC({class: `grid-cell`})
+        const root = div({class: `grid-cell`})
             .setStyleCSS({
                 gridColumn: typeof options.col === "number" ? options.col.toString() : options.col,
                 gridRow: typeof options.row === "number" ? options.row.toString() : options.row,
@@ -93,7 +93,7 @@ export class GridCell extends LV2HtmlComponentBase {
             });
             
         if (options.iconUrl) {
-           this._iconContainer = new DivC()
+           this._iconContainer = div()
                .setStyleCSS({
                    width: '48px',
                    height: '48px',
@@ -111,7 +111,7 @@ export class GridCell extends LV2HtmlComponentBase {
             if (!options.iconUrl) {
                 const texts = Array.isArray(options.label) ? options.label : [options.label];
                 texts.forEach(t => {
-                    root.child(new SpanC({text: t}).setStyleCSS({ pointerEvents: 'none', lineHeight: '1.2' }));
+                    root.child(span({text: t}).setStyleCSS({ pointerEvents: 'none', lineHeight: '1.2' }));
                 });
             }
         }

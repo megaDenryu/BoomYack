@@ -1,4 +1,4 @@
-import { DivC, LV2HtmlComponentBase } from "SengenUI/index";
+import { div, DivC, LV2HtmlComponentBase } from "SengenUI/index";
 
 
 import { IグループミニキャンバスView } from "../../I配置物";
@@ -12,8 +12,10 @@ export class グループミニキャンバスView extends LV2HtmlComponentBase 
     }
 
     protected createComponentRoot(): DivC {
-        return new DivC({}).childs([
-            // グループミニキャンバスの基本的な表示要素をここに追加
-        ]);
+        return (
+          div({}).childs([
+              // グループミニキャンバスの基本的な表示要素をここに追加
+          ])
+        );
     }
 }

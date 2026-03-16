@@ -1,4 +1,4 @@
-import { DivC, LV2HtmlComponentBase } from "SengenUI/index";
+import { div, DivC, LV2HtmlComponentBase } from "SengenUI/index";
 
 
 import { drag_handle } from "./style.css";
@@ -39,16 +39,18 @@ export class DragHandler extends LV2HtmlComponentBase {
     }
 
     protected createComponentRoot(): DivC {
-        return new DivC({ class: drag_handle })
-            .addDivEventListener('mousedown', (e) => {
-                e.preventDefault();
-                this._isDragging = true;
-                this._dragStartX = e.clientX;
-                this._dragStartY = e.clientY;
-                this._initialX = 0; // 初期位置は親コンポーネントが管理
-                this._initialY = 0;
-                this._onDragStart(this._initialX, this._initialY);
-            });
+        return (
+            div({ class: drag_handle })
+                .addDivEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    this._isDragging = true;
+                    this._dragStartX = e.clientX;
+                    this._dragStartY = e.clientY;
+                    this._initialX = 0; // 初期位置は親コンポーネントが管理
+                    this._initialY = 0;
+                    this._onDragStart(this._initialX, this._initialY);
+                })
+        );
     }
     
     private handleMouseMove(e: MouseEvent): void {

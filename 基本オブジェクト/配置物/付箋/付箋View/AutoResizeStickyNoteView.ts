@@ -1,4 +1,4 @@
-import { DivC, LV2HtmlComponentBase, Px長さ } from "SengenUI/index";
+import { div, DivC, LV2HtmlComponentBase, Px長さ } from "SengenUI/index";
 
 
 import { DragHandler } from "./DragHandler";
@@ -62,7 +62,8 @@ export class AutoResizeStickyNoteView extends LV2HtmlComponentBase {
     }
 
     protected createComponentRoot(): DivC {
-        return new DivC({ class: [sticky_note_container, auto_resize_sticky_note] })
+        return (
+            div({ class: [sticky_note_container, auto_resize_sticky_note] })
             .setStyleCSS({
                 position: "absolute",
                 width: `${this._size.width}px`,
@@ -91,7 +92,7 @@ export class AutoResizeStickyNoteView extends LV2HtmlComponentBase {
                 }),
                 
                 // ヘッダー（タイトル + 閉じるボタン）
-                new DivC({ class: sticky_note_header })
+                div({ class: sticky_note_header })
                     .setStyleCSS({
                         height: "30px",
                         backgroundColor: "#fbc02d",
@@ -104,7 +105,7 @@ export class AutoResizeStickyNoteView extends LV2HtmlComponentBase {
                         flexShrink: "0"
                     })
                     .childs([
-                        new DivC({ class: sticky_note_title })
+                        div({ class: sticky_note_title })
                             .setStyleCSS({
                                 fontSize: "12px",
                                 color: "#795548",
@@ -112,7 +113,7 @@ export class AutoResizeStickyNoteView extends LV2HtmlComponentBase {
                                 userSelect: "none"
                             })
                             .setTextContent("付箋"),
-                        new DivC({ class: sticky_note_close_button })
+                        div({ class: sticky_note_close_button })
                             .setStyleCSS({
                                 width: "20px",
                                 height: "20px",
@@ -134,7 +135,7 @@ export class AutoResizeStickyNoteView extends LV2HtmlComponentBase {
                     ]),
                 
                 // コンテンツエリア（自動リサイズテキストエリア）
-                new DivC()
+                div()
                     .setStyleCSS({
                         flex: "1",
                         display: "flex",
@@ -168,7 +169,8 @@ export class AutoResizeStickyNoteView extends LV2HtmlComponentBase {
                             this._textArea = textArea;
                         })
                     ])
-            ]);
+            ])
+        );
     }
     
     /**

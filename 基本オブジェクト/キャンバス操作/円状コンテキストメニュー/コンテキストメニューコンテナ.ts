@@ -1,4 +1,4 @@
-import { DivC, LV2HtmlComponentBase } from "SengenUI/index";
+import { div, DivC, LV2HtmlComponentBase } from "SengenUI/index";
 
 
 import { Iコンテキストメニュー, 円状コンテキストメニュー } from "./円状コンテキストメニュー";
@@ -13,11 +13,13 @@ export class コンテキストメニューコンテナ extends LV2HtmlComponent
     }
 
     protected createComponentRoot(): DivC {
-        return new DivC({"class": "円状コンテキストメニューコンテナ"})
-                                .setStyleCSS({
-                                    position: 'absolute', top: '0',left: '0',width: '10px',height: '10px',
-                                })
-    };
+        return (
+          div({"class": "円状コンテキストメニューコンテナ"})
+              .setStyleCSS({
+                  position: 'absolute', top: '0', left: '0', width: '10px', height: '10px',
+              })
+        );
+    }
 
     public zIndex(zIndex: string): this {
         this._componentRoot.setStyleCSS({ zIndex: zIndex });

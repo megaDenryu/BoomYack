@@ -1,4 +1,4 @@
-import { DivC, HtmlComponentBase, I描画空間, LV2HtmlComponentBase, Px2DVector, VectorN, VectorNと見なせる, dotVectorN, 配置物座標点 } from "SengenUI/index";
+import { div, DivC, HtmlComponentBase, I描画空間, LV2HtmlComponentBase, Px2DVector, VectorN, VectorNと見なせる, dotVectorN, 配置物座標点 } from "SengenUI/index";
 
 
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
@@ -71,12 +71,14 @@ export class 矢印接続可能なもの<座標点T extends 配置物座標点> 
     }
 
     protected createComponentRoot(): HtmlComponentBase {
-        return new DivC({class:"矢印ホバー用四角形"}).setStyleCSS({
-            position: "absolute",
-            opacity: "0",
-            transition: "opacity 0.2s ease-in-out"
-        }).bind(self => this._ホバー用四角形 = self)
-        .childs(this.接続点リスト());
+        return (
+          div({class:"矢印ホバー用四角形"}).setStyleCSS({
+              position: "absolute",
+              opacity: "0",
+              transition: "opacity 0.2s ease-in-out"
+          }).bind(self => this._ホバー用四角形 = self)
+          .childs(this.接続点リスト())
+        );
     }
 
     public *接続点リスト(): Iterable<接続点<座標点T>> {

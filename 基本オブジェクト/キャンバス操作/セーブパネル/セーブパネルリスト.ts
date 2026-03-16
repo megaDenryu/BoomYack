@@ -1,4 +1,4 @@
-import { ButtonC, DivC, LV2HtmlComponentBase, SpanC } from "SengenUI/index";
+import { button, div, span, DivC, LV2HtmlComponentBase } from "SengenUI/index";
 
 
 
@@ -47,11 +47,12 @@ export class セーブパネルリスト extends LV2HtmlComponentBase {
     }
 
     protected createComponentRoot(): DivC {
-        return new DivC({ class: saveListContainer })
-            .child(
-                new DivC({ class: emptyMessage })
-                    .child(new SpanC({ text: "保存データがありません" }))
-            );
+        return (
+          div({ class: saveListContainer })
+              .child(
+                  div({ class: emptyMessage })
+                      .child(span({ text: "保存データがありません" })))
+        );
     }
 
     /** リストデータを設定 */
@@ -100,8 +101,8 @@ export class セーブパネルリスト extends LV2HtmlComponentBase {
         
         if (visibleItems.length === 0) {
             this._componentRoot.child(
-                new DivC({ class: emptyMessage })
-                    .child(new SpanC({ text: "保存データがありません" }))
+                div({ class: emptyMessage })
+                    .child(span({ text: "保存データがありません" }))
             );
             return;
         }
@@ -111,22 +112,22 @@ export class セーブパネルリスト extends LV2HtmlComponentBase {
             const itemClasses = isSelected ? [saveListItem, saveListItemSelected] : [saveListItem];
             
             this._componentRoot.child(
-                new DivC({ class: itemClasses })
+                div({ class: itemClasses })
                     .addDivEventListener('click', () => this.selectItem(item))
                     .childs([
-                        new DivC().childs([
-                            new SpanC({ text: item.name, class: saveItemName }),
-                            new SpanC({ 
+                        div().childs([
+                            span({ text: item.name, class: saveItemName }),
+                            span({ 
                                 text: new Date(item.updatedAt).toLocaleString(), 
                                 class: saveItemDate 
                             }).setStyleCSS({ display: 'block' })
                         ]),
-                        new ButtonC({ text: "json", class: jsonFileOutputButton})
+                        button({ text: "json", class: jsonFileOutputButton})
                             .addTypedEventListener("click", (e) => {
                                 e.stopPropagation();
                                 this._events.onJsonOutput(item)
                             }),
-                        new ButtonC({ text: "", class: deleteItemButton })
+                        button({ text: "", class: deleteItemButton })
                             .setStyleCSS({
                                 backgroundImage: `url(${ゴミ箱Icon})`,
                                 backgroundSize: 'contain',
@@ -149,24 +150,24 @@ export class セーブパネルリスト extends LV2HtmlComponentBase {
         
         if (trashItems.length === 0) {
             this._componentRoot.child(
-                new DivC({ class: emptyMessage })
-                    .child(new SpanC({ text: "ゴミ箱は空です" }))
+                div({ class: emptyMessage })
+                    .child(span({ text: "ゴミ箱は空です" }))
             );
             return;
         }
         
         for (const { item } of trashItems) {
             this._componentRoot.child(
-                new DivC({ class: [saveListItem, trashedItem] })
+                div({ class: [saveListItem, trashedItem] })
                     .childs([
-                        new DivC().childs([
-                            new SpanC({ text: item.name, class: saveItemName }),
-                            new SpanC({ 
+                        div().childs([
+                            span({ text: item.name, class: saveItemName }),
+                            span({ 
                                 text: new Date(item.updatedAt).toLocaleString(), 
                                 class: saveItemDate 
                             }).setStyleCSS({ display: 'block' })
                         ]),
-                        new ButtonC({ text: "↩", class: restoreButton })
+                        button({ text: "↩", class: restoreButton })
                             .addTypedEventListener('click', (e) => {
                                 e.stopPropagation();
                                 this._events.onRestoreFromTrash(item.id.id);

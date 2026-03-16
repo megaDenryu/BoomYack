@@ -1,4 +1,4 @@
-import { DivC, LV2HtmlComponentBase, MousePosition } from "SengenUI/index";
+import { div, DivC, LV2HtmlComponentBase, MousePosition } from "SengenUI/index";
 import { Action, AsyncAction } from "TypeScriptBenriKakuchou/アーキテクチャBase";
 import { Iコンテキストメニュー } from "../円状コンテキストメニュー/円状コンテキストメニュー";
 import { GridCell, IGridMenuItemStyle, IGridCellToggleSeed, SelectableGridCell } from "./GridCell";
@@ -82,7 +82,7 @@ export class 多段格子コンテキストメニュー extends LV2HtmlComponent
     }
 
     protected createComponentRoot(): DivC {
-        const gridContainer = new DivC({class: "grid-context-menu-container"})
+        const gridContainer = div({class: "grid-context-menu-container"})
             .setStyleCSS({
                 display: "none",
                 position: "absolute",

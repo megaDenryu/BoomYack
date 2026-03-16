@@ -1,4 +1,4 @@
-import { ButtonC, DivC, HtmlComponentBase, LV2HtmlComponentBase, MousePosition, Px長さ } from "SengenUI/index";
+import { button, div, ButtonC, DivC, LV2HtmlComponentBase, MousePosition, Px長さ } from "SengenUI/index";
 
 
 
@@ -43,12 +43,13 @@ export class 円状コンテキストメニュー extends LV2HtmlComponentBase i
     }
 
     protected createComponentRoot(items: 円状メニューアイテムオプション[]): DivC {
-        return new DivC({ class: 円状メニューコンテナ })
-                    .setStyleCSS({ display: 'none' })
-                    .childs([
-                        new DivC({ class: 円状メニュー中央エリア }),
-                        ...this.createCircularItems(items)
-                    ]);
+        return (
+          div({ class: 円状メニューコンテナ })
+              .setStyleCSS({ display: 'none' })
+              .childs([
+                  div({ class: 円状メニュー中央エリア }),
+                  ...this.createCircularItems(items)])
+        );
     }
 
     private *createCircularItems(items: 円状メニューアイテムオプション[]): Iterable<円状メニューアイテムボタン> {
@@ -138,7 +139,7 @@ export class 円状メニューアイテムボタン extends LV2HtmlComponentBas
     }
 
     protected createComponentRoot(): ButtonC {
-        const btn = new ButtonC({ text: this._option.label ?? "", class: 円状メニューアイテム })
+        const btn = button({ text: this._option.label ?? "", class: 円状メニューアイテム })
                     .addTypedEventListener("click", (e: MouseEvent) => { 
                         e.preventDefault();
                         e.stopPropagation();

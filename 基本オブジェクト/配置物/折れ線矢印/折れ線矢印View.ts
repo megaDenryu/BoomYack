@@ -1,4 +1,4 @@
-import { CircleC, Degree角度, DivC, Drag中値, Drag終了値, Drag開始値, Iドラッグに連動可能, LV2HtmlComponentBase, MouseWife, PolygonC, Px長さ, SvgC, TypedEventListener, 位置管理, 配置物座標点 } from "SengenUI/index";
+import { circle, div, polygon, svg, CircleC, Degree角度, DivC, Drag中値, Drag終了値, Drag開始値, Iドラッグに連動可能, LV2HtmlComponentBase, MouseWife, PolygonC, Px長さ, SvgC, TypedEventListener, 位置管理, 配置物座標点 } from "SengenUI/index";
 
 
 import { I折れ線矢印View, 配置物zIndex } from "../../I配置物";
@@ -47,16 +47,18 @@ export class 折れ線矢印View extends LV2HtmlComponentBase implements I折れ
     }
 
     protected createComponentRoot(): DivC {
-        return new DivC()
-            .setStyleCSS({
-                position: "absolute",
-                width: "100%",
-                height: "100%",
-                pointerEvents: "none",
-            }).childs([
-                this.始点ハンドルView,
-                this.終点ハンドルView,
-            ]);
+        return (
+            div()
+                .setStyleCSS({
+                    position: "absolute",
+                    width: "100%",
+                    height: "100%",
+                    pointerEvents: "none",
+                }).childs([
+                    this.始点ハンドルView,
+                    this.終点ハンドルView,
+                ])
+        );
     }
 
 
@@ -165,16 +167,18 @@ export class 矢印View extends LV2HtmlComponentBase {
         this._componentRoot = this.createComponentRoot();
     }
     protected createComponentRoot(): DivC {
-        return new DivC({class:"矢印"}).setStyleCSS({
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                    pointerEvents: "none",
-                }).childs([
-                    this.始点ハンドルView,
-                    this.終点ハンドルView,
-                    this.線分ハンドルView
-                ]);
+        return (
+            div({class:"矢印"}).setStyleCSS({
+                        position: "absolute",
+                        width: "100%",
+                        height: "100%",
+                        pointerEvents: "none",
+                    }).childs([
+                        this.始点ハンドルView,
+                        this.終点ハンドルView,
+                        this.線分ハンドルView
+                    ])
+        );
     }
 
     public 選択状態のzIndexにする(): void {
@@ -213,34 +217,36 @@ export class 点ハンドルViewBase extends LV2HtmlComponentBase implements I�
 
     protected createComponentRoot(): DivC {
         // 外側のコンテナ: 位置管理用（transform適用なし）
-        return new DivC()
-            .setStyleCSS({
-                position: "absolute",
-                width: "0px",    // サイズを0にして基準点のみ
-                height: "0px",
-                pointerEvents: "none",
-                zIndex:配置物zIndex.矢印内部構造.点ハンドル
-            })
-            .bind((self) => { this._位置管理 = new 位置管理(self); })
-            .child(
-                // 内側のコンテナ: SVGを配置
-                new DivC()
-                    .setStyleCSS({
-                        position: "absolute",
-                        transform: "translate(-50%, -50%)",
-                        pointerEvents: "auto",
-                        cursor: "move"
-                    })
-                    .bind((element) => { 
-                        this._svgContainer = element;
-                        this._mouseWife = new MouseWife(element).ドラッグ連動登録(this);
-                    })
-                    .addDivEventListener("mouseover", (e) => {
-                        this.onHoverStyleChange(true);
-                    })
-                    .addDivEventListener("mouseout", (e) => {
-                        this.onHoverStyleChange(false);
-                    }));
+        return (
+            div()
+                .setStyleCSS({
+                    position: "absolute",
+                    width: "0px",    // サイズを0にして基準点のみ
+                    height: "0px",
+                    pointerEvents: "none",
+                    zIndex:配置物zIndex.矢印内部構造.点ハンドル
+                })
+                .bind((self) => { this._位置管理 = new 位置管理(self); })
+                .child(
+                    // 内側のコンテナ: SVGを配置
+                    div()
+                        .setStyleCSS({
+                            position: "absolute",
+                            transform: "translate(-50%, -50%)",
+                            pointerEvents: "auto",
+                            cursor: "move"
+                        })
+                        .bind((element) => {
+                            this._svgContainer = element;
+                            this._mouseWife = new MouseWife(element).ドラッグ連動登録(this);
+                        })
+                        .addDivEventListener("mouseover", (e) => {
+                            this.onHoverStyleChange(true);
+                        })
+                        .addDivEventListener("mouseout", (e) => {
+                            this.onHoverStyleChange(false);
+                        }))
+        );
     }
 
     protected addSvgContent(shape: SvgC): this {
@@ -306,8 +312,8 @@ export class 点ハンドルView extends 点ハンドルViewBase {
         
         super(ハンドル操作実行時コマンドlist);
         this.addSvgContent(
-            new SvgC({ width: 20, height: 20, viewBox: "0 0 20 20" }).child(
-                new CircleC({
+            svg({ width: 20, height: 20, viewBox: "0 0 20 20" }).child(
+                circle({
                     cx: 10,
                     cy: 10,
                     r: 8,
@@ -357,29 +363,31 @@ export class 線分ハンドルView extends LV2HtmlComponentBase implements Iド
     }
 
     protected createComponentRoot(): DivC {
-        return new DivC({ class: 線分ハンドルコンテナ })
-            .setStyleCSS({
-                position: "absolute",
-                width: "100px",
-                pointerEvents: "auto",
-                zIndex: 配置物zIndex.矢印内部構造.線分
-            })
-            .child(
-                new DivC({ class: 線分ハンドル基本 })
-                    .bind((element) => {
-                        this._ドラッグハンドル = element;
-                        this._mouseWife = new MouseWife(element).ドラッグ連動登録(this);
-                        element.addDivEventListener("mouseover", () => {
-                            this._はホバー中 = true;
-                            this.状態を反映させる();
-                        });
-                        element.addDivEventListener("mouseout", () => {
-                            this._はホバー中 = false;
-                            this.状態を反映させる();
-                        });
-                        this.deselect();
-                    })
-            );
+        return (
+            div({ class: 線分ハンドルコンテナ })
+                .setStyleCSS({
+                    position: "absolute",
+                    width: "100px",
+                    pointerEvents: "auto",
+                    zIndex: 配置物zIndex.矢印内部構造.線分
+                })
+                .child(
+                    div({ class: 線分ハンドル基本 })
+                        .bind((element) => {
+                            this._ドラッグハンドル = element;
+                            this._mouseWife = new MouseWife(element).ドラッグ連動登録(this);
+                            element.addDivEventListener("mouseover", () => {
+                                this._はホバー中 = true;
+                                this.状態を反映させる();
+                            });
+                            element.addDivEventListener("mouseout", () => {
+                                this._はホバー中 = false;
+                                this.状態を反映させる();
+                            });
+                            this.deselect();
+                        })
+                )
+        );
     }
 
 
@@ -538,8 +546,8 @@ class 円ハンドルView extends 点ハンドルViewBase {
     public constructor(ハンドル操作実行時コマンドlist: Iハンドル操作実行時コマンド[]) {
         super(ハンドル操作実行時コマンドlist);
         this.addSvgContent(
-            new SvgC({ width: 12, height: 12, viewBox: "0 0 12 12" }).child(
-                new CircleC({
+            svg({ width: 12, height: 12, viewBox: "0 0 12 12" }).child(
+                circle({
                     cx: 6,
                     cy: 6,
                     r: 5,
@@ -612,8 +620,8 @@ class 終点矢印ハンドルView extends 点ハンドルViewBase {
     public constructor(ハンドル操作実行時コマンドlist: Iハンドル操作実行時コマンド[]) {
         super(ハンドル操作実行時コマンドlist);
         this.addSvgContent(
-            new SvgC({ width: 20, height: 20, viewBox: "0 0 20 20" }).child(
-                new PolygonC({
+            svg({ width: 20, height: 20, viewBox: "0 0 20 20" }).child(
+                polygon({
                     points: [[18, 10], [2, 18], [2, 2]],
                     fill: "#FF5722",
                     stroke: "#D84315",
