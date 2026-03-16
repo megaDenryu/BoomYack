@@ -7,7 +7,7 @@ import { IDMap } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
 import { 付箋ID } from "BoomYack/基本オブジェクト/ID";
 import { CanvasGraphModel } from "BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
 import { Iグラフ配置先 } from "BoomYack/基本オブジェクト/配置物リポジトリ";
-import { node付箋pair } from "../ValueObjects/node付箋pair";
+import { ノード付箋ペア } from "../ValueObjects/ノード付箋ペア";
 import { I後処理位置調整Strategy } from "./IStrategy";
 
 
@@ -23,7 +23,7 @@ export class グリッドレイアウトStrategy implements I後処理位置調�
         return new グリッドレイアウトStrategy(列数);
     }
 
-    public 実行(pairMap: IDMap<付箋ID, node付箋pair>, 配置先: Iグラフ配置先): void {
+    public 実行(pairMap: IDMap<付箋ID, ノード付箋ペア>, 配置先: Iグラフ配置先): void {
         const pairs = Array.from(pairMap.values());
 
         pairs.forEach((pair, index) => {

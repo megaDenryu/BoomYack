@@ -7,7 +7,7 @@ import { テキスト用グラフノード, 付箋text } from "BoomYack/基本�
 import { 付箋集約 } from "BoomYack/基本オブジェクト/配置物/付箋2/付箋集約";
 
 
-export class node付箋pair {
+export class ノード付箋ペア {
     public constructor(
         public readonly node: テキスト用グラフノード<付箋text>,
         public readonly 付箋: 付箋集約<描画座標点>

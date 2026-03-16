@@ -12,7 +12,7 @@ import { CanvasPersistenceManager } from "./CanvasPersistenceManager";
 
 
 import { キャンバスメタデータ } from "../データクラス";
-import { 折れ線矢印VM } from "../../配置物"; // export確認要
+import { 折れ線矢印VM } from "../../配置物";
 import { 折れ線矢印ID, キャンバスID } from "../../ID";
 import { 配置物連結グラフ } from "../配置物グラフ/配置物連結グラフ";
 import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?url';

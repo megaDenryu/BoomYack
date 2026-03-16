@@ -61,16 +61,3 @@ export class キャンバスID extends IDBase自動採番<"キャンバスID", �
         super(id);
     }
 }
-
-function testID() {
-    const id1 = new ノードID();
-    const id2 = new ノードID();
-    const edgeId1 = new エッジID();
-    const edgeId2 = new エッジID();
-
-    // console.log(id1.equal(id1)); // true
-    // console.log(id1.equal(edgeId2)); // false
-    // console.log(edgeId1.equal(id1)); // false
-    
-
-}

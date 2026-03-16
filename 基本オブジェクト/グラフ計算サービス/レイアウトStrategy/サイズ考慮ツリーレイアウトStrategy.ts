@@ -1,6 +1,6 @@
 import { Px2DVector, Px長さ, 描画座標点 } from "SengenUI/index";
 import { Iグラフ配置先 } from "BoomYack/基本オブジェクト/配置物リポジトリ";
-import { node付箋pair } from "../ValueObjects/node付箋pair";
+import { ノード付箋ペア } from "../ValueObjects/ノード付箋ペア";
 import { I後処理位置調整Strategy } from "./IStrategy";
 import { IDMap } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
 import { 付箋ID } from "BoomYack/基本オブジェクト/ID";
@@ -14,22 +14,22 @@ export class サイズ考慮ツリーレイアウトStrategy implements I後処�
         this.設定 = 設定;
     }
 
-    public 実行(pairMap: IDMap<付箋ID, node付箋pair>, 配置先: Iグラフ配置先): void {
+    public 実行(pairMap: IDMap<付箋ID, ノード付箋ペア>, 配置先: Iグラフ配置先): void {
         const layoutContext = new TreeLayoutContext(pairMap, this.設定, 配置先);
         layoutContext.execute();
     }
 }
 
 class TreeLayoutContext {
-    private readonly pairMap: IDMap<付箋ID, node付箋pair>;
-    private readonly nodeIDMap: Map<string, node付箋pair>;
+    private readonly pairMap: IDMap<付箋ID, ノード付箋ペア>;
+    private readonly nodeIDMap: Map<string, ノード付箋ペア>;
     private readonly config: レイアウト設定;
     private readonly 配置先: Iグラフ配置先;
     private readonly visited = new Set<string>();
     private readonly subtreeWidths = new Map<string, number>();
 
     constructor(
-        pairMap: IDMap<付箋ID, node付箋pair>,
+        pairMap: IDMap<付箋ID, ノード付箋ペア>,
         config: レイアウト設定,
         配置先: Iグラフ配置先
     ) {
@@ -72,7 +72,7 @@ class TreeLayoutContext {
         }
     }
 
-    private findRoots(): node付箋pair[] {
+    private findRoots(): ノード付箋ペア[] {
         const candidates = new Set(this.nodeIDMap.values());
 
         this.nodeIDMap.forEach(pair => {
@@ -92,8 +92,8 @@ class TreeLayoutContext {
     // calculateSubtreeWidth用のvisited
     private calculated = new Set<string>();
 
-    private getUnvisitedChildren(pair: node付箋pair): node付箋pair[] {
-        const children: node付箋pair[] = [];
+    private getUnvisitedChildren(pair: ノード付箋ペア): ノード付箋ペア[] {
+        const children: ノード付箋ペア[] = [];
         pair.node.linkNode.nextIDs.forEach(nextID => {
             const nextPair = this.nodeIDMap.get(nextID);
             if (nextPair && !this.calculated.has(nextID)) {
@@ -106,7 +106,7 @@ class TreeLayoutContext {
     // calculateSubtreeWidthを修正
     // このメソッドは、pair以下の未計算ノードのサイズを計算し、calculatedに追加する。
     // 戻り値は、pairとその子供たち（今回計算したもの）を含む部分木の幅。
-    private calculateSubtreeWidth_Recursive(pair: node付箋pair): number {
+    private calculateSubtreeWidth_Recursive(pair: ノード付箋ペア): number {
         this.calculated.add(pair.node.id);
 
         const children = this.getUnvisitedChildren(pair);
@@ -127,13 +127,13 @@ class TreeLayoutContext {
     }
 
     // ラッパー
-    private calculateSubtreeWidth(pair: node付箋pair): void {
+    private calculateSubtreeWidth(pair: ノード付箋ペア): void {
         if (!this.calculated.has(pair.node.id)) {
             this.calculateSubtreeWidth_Recursive(pair);
         }
     }
 
-    private placeNode(pair: node付箋pair, centerX: number, y: number): void {
+    private placeNode(pair: ノード付箋ペア, centerX: number, y: number): void {
         // ノードの位置設定
         // centerXは部分木の中心。ノード自体の中心もここにする。
         const nodeWidth = pair.付箋.size.x.value;
@@ -158,7 +158,7 @@ class TreeLayoutContext {
         // ここで「このノードの子供として扱われたノード」を知る必要がある。
         // あるいは、placeNode でも visited を使って、「まだ配置されていない子供」を配置する。
 
-        const children: node付箋pair[] = [];
+        const children: ノード付箋ペア[] = [];
         pair.node.linkNode.nextIDs.forEach(nextID => {
             const nextPair = this.nodeIDMap.get(nextID);
             if (nextPair && !this.visited.has(nextID)) {

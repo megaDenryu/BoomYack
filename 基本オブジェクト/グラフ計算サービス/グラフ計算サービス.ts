@@ -7,7 +7,7 @@ import { 付箋ID } from "../ID";
 import { 階層的レイアウトStrategy } from "./レイアウトStrategy/階層的レイアウトStrategy";
 import { レイアウト設定 } from "./ValueObjects/レイアウト設定";
 import { グリッドレイアウトStrategy } from "./レイアウトStrategy/グリッドレイアウトStrategy";
-import { node付箋pair } from "./ValueObjects/node付箋pair";
+import { ノード付箋ペア } from "./ValueObjects/ノード付箋ペア";
 import { I前処理位置調整Strategy, I後処理位置調整Strategy } from "./レイアウトStrategy/IStrategy";
 import { 何もしない後処理Strategy } from "./レイアウトStrategy/何もしない後処理Strategy";
 import { ForceDirectedLayoutStrategy } from "./レイアウトStrategy/ForceDirectedLayoutStrategy";
@@ -22,10 +22,10 @@ import { I配置物集約 } from "../I配置物";
 export class テキスト用グラフからキャンバスに配置するサービス {
     private readonly 配置先: Iグラフ配置先;
     private readonly グラフ: テキスト用グラフ<付箋text>;
-    private readonly node付箋pairMap: IDMap<付箋ID, node付箋pair> = new IDMap<付箋ID, node付箋pair>();
+    private readonly ノード付箋ペアMap: IDMap<付箋ID, ノード付箋ペア> = new IDMap<付箋ID, ノード付箋ペア>();
     private readonly 先行位置調整サービス: I前処理位置調整Strategy;
     private readonly 後処理位置調整サービス: I後処理位置調整Strategy;
-    private readonly nodeID別node付箋pairMap: Map<string, node付箋pair> = new Map();
+    private readonly nodeID別ノード付箋ペアMap: Map<string, ノード付箋ペア> = new Map();
     private readonly addedArrows: I配置物集約[] = [];
 
     public constructor(
@@ -53,25 +53,25 @@ export class テキスト用グラフからキャンバスに配置するサー�
         this.後処理による位置調整();
 
         const addedItems: I配置物集約[] = [];
-        for (const pair of this.node付箋pairMap.values()) {
+        for (const pair of this.ノード付箋ペアMap.values()) {
             addedItems.push(pair.付箋 as unknown as I配置物集約);
         }
         addedItems.push(...this.addedArrows);
         return addedItems;
     }
 
-    private テキスト用グラフノードに対して作業を実行する(node: テキスト用グラフノード<付箋text>): node付箋pair {
+    private テキスト用グラフノードに対して作業を実行する(node: テキスト用グラフノード<付箋text>): ノード付箋ペア {
         // 既に処理済みの場合は既存のpairを返す（循環グラフ対策）
-        const 既存pair = this.nodeID別node付箋pairMap.get(node.id);
+        const 既存pair = this.nodeID別ノード付箋ペアMap.get(node.id);
         if (既存pair !== undefined) {
             return 既存pair;
         }
 
         // 前処理Strategyから位置を取得
         const pos = this.先行位置調整サービス.ノード位置を計算(node);
-        const node付箋 = new node付箋pair(node, this.配置先.描画座標点でadd付箋(pos, node.nodeData.text));
-        this.node付箋pairMap.set(node付箋.付箋.id, node付箋);
-        this.nodeID別node付箋pairMap.set(node.id, node付箋);
+        const node付箋 = new ノード付箋ペア(node, this.配置先.描画座標点でadd付箋(pos, node.nodeData.text));
+        this.ノード付箋ペアMap.set(node付箋.付箋.id, node付箋);
+        this.nodeID別ノード付箋ペアMap.set(node.id, node付箋);
 
         // 次ノードへの矢印接続
         node.linkNode.nextIDs.forEach(ノードID => {
@@ -93,7 +93,7 @@ export class テキスト用グラフからキャンバスに配置するサー�
     }
 
     private 後処理による位置調整(): void {
-        this.後処理位置調整サービス.実行(this.node付箋pairMap, this.配置先);
+        this.後処理位置調整サービス.実行(this.ノード付箋ペアMap, this.配置先);
     }
 }
 
