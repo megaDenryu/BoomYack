@@ -97,8 +97,13 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         this.voiceRecognitionService = new VoiceRecognitionService(this.selectionManager);
         
         this.voiceRecognitionService.onStateChange((isRecording) => {
-            if (this.menu && this.menu.selectItem) {
-                this.menu.selectItem("L2-mic-toggle", isRecording);
+            if (this.menu && (this.menu as 多段格子コンテキストメニュー).updateItem) {
+                const multiMenu = this.menu as 多段格子コンテキストメニュー;
+                if (isRecording) {
+                    multiMenu.updateItem("L1-mic", { iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' });
+                } else {
+                    multiMenu.updateItem("L1-mic", { iconUrl: MicOffIcon });
+                }
             }
             if (this._recordingIndicator) {
                 this._recordingIndicator.setStyleCSS({ display: isRecording ? 'flex' : 'none' });
@@ -178,14 +183,13 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             { id: "L1-save", iconUrl: SaveIcon, backgroundColor: imgBg, Position: 'right', onClick: (e: MouseEvent) => this._options.onSaveClick?.() },
 
             // カテゴリ（テキスト系）を斜め方向に配置
-            { id: "L1-ai", label: ["AI", "分解"], Position: 'lt' },
+            { id: "L1-ai", label: ["分解", "生成"], Position: 'lt' },
             { id: "L1-graph", label: ["グラフ", "操作"], Position: 'rt' },
-            { id: "L1-edit", label: ["編集", "操作"], Position: 'lb' },
-            { id: "L1-other", label: "その他", Position: 'rb' }
+            { id: "L1-mic", iconUrl: MicOffIcon, backgroundColor: imgBg, Position: 'lb', onClick: (e: MouseEvent) => { e.stopPropagation(); this.voiceRecognitionService.toggleRecording(); } },
         ];
 
         const layer2Items: 格子メニュー2層オプション[] = [
-            // AI (LT)
+            // 分解生成 (LT)
             // TODO: 必要に応じてAI操作を追加
 
             // グラフ操作 (RT)
@@ -198,26 +202,8 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                 const 選択配置物 = this.selectionManager.選択中配置物[0];
                 if (選択配置物) { this.グラフ操作サービス.グラフを選択してjsonファイル出力(選択配置物); }
             }},
-
-            // 編集・操作 (LB)
-            { parentId: "L1-edit", label: "コピー", onClick: (e: MouseEvent) => this.選択中配置物をコピー() },
-            { parentId: "L1-edit", label: "貼り付け", onClick: (e: MouseEvent) => this.グラフ操作サービス.クリップボードから貼り付け(e, (cmd) => this.commandRepository.push(cmd))},
-
-            // その他 (RB)
-            { 
-                id: "L2-mic-toggle", 
-                parentId: "L1-other", 
-                type: 'toggle',
-                toggleSeed: {
-                    stateTrue: { label: "マイク入力", iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' },
-                    stateFalse: { label: "マイク入力", iconUrl: MicOffIcon }
-                },
-                onClick: (e: MouseEvent) => { 
-                    e.stopPropagation(); 
-                    this.voiceRecognitionService.toggleRecording(); 
-                }
-            },
-            // 必要に応じて追加
+            { parentId: "L1-graph", label: "コピー", onClick: (e: MouseEvent) => this.選択中配置物をコピー() },
+            { parentId: "L1-graph", label: "貼り付け", onClick: (e: MouseEvent) => this.グラフ操作サービス.クリップボードから貼り付け(e, (cmd) => this.commandRepository.push(cmd))},
         ];
         
         let canvasContainer: DivC | null = null;
@@ -274,7 +260,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                             self.コンテキストメニュー追加(new 多段格子コンテキストメニュー({
                                 mode: "clickable",
                                 opacity: 0.85,
-                                showCenterButton: true,
+                                showCenterButton: false,
                                 layer1Items: layer1Items,
                                 layer2Items: layer2Items
                             }).bind((self: Iコンテキストメニュー) => this.menu = self))

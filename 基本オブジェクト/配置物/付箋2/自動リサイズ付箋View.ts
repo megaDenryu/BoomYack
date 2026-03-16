@@ -131,7 +131,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
             new 多段格子コンテキストメニュー({
                 mode: "clickable",
                 opacity: 0.85,
-                showCenterButton: true,
+                showCenterButton: false,
                 layer1Items: [
                     // アイコン系（1層目十字）
                     { id: 'L1-save', iconUrl: SaveIcon, backgroundColor: imgBg, Position: 'right', onClick: () => { /* 保存処理があれば */ } },
@@ -141,57 +141,42 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                     { id: 'L1-arrow', iconUrl: 折れ線矢印Icon, backgroundColor: imgBg, Position: 'left' },
 
                     // カテゴリ系（1層目斜め）
-                    { id: 'L1-decomp', label: '分解', Position: 'lt' },
-                    { id: 'L1-gen', label: '生成', Position: 'rt' },
-                    { id: 'L1-graph', label: ['グラフ', '操作'], Position: 'lb' },
-                    { id: 'L1-other', label: 'その他', Position: 'rb' },
+                    { id: 'L1-decomp', label: '分解生成', Position: 'lt' },
+                    { id: 'L1-graph', label: ['グラフ', '操作'], Position: 'rt' },
+                    { id: 'L1-mic', iconUrl: MicOffIcon, backgroundColor: imgBg, Position: 'lb', onClick: (e) => { e.stopPropagation(); コンテキストメニュー依存関係.onマイク入力トグル?.(); } },
+                    { id: 'L1-settings', label: '設定', Position: 'rb', onClick: () => { コンテキストメニュー依存関係.on設定パネル表示?.(this._position as 描画座標点); } },
                 ],
                 layer2Items: [
-                    // 分解 (LT)
+                    // 分解生成 (LT)
                     { parentId: 'L1-decomp', label: "LLM分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_LLM?.(); } },
                     { parentId: 'L1-decomp', label: "区切り分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_区切り文字?.(); } },
+                    { parentId: 'L1-decomp', label: "続き生成", onClick: () => { コンテキストメニュー依存関係.onAI生成?.(); } },
 
-                    // 生成 (RT)
-                    { parentId: 'L1-gen', label: "続き生成", onClick: () => { コンテキストメニュー依存関係.onAI生成?.(); } },
-
-                    // グラフ操作 (LB)
+                    // グラフ操作 (RT)
                     { parentId: 'L1-graph', label: "グラフ選択", onClick: () => { コンテキストメニュー依存関係.onグラフ選択?.(); } },
                     { parentId: 'L1-graph', label: ["グラフをテキスト", "としてコピー"], onClick: () => { コンテキストメニュー依存関係.onグラフをテキストとしてコピー?.(); } },
                     { parentId: 'L1-graph', label: ["グラフを", "JSON出力"], onClick: () => { コンテキストメニュー依存関係.onグラフをJSON出力?.(); } },
                     { parentId: 'L1-graph', label: "コピー", onClick: () => { コンテキストメニュー依存関係.on選択配置物をコピー?.(); } },
-
-                    // その他 (RB)
-                    { 
-                        id: 'L2-mic-toggle', 
-                        parentId: 'L1-other', 
-                        type: 'toggle',
-                        toggleSeed: {
-                            stateTrue: { label: "マイク入力", iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' },
-                            stateFalse: { label: "マイク入力", iconUrl: MicOffIcon }
-                        },
-                        onClick: (e) => { 
-                            e.stopPropagation();
-                            コンテキストメニュー依存関係.onマイク入力トグル?.();
-                        } 
-                    },
-                    { parentId: 'L1-other', label: "貼り付け", onClick: (e) => { コンテキストメニュー依存関係.onクリップボードから貼り付け?.(e); } },
-                    // 設定パネルを開く（文字サイズ・色の設定など）
-                    { parentId: 'L1-other', label: "設定", onClick: () => { コンテキストメニュー依存関係.on設定パネル表示?.(this._position as 描画座標点); } },
+                    { parentId: 'L1-graph', label: "貼り付け", onClick: (e) => { コンテキストメニュー依存関係.onクリップボードから貼り付け?.(e); } },
                 ]
             }).bind((menu) => { this._コンテキストメニュー = menu; })
         );
 
         if (コンテキストメニュー依存関係.onマイク状態監視登録) {
             コンテキストメニュー依存関係.onマイク状態監視登録((isRecording) => {
-                if (this._コンテキストメニュー && (this._コンテキストメニュー as 多段格子コンテキストメニュー).selectItem) {
+                if (this._コンテキストメニュー && (this._コンテキストメニュー as 多段格子コンテキストメニュー).updateItem) {
                     const multiMenu = this._コンテキストメニュー as 多段格子コンテキストメニュー;
-                    multiMenu.selectItem("L2-mic-toggle", isRecording);
+                    if (isRecording) {
+                        multiMenu.updateItem("L1-mic", { iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' });
+                    } else {
+                        multiMenu.updateItem("L1-mic", { iconUrl: MicOffIcon });
+                    }
                 }
             });
             // 初期状態反映
             if (コンテキストメニュー依存関係.getマイク入力状態 && コンテキストメニュー依存関係.getマイク入力状態()) {
                  requestAnimationFrame(() => {
-                     (this._コンテキストメニュー as 多段格子コンテキストメニュー).selectItem?.("L2-mic-toggle", true);
+                     (this._コンテキストメニュー as 多段格子コンテキストメニュー).updateItem?.("L1-mic", { iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' });
                  });
             }
         }
