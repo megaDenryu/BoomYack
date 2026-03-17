@@ -1,4 +1,4 @@
-import { div, DivC, Drag中値, Drag終了値, Drag開始値, HtmlComponentBase, I描画空間, LV2HtmlComponentBase, MouseWife, Px2DVector, Px長さ, TypedEventListener, 図形内座標点, 描画座標点, 配置物座標点 } from "SengenUI/index";
+import { div, DivC, Drag中値, Drag終了値, Drag開始値, HtmlComponentBase, I描画空間, LV2HtmlComponentBase, PointerWife, Px2DVector, Px長さ, TypedEventListener, 図形内座標点, 描画座標点, 配置物座標点 } from "SengenUI/index";
 
 
 
@@ -75,8 +75,8 @@ export class 自動リサイズ付箋View2<座標点T extends 配置物座標点
     private _onDrag?: () => void;
     private _onResize?: () => void;
     private _onTextChange?: (text: string) => void;
-    private _mouseWife: MouseWife;
-    public get mouseWife(): MouseWife { return this._mouseWife; }
+    private _mouseWife: PointerWife;
+    public get mouseWife(): PointerWife { return this._mouseWife; }
     private _ヘッダー高さ: Px長さ = new Px長さ(30);
 
     public constructor(
@@ -106,7 +106,7 @@ export class 自動リサイズ付箋View2<座標点T extends 配置物座標点
             div({ class : [付箋ホバー領域, auto_resize_sticky_note]}).bind(self => {
                                                                                             this.付箋ホバー領域 = self;
                                                                                             this.set付箋ボードTransform({position:this._position, size:this._size});
-                                                                                            this._mouseWife = new MouseWife(self).ドラッグ連動登録({
+                                                                                            this._mouseWife = new PointerWife(self).ドラッグ連動登録({
                                                                                                 onドラッグ開始: (e: Drag開始値)=> {},
                                                                                                 onドラッグ中: (e: Drag中値)=> {this.ドラッグ移動処理(e);},
                                                                                                 onドラッグ終了: (e: Drag終了値)=> {}
@@ -372,8 +372,8 @@ export class 自動リサイズ付箋View2<座標点T extends 配置物座標点
 
 class 付箋ヘッダー extends LV2HtmlComponentBase{
     protected _componentRoot: HtmlComponentBase;
-    private _mouseWife!: MouseWife;
-    public get mouseWife(): MouseWife { return this._mouseWife; }
+    private _mouseWife!: PointerWife;
+    public get mouseWife(): PointerWife { return this._mouseWife; }
     private _onDelete?: () => void;
 
     public constructor(ヘッダー高さ: Px長さ,onDelete?: () => void) {
@@ -394,15 +394,15 @@ class 付箋ヘッダー extends LV2HtmlComponentBase{
                                 this._onDelete?.();
                             })
                     ])
-                    .bind((header) => {this._mouseWife = new MouseWife(header); })
+                    .bind((header) => {this._mouseWife = new PointerWife(header); })
         );
     }
 }
 
 class リサイズハンドル extends LV2HtmlComponentBase{
     protected _componentRoot: HtmlComponentBase;
-    private _mouseWife!: MouseWife;
-    public get mouseWife(): MouseWife { return this._mouseWife; }
+    private _mouseWife!: PointerWife;
+    public get mouseWife(): PointerWife { return this._mouseWife; }
 
     public constructor(左右: 'left' | 'right') {
         super();
@@ -412,7 +412,7 @@ class リサイズハンドル extends LV2HtmlComponentBase{
     protected createComponentRoot(左右: 'left' | 'right'): HtmlComponentBase {
         return (
             div({ class: 左右 == 'left' ? auto_resize_handle_left : auto_resize_handle_right })
-                .bind((handle) => {this._mouseWife = new MouseWife(handle) })
+                .bind((handle) => {this._mouseWife = new PointerWife(handle) })
         );
     }
 }

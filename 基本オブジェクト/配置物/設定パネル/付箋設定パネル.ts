@@ -1,5 +1,5 @@
 import { NumberSliderInput } from "OneONetUIComponents/index";
-import { button, div, input, label, DivC, LV2HtmlComponentBase, MouseWife, Px2DVector, ビューポート座標値 } from "SengenUI/index";
+import { button, div, input, label, DivC, LV2HtmlComponentBase, PointerWife, Px2DVector, ビューポート座標値 } from "SengenUI/index";
 
 
 import { 設定パネルコンテナ, 設定パネルヘッダー, 設定パネルタイトル, 閉じるボタン, 設定項目, 設定項目ラベル, カラー入力, 数値入力 } from "./style.css";
@@ -19,7 +19,7 @@ export class 付箋設定パネル extends LV2HtmlComponentBase {
     private _on設定変更: (新設定: 付箋設定状態) => void;
     private _on閉じる: () => void;
     private _position: ビューポート座標値;
-    private _mouseWife!: MouseWife;
+    private _mouseWife!: PointerWife;
 
     constructor(options: 付箋設定パネルオプション) {
         super();
@@ -39,7 +39,7 @@ export class 付箋設定パネル extends LV2HtmlComponentBase {
                         div({ class: 設定パネルタイトル, text: "付箋設定" }),
                         button({ class: 閉じるボタン, text: "×" }).addTypedEventListener("click", () => { this._on閉じる(); })
                     ]).bind(self => {
-                        this._mouseWife = new MouseWife(self).ドラッグ連動登録({
+                        this._mouseWife = new PointerWife(self).ドラッグ連動登録({
                             onドラッグ開始: (e) => { self.setStyleCSS({ cursor: "grabbing" }); },
                             onドラッグ中: (e) => {
                                 const delta = e.data.直前のマウス位置から現在位置までの差分;

@@ -200,17 +200,11 @@ export class GlobalMouseManager {
     public scale: number;
     public mousePos: 画面座標点;
     private _onScale: Action<拡縮入力>;
-    private _activePointers: Map<number, PointerEvent> = new Map();
-    private _前回ピンチ距離: number | null = null;
 
     constructor(onScale: Action<拡縮入力>) {
         this.scale = 1;
         document.addEventListener("pointermove", (e) => this.onGlobalPointerMove(e));
         window.addEventListener('wheel', (e: WheelEvent) => this.onWheel(e), { passive: false });
-        document.addEventListener('pointerdown', (e) => this.onPointerDown(e));
-        document.addEventListener('pointermove', (e) => this.onPointerMoveForPinch(e), { passive: false });
-        document.addEventListener('pointerup', (e) => this.onPointerUp(e));
-        document.addEventListener('pointercancel', (e) => this.onPointerUp(e));
         this._onScale = onScale;
     }
 
@@ -219,46 +213,11 @@ export class GlobalMouseManager {
         if (e.ctrlKey) {
             e.preventDefault();
             const deltaRatio = e.deltaY > 0 ? -0.1 : 0.1;
-            this.拡縮を適用(deltaRatio, e.clientX, e.clientY);
+            const newScale = this.scale + deltaRatio;
+            if (newScale <= 0.1 || newScale >= 5.0) return;
+            this.scale = newScale;
+            this._onScale({ 拡縮率: this.scale, 中心X: e.clientX, 中心Y: e.clientY });
         }
-    }
-
-    private onPointerDown(e: PointerEvent): void {
-        this._activePointers.set(e.pointerId, e);
-    }
-
-    private onPointerMoveForPinch(e: PointerEvent): void {
-        if (!this._activePointers.has(e.pointerId)) return;
-        this._activePointers.set(e.pointerId, e);
-
-        if (this._activePointers.size >= 2) {
-            e.preventDefault();
-            const pointers = [...this._activePointers.values()];
-            const 距離 = Math.hypot(
-                pointers[0].clientX - pointers[1].clientX,
-                pointers[0].clientY - pointers[1].clientY
-            );
-            if (this._前回ピンチ距離 !== null) {
-                const 変化率 = 距離 / this._前回ピンチ距離;
-                const deltaRatio = (変化率 - 1) * 0.5;
-                const 中心X = (pointers[0].clientX + pointers[1].clientX) / 2;
-                const 中心Y = (pointers[0].clientY + pointers[1].clientY) / 2;
-                this.拡縮を適用(deltaRatio, 中心X, 中心Y);
-            }
-            this._前回ピンチ距離 = 距離;
-        }
-    }
-
-    private onPointerUp(e: PointerEvent): void {
-        this._activePointers.delete(e.pointerId);
-        if (this._activePointers.size < 2) { this._前回ピンチ距離 = null; }
-    }
-
-    private 拡縮を適用(deltaRatio: number, 中心X: number, 中心Y: number): void {
-        const newScale = this.scale + deltaRatio;
-        if (newScale <= 0.1 || newScale >= 5.0) return;
-        this.scale = newScale;
-        this._onScale({ 拡縮率: this.scale, 中心X, 中心Y });
     }
 
     private onGlobalPointerMove(e: MouseEvent | PointerEvent): void {

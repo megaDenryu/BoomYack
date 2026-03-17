@@ -1,4 +1,4 @@
-import { div, span, DivC, Drag中値, LV2HtmlComponentBase, MouseEventData, MouseWife, Px2DVector, Px長さ, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
+import { div, span, DivC, Drag中値, LV2HtmlComponentBase, MouseEventData, PointerWife, Px2DVector, Px長さ, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
 import { 配置物zIndex } from "../../I配置物";
 
 
@@ -57,7 +57,7 @@ export interface CanvasViewOptions {
 
 export class CanvasView extends LV2HtmlComponentBase implements I配置物選択機能集約用のキャンバス機能 {
     protected _componentRoot: DivC;
-    private _mouseWife!: MouseWife;
+    private _mouseWife!: PointerWife;
     
     // Model & Services
     public readonly model: CanvasGraphModel;
@@ -71,7 +71,8 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     private _recordingIndicator: DivC | null = null;
     private _再描画予約済み = false;
     private _再描画リクエストID: number | null = null;
-    
+    private _currentScale: number = 1;
+
     // UI Elements
     private menu!: Iコンテキストメニュー;
     private contextMenuContainer: コンテキストメニューコンテナ;
@@ -138,7 +139,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         
         // _mouseWifeの初期化はcreateComponentRoot内のbindで行われるため、ここではプロパティへの代入待ち、あるいは再度ラップする。
         // Original: bindで_mouseWife生成。
-        // ここでは型定義上 _mouseWife!: MouseWife とするか、bind内で代入する。
+        // ここでは型定義上 _mouseWife!: PointerWife とするか、bind内で代入する。
     }
 
     private handleKeyDown = (e: KeyboardEvent): void => {
@@ -224,10 +225,18 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                     div({class: 描画キャンバスViewcss}).setStyleCSS({
                                 position: 'absolute',top: '0',left: '0',width: '100%',height: '100%',
                                 zIndex: 配置物zIndex.キャンバス.描画キャンバス,
-                            }).bind((self) => {this._mouseWife = new MouseWife(self).ドラッグ連動登録({
+                            }).bind((self) => {this._mouseWife = new PointerWife(self)
+                                .ドラッグ連動登録({
                                     onドラッグ開始: (e) => {},
                                     onドラッグ中: (e: Drag中値) => this.onCanvasDrag(e),
                                     onドラッグ終了: (e) => this.onCanvasDragEnd(e),
+                                })
+                                .onPinchZoom((変化率, 中心X, 中心Y) => {
+                                    const deltaRatio = (変化率 - 1) * 0.5;
+                                    const newScale = this._currentScale + deltaRatio;
+                                    if (newScale <= 0.1 || newScale >= 5.0) return;
+                                    this._currentScale = newScale;
+                                    this.scaleUpdate({ 拡縮率: this._currentScale, 中心X, 中心Y });
                                 });
                             })
                             .addDivEventListener('contextmenu', (e: MouseEvent) => {

@@ -1,4 +1,4 @@
-import { circle, div, polygon, svg, CircleC, Degree角度, DivC, Drag中値, Drag終了値, Drag開始値, Iドラッグに連動可能, LV2HtmlComponentBase, MouseWife, PolygonC, Px長さ, SvgC, TypedEventListener, 位置管理, 配置物座標点 } from "SengenUI/index";
+import { circle, div, polygon, svg, CircleC, Degree角度, DivC, Drag中値, Drag終了値, Drag開始値, Iドラッグに連動可能, LV2HtmlComponentBase, PointerWife, PolygonC, Px長さ, SvgC, TypedEventListener, 位置管理, 配置物座標点 } from "SengenUI/index";
 
 
 import { I折れ線矢印View, 配置物zIndex } from "../../I配置物";
@@ -204,7 +204,7 @@ export interface I点ハンドルView {
  */
 export class 点ハンドルViewBase extends LV2HtmlComponentBase implements I折れ線矢印View, Iドラッグに連動可能 {
     protected _componentRoot: DivC;
-    private _mouseWife: MouseWife;
+    private _mouseWife: PointerWife;
     private _svgContainer: DivC;
     private _位置管理: 位置管理;
     private _ハンドル操作実行時コマンドlist: Iハンドル操作実行時コマンド[];
@@ -239,7 +239,7 @@ export class 点ハンドルViewBase extends LV2HtmlComponentBase implements I�
                         })
                         .bind((element) => {
                             this._svgContainer = element;
-                            this._mouseWife = new MouseWife(element).ドラッグ連動登録(this);
+                            this._mouseWife = new PointerWife(element).ドラッグ連動登録(this);
                         })
                         .addDivEventListener("mouseover", (e) => {
                             this.onHoverStyleChange(true);
@@ -350,7 +350,7 @@ export class 始点中心線分情報 {
 
 export class 線分ハンドルView extends LV2HtmlComponentBase implements Iドラッグに連動可能 {
     protected _componentRoot: DivC;
-    private _mouseWife: MouseWife;
+    private _mouseWife: PointerWife;
     private _ドラッグハンドル: DivC;
     private _ハンドル操作実行時コマンドlist: Iハンドル操作実行時コマンド[];
     private _は選択中: boolean = false;
@@ -376,7 +376,7 @@ export class 線分ハンドルView extends LV2HtmlComponentBase implements Iド
                     div({ class: 線分ハンドル基本 })
                         .bind((element) => {
                             this._ドラッグハンドル = element;
-                            this._mouseWife = new MouseWife(element).ドラッグ連動登録(this);
+                            this._mouseWife = new PointerWife(element).ドラッグ連動登録(this);
                             element.addDivEventListener("mouseover", () => {
                                 this._はホバー中 = true;
                                 this.状態を反映させる();

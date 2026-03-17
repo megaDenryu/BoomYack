@@ -1,5 +1,5 @@
 import { NumberSliderInput } from "OneONetUIComponents/index";
-import { button, div, input, label, DivC, LV2HtmlComponentBase, MouseWife, Px2DVector, 配置物座標点 } from "SengenUI/index";
+import { button, div, input, label, DivC, LV2HtmlComponentBase, PointerWife, Px2DVector, 配置物座標点 } from "SengenUI/index";
 ﻿
 
 
@@ -24,7 +24,7 @@ export class 矢印設定パネル<座標点T extends 配置物座標点> extend
     private _on設定変更: (新設定: 矢印設定状態) => void;
     private _on閉じる: () => void;
     private _position: 座標点T;
-    private _mouseWife: MouseWife;
+    private _mouseWife: PointerWife;
 
     constructor(options: 矢印設定パネルオプション<座標点T>) {
         super();
@@ -47,7 +47,7 @@ export class 矢印設定パネル<座標点T extends 配置物座標点> extend
                         div({ class: 設定パネルタイトル, text: "矢印設定" }),
                         button({ class: 閉じるボタン, text: "×" }).addTypedEventListener("click", () => {this._on閉じる();})
                     ]).bind(self => {
-                        this._mouseWife = new MouseWife(self).ドラッグ連動登録({
+                        this._mouseWife = new PointerWife(self).ドラッグ連動登録({
                             onドラッグ開始: (e) => {self.setStyleCSS({ cursor: "grabbing" });},
                             onドラッグ中: (e) => {
                                 const delta = e.data.直前のマウス位置から現在位置までの差分;

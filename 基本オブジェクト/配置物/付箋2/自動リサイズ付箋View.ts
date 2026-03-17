@@ -1,4 +1,4 @@
-import { div, DivC, Drag中値, Drag終了値, Drag開始値, HtmlComponentBase, LV2HtmlComponentBase, MouseEventData, MouseWife, Px2DVector, Px長さ, TypedEventListener, 図形内座標点, 描画座標点, 配置物座標点 } from "SengenUI/index";
+import { div, DivC, Drag中値, Drag終了値, Drag開始値, HtmlComponentBase, LV2HtmlComponentBase, MouseEventData, PointerWife, Px2DVector, Px長さ, TypedEventListener, 図形内座標点, 描画座標点, 配置物座標点 } from "SengenUI/index";
 
 
 
@@ -103,8 +103,8 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
     private _onDrag?: (e: Drag中値, ドラッグしたコンポーネント: 自動リサイズ付箋View<座標点T>) => void;
     private _onResize?: () => void;
     private _onTextChange?: (text: string) => void;
-    private _mouseWife: MouseWife;
-    public get mouseWife(): MouseWife { return this._mouseWife; }
+    private _mouseWife: PointerWife;
+    public get mouseWife(): PointerWife { return this._mouseWife; }
     private _コンテキストメニュー: Iコンテキストメニュー;
     private _コンテキストメニューコンテナ: コンテキストメニューコンテナ;
 
@@ -193,7 +193,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
             div({ class : [付箋ホバー領域, auto_resize_sticky_note]}).bind(self => {
                                                                                             this.付箋ホバー領域 = self;
                                                                                             this.set付箋ボードTransform({position:this._position, size:this._size});
-                                                                                            this._mouseWife = new MouseWife(self).ドラッグ連動登録({
+                                                                                            this._mouseWife = new PointerWife(self).ドラッグ連動登録({
                                                                                                 onドラッグ開始: (e: Drag開始値)=> {option.onDragStart?.();},
                                                                                                 onドラッグ中: (e: Drag中値)=> {
                                                                                                     this.ドラッグ移動処理(e);
@@ -488,8 +488,8 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
 
 class リサイズハンドル extends LV2HtmlComponentBase{
     protected _componentRoot: HtmlComponentBase;
-    private _mouseWife!: MouseWife;
-    public get mouseWife(): MouseWife { return this._mouseWife; }
+    private _mouseWife!: PointerWife;
+    public get mouseWife(): PointerWife { return this._mouseWife; }
 
     public constructor(左右: 'left' | 'right') {
         super();
@@ -499,7 +499,7 @@ class リサイズハンドル extends LV2HtmlComponentBase{
     protected createComponentRoot(左右: 'left' | 'right'): HtmlComponentBase {
         return (
             div({ class: 左右 == 'left' ? auto_resize_handle_left : auto_resize_handle_right })
-                .bind((handle) => {this._mouseWife = new MouseWife(handle) })
+                .bind((handle) => {this._mouseWife = new PointerWife(handle) })
         );
     }
 }
