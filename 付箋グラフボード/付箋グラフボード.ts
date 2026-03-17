@@ -212,7 +212,8 @@ export class GlobalMouseManager {
 
         // Why: ピンチズームのために複数ポインタを追跡する
         document.addEventListener('pointerdown', (e) => this.onPointerDown(e));
-        document.addEventListener('pointermove', (e) => this.onPointerMoveForPinch(e));
+        // Why: passive: false でpreventDefault()を確実に機能させる（一部ブラウザはtouchのpointermoveをpassive: trueにする）
+        document.addEventListener('pointermove', (e) => this.onPointerMoveForPinch(e), { passive: false });
         document.addEventListener('pointerup', (e) => this.onPointerUp(e));
         document.addEventListener('pointercancel', (e) => this.onPointerUp(e));
 
