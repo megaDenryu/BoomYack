@@ -1,7 +1,7 @@
-import { canvas, div, DivC, DocumentBodyC, LV2HtmlComponentBase, MouseEventData, Px2DVector, Px長さ, CanvasC, 描画座標点, 画面座標点 } from "SengenUI/index";
+import { canvas, div, DivC, LV2HtmlComponentBase, MouseEventData, Px2DVector, Px長さ, CanvasC, 描画座標点, 画面座標点 } from "SengenUI/index";
 import { sticky_graph_board_container } from './style.css';
 import { 自動リサイズ付箋View2 } from 'BoomYack/基本オブジェクト/配置物/付箋2/自動リサイズ付箋View2';
-import { CanvasView, CanvasViewOptions } from 'BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasView';
+import { CanvasView, CanvasViewOptions, 拡縮入力 } from 'BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasView';
 import { 配置物zIndex } from 'BoomYack/基本オブジェクト/I配置物';
 import { Action } from 'TypeScriptBenriKakuchou/アーキテクチャBase';
 import { セーブパネル, ISavePanelEvents, SaveMode } from 'BoomYack/基本オブジェクト/キャンバス操作/セーブパネル';
@@ -196,67 +196,73 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
     }
 }
 
-export class 拡縮情報 {
-    public readonly 現在scale: number;
-    public readonly 拡縮変化率: number;
-    constructor(現在scale: number, 拡縮変化率: number) {
-        this.現在scale = 現在scale;
-        this.拡縮変化率 = 拡縮変化率;
-    }
-}
-
 export class GlobalMouseManager {
     public scale: number;
-    public mousePos:画面座標点
-    public _onResize: Action<{拡縮率:number, e:WheelEvent}>;
+    public mousePos: 画面座標点;
+    private _onScale: Action<拡縮入力>;
+    private _activePointers: Map<number, PointerEvent> = new Map();
+    private _前回ピンチ距離: number | null = null;
 
-    constructor(onResize: Action<{拡縮率:number, e:WheelEvent}>, minScale: number = 0.1, maxScale: number = 10) {
+    constructor(onScale: Action<拡縮入力>) {
         this.scale = 1;
-        new DocumentBodyC().addEventListener("mousemove",(e)=>this.onGlobalMouseMove(e));
-        
-        // Ctrl+Wheelでのブラウザ標準ズームを無効化し、独自のウィンドウリサイズ処理を行う
+        document.addEventListener("pointermove", (e) => this.onGlobalPointerMove(e));
         window.addEventListener('wheel', (e: WheelEvent) => this.onWheel(e), { passive: false });
-        this._onResize = onResize;
-    }
-
-    public new拡縮率(e: WheelEvent): 拡縮情報 {
-        const wheel = e.deltaY;
-        let deltaRatio = 0;
-        if (wheel > 0) {
-            deltaRatio = -0.1;
-        } else {
-            deltaRatio = 0.1;
-        }
-        
-        const newScale = this.scale + deltaRatio;
-        if (newScale <= 0.1 || newScale >= 5.0) {
-            return new 拡縮情報(this.scale, 1.0);
-        }
-        const 拡縮率 = newScale / this.scale;
-        this.scale = newScale;
-        return new 拡縮情報(this.scale, 拡縮率);
+        document.addEventListener('pointerdown', (e) => this.onPointerDown(e));
+        document.addEventListener('pointermove', (e) => this.onPointerMoveForPinch(e), { passive: false });
+        document.addEventListener('pointerup', (e) => this.onPointerUp(e));
+        document.addEventListener('pointercancel', (e) => this.onPointerUp(e));
+        this._onScale = onScale;
     }
 
     private onWheel(e: WheelEvent): void {
-        this.onGlobalMouseMove(e);
-        
+        this.onGlobalPointerMove(e);
         if (e.ctrlKey) {
-            e.preventDefault(); // ブラウザ標準のズームを無効化
-            this.resizeWindow(e);
+            e.preventDefault();
+            const deltaRatio = e.deltaY > 0 ? -0.1 : 0.1;
+            this.拡縮を適用(deltaRatio, e.clientX, e.clientY);
         }
     }
 
-    private resizeWindow(e: WheelEvent): void {
-        // new拡縮率を呼び出してscaleを更新する
-        const 拡縮情報 = this.new拡縮率(e);
-        
-        // 変化がない場合は何もしない
-        if (拡縮情報.拡縮変化率 === 1.0) return;
-        this._onResize({拡縮率:拡縮情報.現在scale, e:e});
+    private onPointerDown(e: PointerEvent): void {
+        this._activePointers.set(e.pointerId, e);
     }
 
-    public onGlobalMouseMove(e:MouseEvent){
-        const mouseEvent = new MouseEventData(e)
+    private onPointerMoveForPinch(e: PointerEvent): void {
+        if (!this._activePointers.has(e.pointerId)) return;
+        this._activePointers.set(e.pointerId, e);
+
+        if (this._activePointers.size >= 2) {
+            e.preventDefault();
+            const pointers = [...this._activePointers.values()];
+            const 距離 = Math.hypot(
+                pointers[0].clientX - pointers[1].clientX,
+                pointers[0].clientY - pointers[1].clientY
+            );
+            if (this._前回ピンチ距離 !== null) {
+                const 変化率 = 距離 / this._前回ピンチ距離;
+                const deltaRatio = (変化率 - 1) * 0.5;
+                const 中心X = (pointers[0].clientX + pointers[1].clientX) / 2;
+                const 中心Y = (pointers[0].clientY + pointers[1].clientY) / 2;
+                this.拡縮を適用(deltaRatio, 中心X, 中心Y);
+            }
+            this._前回ピンチ距離 = 距離;
+        }
+    }
+
+    private onPointerUp(e: PointerEvent): void {
+        this._activePointers.delete(e.pointerId);
+        if (this._activePointers.size < 2) { this._前回ピンチ距離 = null; }
+    }
+
+    private 拡縮を適用(deltaRatio: number, 中心X: number, 中心Y: number): void {
+        const newScale = this.scale + deltaRatio;
+        if (newScale <= 0.1 || newScale >= 5.0) return;
+        this.scale = newScale;
+        this._onScale({ 拡縮率: this.scale, 中心X, 中心Y });
+    }
+
+    private onGlobalPointerMove(e: MouseEvent | PointerEvent): void {
+        const mouseEvent = new MouseEventData(e);
         this.mousePos = 画面座標点.fromNumbers(mouseEvent.position.x, mouseEvent.position.y);
     }
 }

@@ -38,6 +38,12 @@ export interface 全ての接続点を表示非表示切り替え可能 {
 export interface I配置物選択機能集約用のキャンバス機能 extends 全ての接続点を表示非表示切り替え可能 {
 }
 
+export interface 拡縮入力 {
+    拡縮率: number;
+    中心X: number;
+    中心Y: number;
+}
+
 export interface CanvasViewOptions {
     canvasId?: string;
     onSaveClick?: () => void;
@@ -228,6 +234,9 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                                 e.preventDefault();
                                 this.menu.表示(new MouseEventData(e).position);
                             })
+                            .onLongPress((pos) => {
+                                this.menu.表示({ x: pos.x, y: pos.y });
+                            })
                             .addDivEventListener('click', (e: MouseEvent) => {
                                 if (canvasContainer) {
                                     canvasContainer.focus({ preventScroll: true });
@@ -346,15 +355,15 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         }
     }
     
-    public scaleUpdate(input:{拡縮率:number, e:WheelEvent}): void {
+    public scaleUpdate(input: 拡縮入力): void {
          this.model.update拡縮率(
-            input.拡縮率, 
-            new 画面座標点(new Px2DVector(new Px長さ(input.e.clientX), new Px長さ(input.e.clientY)))
+            input.拡縮率,
+            new 画面座標点(new Px2DVector(new Px長さ(input.中心X), new Px長さ(input.中心Y)))
          );
-         
+
          this._配置物コンテナ.setStyleCSS({
              transform: `scale(${input.拡縮率})`,
-             transformOrigin: `${input.e.clientX}px ${input.e.clientY}px`
+             transformOrigin: `${input.中心X}px ${input.中心Y}px`
          });
     }
     

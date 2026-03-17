@@ -33,15 +33,14 @@ export class DragHandler extends LV2HtmlComponentBase {
         this._onDragEnd = options.onDragEnd ?? (() => {});
         this._componentRoot = this.createComponentRoot();
         
-        // グローバルマウスイベントを設定
-        document.addEventListener('mousemove', this.handleMouseMove.bind(this));
-        document.addEventListener('mouseup', this.handleMouseUp.bind(this));
+        document.addEventListener('pointermove', this.handleMouseMove.bind(this));
+        document.addEventListener('pointerup', this.handleMouseUp.bind(this));
     }
 
     protected createComponentRoot(): DivC {
         return (
             div({ class: drag_handle })
-                .addDivEventListener('mousedown', (e) => {
+                .addDivEventListener('pointerdown', (e) => {
                     e.preventDefault();
                     this._isDragging = true;
                     this._dragStartX = e.clientX;
@@ -75,8 +74,8 @@ export class DragHandler extends LV2HtmlComponentBase {
     
     // リソース解放
     public delete(): void {
-        document.removeEventListener('mousemove', this.handleMouseMove.bind(this));
-        document.removeEventListener('mouseup', this.handleMouseUp.bind(this));
+        document.removeEventListener('pointermove', this.handleMouseMove.bind(this));
+        document.removeEventListener('pointerup', this.handleMouseUp.bind(this));
         super.delete();
     }
 }

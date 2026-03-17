@@ -212,7 +212,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                                                             .addDivEventListener('click', (e: MouseEvent) => {
                                                                                 this._コンテキストメニュー.非表示();
                                                                             })
-                                                                            .addDivEventListener('mousedown', (e: MouseEvent) => {
+                                                                            .addDivEventListener('pointerdown', (e: PointerEvent) => {
                                                                                 this.選択する?.(e);
                                                                             })
                                                                             .childs([
