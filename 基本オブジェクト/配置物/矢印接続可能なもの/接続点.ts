@@ -112,6 +112,7 @@ export class 接続点<座標点T extends 配置物座標点> extends LV2HtmlCom
                           stroke: "blue",
                           strokeWidth: 3
                       })
+                      .addSvgEventListener("pointerdown", (e) => { e.stopPropagation(); })
                       .addSvgEventListener("click", () => this.onClick())
                   ))
         );
