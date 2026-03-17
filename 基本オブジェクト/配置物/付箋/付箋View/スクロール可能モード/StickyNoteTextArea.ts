@@ -57,7 +57,7 @@ export class StickyNoteTextArea extends LV2HtmlComponentBase {
                 target.style.outline = "none";
                 this._onBlur();
             })
-            .addTextAreaEventListener('mousedown', (e) => {
+            .addTextAreaEventListener('pointerdown', (e) => {
                 // ドラッグ・リサイズとの競合を回避
                 e.stopPropagation();
             });

@@ -63,9 +63,9 @@ export class ResizeHandler extends LV2HtmlComponentBase {
         this._onResizeEnd = options.onResizeEnd ?? (() => {});
         this._componentRoot = this.createComponentRoot();
         
-        // グローバルマウスイベントを設定
-        document.addEventListener('mousemove', this.handleMouseMove.bind(this));
-        document.addEventListener('mouseup', this.handleMouseUp.bind(this));
+        // グローバルポインタイベントを設定
+        document.addEventListener('pointermove', this.handleMouseMove.bind(this));
+        document.addEventListener('pointerup', this.handleMouseUp.bind(this));
     }
 
     protected createComponentRoot(): DivC {
@@ -87,7 +87,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     right: "10px",
                     height: `${handleSize}px`
                 })
-                .addDivEventListener('mousedown', (e) => this.startResize(e, 'top'))
+                .addDivEventListener('pointerdown', (e) => this.startResize(e, 'top'))
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, top: handle }; }),
             
             // 下辺
@@ -98,7 +98,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     right: "10px",
                     height: `${handleSize}px`
                 })
-                .addDivEventListener('mousedown', (e) => this.startResize(e, 'bottom'))
+                .addDivEventListener('pointerdown', (e) => this.startResize(e, 'bottom'))
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, bottom: handle }; }),
             
             // 左辺
@@ -109,7 +109,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     bottom: "10px",
                     width: `${handleSize}px`
                 })
-                .addDivEventListener('mousedown', (e) => this.startResize(e, 'left'))
+                .addDivEventListener('pointerdown', (e) => this.startResize(e, 'left'))
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, left: handle }; }),
             
             // 右辺
@@ -120,7 +120,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     bottom: "10px",
                     width: `${handleSize}px`
                 })
-                .addDivEventListener('mousedown', (e) => this.startResize(e, 'right'))
+                .addDivEventListener('pointerdown', (e) => this.startResize(e, 'right'))
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, right: handle }; }),
             
             // 左上角
@@ -131,7 +131,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     width: `${cornerSize}px`,
                     height: `${cornerSize}px`
                 })
-                .addDivEventListener('mousedown', (e) => this.startResize(e, 'topLeft'))
+                .addDivEventListener('pointerdown', (e) => this.startResize(e, 'topLeft'))
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, topLeft: handle }; }),
             
             // 右上角
@@ -142,7 +142,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     width: `${cornerSize}px`,
                     height: `${cornerSize}px`
                 })
-                .addDivEventListener('mousedown', (e) => this.startResize(e, 'topRight'))
+                .addDivEventListener('pointerdown', (e) => this.startResize(e, 'topRight'))
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, topRight: handle }; }),
             
             // 左下角
@@ -153,7 +153,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     width: `${cornerSize}px`,
                     height: `${cornerSize}px`
                 })
-                .addDivEventListener('mousedown', (e) => this.startResize(e, 'bottomLeft'))
+                .addDivEventListener('pointerdown', (e) => this.startResize(e, 'bottomLeft'))
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, bottomLeft: handle }; }),
             
             // 右下角
@@ -164,7 +164,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     width: `${cornerSize}px`,
                     height: `${cornerSize}px`
                 })
-                .addDivEventListener('mousedown', (e) => this.startResize(e, 'bottomRight'))
+                .addDivEventListener('pointerdown', (e) => this.startResize(e, 'bottomRight'))
                 .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, bottomRight: handle }; })
         ]);
     }
@@ -258,8 +258,8 @@ export class ResizeHandler extends LV2HtmlComponentBase {
     
     // リソース解放
     public delete(): void {
-        document.removeEventListener('mousemove', this.handleMouseMove.bind(this));
-        document.removeEventListener('mouseup', this.handleMouseUp.bind(this));
+        document.removeEventListener('pointermove', this.handleMouseMove.bind(this));
+        document.removeEventListener('pointerup', this.handleMouseUp.bind(this));
         super.delete();
     }
 }

@@ -91,11 +91,11 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
         .addTextAreaEventListener('keydown', (e) => {
             e.stopPropagation(); // Undoショートカット等がCanvasに伝播するのを防ぐ
         })
-        .addTextAreaEventListener('mousedown', (e) => {
+        .addTextAreaEventListener('pointerdown', (e) => {
             // ドラッグ・リサイズとの競合を回避し、フォーカス取得を確実にする
             e.stopPropagation();
         })
-        .addTextAreaEventListener('mouseup', (e) => {
+        .addTextAreaEventListener('pointerup', (e) => {
             // 親要素のMouseWifeドラッグ終了処理がフォーカスを奪うのを防ぐ
             e.stopPropagation();
         })

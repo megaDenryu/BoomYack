@@ -125,7 +125,7 @@ export class 自動リサイズ付箋View extends LV2HtmlComponentBase implement
         let initialPositionY = 0;
         let isSelected = false;
         
-        const onMouseDown = (e:MouseEvent) => {
+        const onPointerDown = (e: PointerEvent) => {
             const target = e.target as HTMLElement;
             if (target.textContent === '×' || target.closest('[class*="close_button"]')) return;
             e.preventDefault();
@@ -134,34 +134,34 @@ export class 自動リサイズ付箋View extends LV2HtmlComponentBase implement
             initialPositionY = this._position.y;
             isSelected = true;
         };
-        
-        const onMouseMove = (e: MouseEvent) => {
+
+        const onPointerMove = (e: PointerEvent) => {
             const updatedHistory = this._mouseStateManager.マウス移動時のマウス情報(e);
-            
+
             if (updatedHistory && this._mouseStateManager.isDrag(updatedHistory)) {
                 if (!isSelected) {
                     return;
                 }
-                
+
                 this._position.x = initialPositionX + updatedHistory.ドラッグ開始位置から現在位置までの差分.x;
                 this._position.y = initialPositionY + updatedHistory.ドラッグ開始位置から現在位置までの差分.y;
-                
+
                 this.updatePosition()._onPositionChange(this._position.x, this._position.y);
             }
         };
-        
-        const onMouseUp = (e: MouseEvent) => {
+
+        const onPointerUp = (e: PointerEvent) => {
             const finalHistory = this._mouseStateManager.マウスアップ時のマウス情報(e);
             isSelected = false;
         };
-        
-        header.addDivEventListener('mousedown', onMouseDown);
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-        
+
+        header.addDivEventListener('pointerdown', onPointerDown);
+        document.addEventListener('pointermove', onPointerMove);
+        document.addEventListener('pointerup', onPointerUp);
+
         this._eventCleanupHandlers.push(() => {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
+            document.removeEventListener('pointermove', onPointerMove);
+            document.removeEventListener('pointerup', onPointerUp);
         });
     }
     
@@ -171,62 +171,51 @@ export class 自動リサイズ付箋View extends LV2HtmlComponentBase implement
         let initialWidth = 0;
         let initialX = 0;
         
-        const onMouseDown = (e: MouseEvent) => {
+        const onPointerDown = (e: PointerEvent) => {
             const updateHistory = this._mouseStateManager.マウスダウン時のマウス情報(e);
             e.preventDefault();
             e.stopPropagation();
-            
+
             isResizing = true;
             resizeStartX = updateHistory.現在のマウス位置.x;
-            initialWidth = this._size.width; //コンストラクタでこのviewの値が設定される。
+            initialWidth = this._size.width;
             initialX = this._position.x;
         };
-        
-        /**
-         * 辺をリサイズ時のマウスムーブは
-         * 1. マウスの移動量を取得
-         * 2. 「適用したい値」を入力して移動量を加算して新しい値をreturn
-         * 3. 新しい値を適用したい値に適用
-         * つまり、サイズはreactive propertyにすべき。
-         * 
-         * そして座標が変わるほうは、サイズもreactive propertyにすべき。
-         * @param e 
-         * @returns 
-         */
-        const onMouseMove = (e: MouseEvent) => {
+
+        const onPointerMove = (e: PointerEvent) => {
             const updateHistory = this._mouseStateManager.マウス移動時のマウス情報(e);
             if (!updateHistory) return;
             if (!isResizing) return;
 
             const deltaX = updateHistory.現在のマウス位置.x - resizeStartX;
-            
+
             if (direction === 'left') {
                 this._size.width = Math.max(this._minWidth, initialWidth - deltaX);
                 this._position.x = initialX + (initialWidth - this._size.width);
             } else {
                 this._size.width = Math.max(this._minWidth, initialWidth + deltaX);
             }
-            
+
             this._componentRoot.setStyleCSS({
                 width: `${this._size.width}px`,
                 left: `${this._position.x}px`
             });
-            
+
             this._onPositionChange(this._position.x, this._position.y);
         };
-        
-        const handleMouseUp = (e: MouseEvent) => {
+
+        const onPointerUp = (e: PointerEvent) => {
             const finalHistory = this._mouseStateManager.マウスアップ時のマウス情報(e);
             isResizing = false;
         };
-        
-        handle.addDivEventListener('mousedown', onMouseDown);
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-        
+
+        handle.addDivEventListener('pointerdown', onPointerDown);
+        document.addEventListener('pointermove', onPointerMove);
+        document.addEventListener('pointerup', onPointerUp);
+
         this._eventCleanupHandlers.push(() => {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
+            document.removeEventListener('pointermove', onPointerMove);
+            document.removeEventListener('pointerup', onPointerUp);
         });
     }
     
