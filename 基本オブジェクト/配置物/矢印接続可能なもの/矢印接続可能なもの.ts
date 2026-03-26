@@ -101,7 +101,7 @@ export class 矢印接続可能なもの<座標点T extends 配置物座標点> 
     public アニメーションさせながらshow():void {
         this._ホバー用四角形.setStyleCSS({ opacity: "1" });
         for (const 接続点 of this.接続点リスト()){
-            接続点.removeAttribute(表示切替.attribute);
+            接続点.toggleAttribute(表示切替.attribute, false);
         }
     }
 
