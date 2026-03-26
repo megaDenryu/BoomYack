@@ -103,7 +103,7 @@ export class 自動リサイズ付箋View2<座標点T extends 配置物座標点
         const 矢印上下左右Position = this.calculate矢印接続ポイント(this._padding);
         // 親要素はzIndexを指定しない → スタッキングコンテキストを作らない
         return (
-            div({ class : [付箋ホバー領域, auto_resize_sticky_note]}).bind(self => {
+            div({ class : [付箋ホバー領域, auto_resize_sticky_note]}).tap(self => {
                                                                                             this.付箋ホバー領域 = self;
                                                                                             this.set付箋ボードTransform({position:this._position, size:this._size});
                                                                                             this._mouseWife = new PointerWife(self).ドラッグ連動登録({
@@ -116,7 +116,7 @@ export class 自動リサイズ付箋View2<座標点T extends 配置物座標点
                                                                                         transition: "background 0.2s ease-in-out"
                                                                                     })
                                                                                     .childs([
-                            new 付箋ヘッダー(this._ヘッダー高さ, option.onDelete).bind((header)=>{header.mouseWife.ドラッグ連動登録({
+                            new 付箋ヘッダー(this._ヘッダー高さ, option.onDelete).tap((header)=>{header.mouseWife.ドラッグ連動登録({
                                                                                                     onドラッグ開始: (e: Drag開始値)=> {},
                                                                                                     onドラッグ中: (e: Drag中値)=> { this.ドラッグ移動処理(e);},
                                                                                                     onドラッグ終了: (e: Drag終了値)=> {}
@@ -143,22 +143,22 @@ export class 自動リサイズ付箋View2<座標点T extends 配置物座標点
                                             this.update接続点座標();
                                             this._onResize?.();
                                         }
-                                    }).bind((textArea) => { this._textArea = textArea; this._formatterCleanup = テキストフォーマット適用(textArea.element); })
+                                    }).tap((textArea) => { this._textArea = textArea; this._formatterCleanup = テキストフォーマット適用(textArea.element); })
                                 ]),
-                            new リサイズハンドル("left").bind((handle) => { handle.mouseWife.ドラッグ連動登録({
+                            new リサイズハンドル("left").tap((handle) => { handle.mouseWife.ドラッグ連動登録({
                                                                                                 onドラッグ開始: (e: Drag開始値)=> {},
                                                                                                 onドラッグ中: (e: Drag中値)=> { this.leftHandleドラッグ中(e);},
                                                                                                 onドラッグ終了: (e: Drag終了値)=> {}
                                                                                             })})
                                                                                             .setStyleCSS({zIndex: 配置物zIndex.付箋内部構造.リサイズハンドル}),
-                            new リサイズハンドル("right").bind((handle) => { handle.mouseWife.ドラッグ連動登録({
+                            new リサイズハンドル("right").tap((handle) => { handle.mouseWife.ドラッグ連動登録({
                                                                                                 onドラッグ開始: (e: Drag開始値)=> {},
                                                                                                 onドラッグ中: (e: Drag中値)=> { this.rightHandleドラッグ中(e);},
                                                                                                 onドラッグ終了: (e: Drag終了値)=> {}
                                                                                             })})
                                                                                             .setStyleCSS({zIndex: 配置物zIndex.付箋内部構造.リサイズハンドル}),
                             new 矢印接続可能なもの<座標点T>( 矢印上下左右Position, 矢印接続可能なもの依存関係, this )
-                                                        .bind((self)=>{
+                                                        .tap((self)=>{
                                                             this._矢印接続可能なもの = self;
                                                         })
 
@@ -394,7 +394,7 @@ class 付箋ヘッダー extends LV2HtmlComponentBase{
                                 this._onDelete?.();
                             })
                     ])
-                    .bind((header) => {this._mouseWife = new PointerWife(header); })
+                    .tap((header) => {this._mouseWife = new PointerWife(header); })
         );
     }
 }
@@ -412,7 +412,7 @@ class リサイズハンドル extends LV2HtmlComponentBase{
     protected createComponentRoot(左右: 'left' | 'right'): HtmlComponentBase {
         return (
             div({ class: 左右 == 'left' ? auto_resize_handle_left : auto_resize_handle_right })
-                .bind((handle) => {this._mouseWife = new PointerWife(handle) })
+                .tap((handle) => {this._mouseWife = new PointerWife(handle) })
         );
     }
 }

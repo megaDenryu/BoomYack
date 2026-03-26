@@ -88,7 +88,7 @@ export class 自動リサイズ付箋View extends LV2HtmlComponentBase implement
                                 this._onDelete();
                             })
                     ])
-                    .bind((header) => { this.setupDragHandling(header); }),
+                    .tap((header) => { this.setupDragHandling(header); }),
                 
                 div()
                     .setStyleCSS({
@@ -108,14 +108,14 @@ export class 自動リサイズ付箋View extends LV2HtmlComponentBase implement
                                 this._size.height = totalHeight;
                                 this._componentRoot?.setStyleCSS({ height: `${totalHeight}px` });
                             }
-                        }).bind((textArea) => { this._textArea = textArea; })
+                        }).tap((textArea) => { this._textArea = textArea; })
                     ]),
                 
                 div({ class: auto_resize_handle_left })
-                    .bind((leftHandle) => { this.setupResizeHandling(leftHandle, 'left'); }),
+                    .tap((leftHandle) => { this.setupResizeHandling(leftHandle, 'left'); }),
                 
                 div({ class: auto_resize_handle_right })
-                    .bind((rightHandle) => { this.setupResizeHandling(rightHandle, 'right'); })
+                    .tap((rightHandle) => { this.setupResizeHandling(rightHandle, 'right'); })
             ])
         );
     }

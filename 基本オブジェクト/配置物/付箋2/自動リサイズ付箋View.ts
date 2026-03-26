@@ -159,7 +159,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                     { parentId: 'L1-graph', label: "コピー", onClick: () => { コンテキストメニュー依存関係.on選択配置物をコピー?.(); } },
                     { parentId: 'L1-graph', label: "貼り付け", onClick: (e) => { コンテキストメニュー依存関係.onクリップボードから貼り付け?.(e); } },
                 ]
-            }).bind((menu) => { this._コンテキストメニュー = menu; })
+            }).tap((menu) => { this._コンテキストメニュー = menu; })
         );
 
         if (コンテキストメニュー依存関係.onマイク状態監視登録) {
@@ -190,7 +190,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
     ): DivC {
         const 矢印上下左右Position = this.calculate矢印接続ポイント(this._padding);
         return (
-            div({ class : [付箋ホバー領域, auto_resize_sticky_note]}).bind(self => {
+            div({ class : [付箋ホバー領域, auto_resize_sticky_note]}).tap(self => {
                                                                                             this.付箋ホバー領域 = self;
                                                                                             this.set付箋ボードTransform({position:this._position, size:this._size});
                                                                                             this._mouseWife = new PointerWife(self).ドラッグ連動登録({
@@ -248,22 +248,22 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                                 this.選択する(mockEvent as any);
                                             }
                                         }
-                                    }).bind((textArea) => { this._textArea = textArea; this._formatterCleanup = テキストフォーマット適用(textArea.element); })
+                                    }).tap((textArea) => { this._textArea = textArea; this._formatterCleanup = テキストフォーマット適用(textArea.element); })
                                 ]),
-                            new リサイズハンドル("left").bind((handle) => { handle.mouseWife.ドラッグ連動登録({
+                            new リサイズハンドル("left").tap((handle) => { handle.mouseWife.ドラッグ連動登録({
                                                                                                 onドラッグ開始: (e: Drag開始値)=> {},
                                                                                                 onドラッグ中: (e: Drag中値)=> { this.leftHandleドラッグ中(e);},
                                                                                                 onドラッグ終了: (e: Drag終了値)=> {}
                                                                                             })})
                                                                                             .setStyleCSS({zIndex: 配置物zIndex.付箋内部構造.リサイズハンドル}),
-                            new リサイズハンドル("right").bind((handle) => { handle.mouseWife.ドラッグ連動登録({
+                            new リサイズハンドル("right").tap((handle) => { handle.mouseWife.ドラッグ連動登録({
                                                                                                 onドラッグ開始: (e: Drag開始値)=> {},
                                                                                                 onドラッグ中: (e: Drag中値)=> { this.rightHandleドラッグ中(e);},
                                                                                                 onドラッグ終了: (e: Drag終了値)=> {}
                                                                                             })})
                                                                                             .setStyleCSS({zIndex: 配置物zIndex.付箋内部構造.リサイズハンドル}),
                             new 矢印接続可能なもの<座標点T>( 矢印上下左右Position, 矢印接続可能なもの依存関係, this )
-                                                        .bind((self)=>{this._矢印接続可能なもの = self;}),
+                                                        .tap((self)=>{this._矢印接続可能なもの = self;}),
 
                         ])
         );
@@ -499,7 +499,7 @@ class リサイズハンドル extends LV2HtmlComponentBase{
     protected createComponentRoot(左右: 'left' | 'right'): HtmlComponentBase {
         return (
             div({ class: 左右 == 'left' ? auto_resize_handle_left : auto_resize_handle_right })
-                .bind((handle) => {this._mouseWife = new PointerWife(handle) })
+                .tap((handle) => {this._mouseWife = new PointerWife(handle) })
         );
     }
 }

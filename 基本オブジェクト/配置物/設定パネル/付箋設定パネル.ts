@@ -38,7 +38,7 @@ export class 付箋設定パネル extends LV2HtmlComponentBase {
                     div({ class: 設定パネルヘッダー }).childs([
                         div({ class: 設定パネルタイトル, text: "付箋設定" }),
                         button({ class: 閉じるボタン, text: "×" }).addTypedEventListener("click", () => { this._on閉じる(); })
-                    ]).bind(self => {
+                    ]).tap(self => {
                         this._mouseWife = new PointerWife(self).ドラッグ連動登録({
                             onドラッグ開始: (e) => { self.setStyleCSS({ cursor: "grabbing" }); },
                             onドラッグ中: (e) => {

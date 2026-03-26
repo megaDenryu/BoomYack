@@ -227,7 +227,7 @@ export class 点ハンドルViewBase extends LV2HtmlComponentBase implements I�
                     pointerEvents: "none",
                     zIndex:配置物zIndex.矢印内部構造.点ハンドル
                 })
-                .bind((self) => { this._位置管理 = new 位置管理(self); })
+                .tap((self) => { this._位置管理 = new 位置管理(self); })
                 .child(
                     // 内側のコンテナ: SVGを配置
                     div()
@@ -237,7 +237,7 @@ export class 点ハンドルViewBase extends LV2HtmlComponentBase implements I�
                             pointerEvents: "auto",
                             cursor: "move"
                         })
-                        .bind((element) => {
+                        .tap((element) => {
                             this._svgContainer = element;
                             this._mouseWife = new PointerWife(element).ドラッグ連動登録(this);
                         })
@@ -374,7 +374,7 @@ export class 線分ハンドルView extends LV2HtmlComponentBase implements Iド
                 })
                 .child(
                     div({ class: 線分ハンドル基本 })
-                        .bind((element) => {
+                        .tap((element) => {
                             this._ドラッグハンドル = element;
                             this._mouseWife = new PointerWife(element).ドラッグ連動登録(this);
                             element.addDivEventListener("mouseover", () => {
@@ -555,7 +555,7 @@ class 円ハンドルView extends 点ハンドルViewBase {
                     fill: "#4CAF50",
                     stroke: "#2E7D32",
                     strokeWidth: 1.5
-                }).bind((circle) => { this._circle = circle; }
+                }).tap((circle) => { this._circle = circle; }
             )
         ));
     }
@@ -628,7 +628,7 @@ class 終点矢印ハンドルView extends 点ハンドルViewBase {
                     stroke: "#D84315",
                     strokeWidth: 1.5,
                     strokeLinejoin: "round"
-                }).bind((poly) => { this._arrow = poly; }
+                }).tap((poly) => { this._arrow = poly; }
             )
         ));
     }

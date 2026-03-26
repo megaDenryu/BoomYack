@@ -87,7 +87,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     height: `${handleSize}px`
                 })
                 .addDivEventListener('pointerdown', (e) => this.startResize(e, 'top'))
-                .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, top: handle }; }),
+                .tap((handle) => { this._resizeHandles = { ...this._resizeHandles, top: handle }; }),
             
             // 下辺
             div({ class: [resize_handle, resize_handle_bottom] })
@@ -98,7 +98,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     height: `${handleSize}px`
                 })
                 .addDivEventListener('pointerdown', (e) => this.startResize(e, 'bottom'))
-                .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, bottom: handle }; }),
+                .tap((handle) => { this._resizeHandles = { ...this._resizeHandles, bottom: handle }; }),
             
             // 左辺
             div({ class: [resize_handle, resize_handle_left] })
@@ -109,7 +109,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     width: `${handleSize}px`
                 })
                 .addDivEventListener('pointerdown', (e) => this.startResize(e, 'left'))
-                .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, left: handle }; }),
+                .tap((handle) => { this._resizeHandles = { ...this._resizeHandles, left: handle }; }),
             
             // 右辺
             div({ class: [resize_handle, resize_handle_right] })
@@ -120,7 +120,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     width: `${handleSize}px`
                 })
                 .addDivEventListener('pointerdown', (e) => this.startResize(e, 'right'))
-                .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, right: handle }; }),
+                .tap((handle) => { this._resizeHandles = { ...this._resizeHandles, right: handle }; }),
             
             // 左上角
             div({ class: [resize_handle, resize_handle_top_left] })
@@ -131,7 +131,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     height: `${cornerSize}px`
                 })
                 .addDivEventListener('pointerdown', (e) => this.startResize(e, 'topLeft'))
-                .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, topLeft: handle }; }),
+                .tap((handle) => { this._resizeHandles = { ...this._resizeHandles, topLeft: handle }; }),
             
             // 右上角
             div({ class: [resize_handle, resize_handle_top_right] })
@@ -142,7 +142,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     height: `${cornerSize}px`
                 })
                 .addDivEventListener('pointerdown', (e) => this.startResize(e, 'topRight'))
-                .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, topRight: handle }; }),
+                .tap((handle) => { this._resizeHandles = { ...this._resizeHandles, topRight: handle }; }),
             
             // 左下角
             div({ class: [resize_handle, resize_handle_bottom_left] })
@@ -153,7 +153,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     height: `${cornerSize}px`
                 })
                 .addDivEventListener('pointerdown', (e) => this.startResize(e, 'bottomLeft'))
-                .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, bottomLeft: handle }; }),
+                .tap((handle) => { this._resizeHandles = { ...this._resizeHandles, bottomLeft: handle }; }),
             
             // 右下角
             div({ class: [resize_handle, resize_handle_bottom_right] })
@@ -164,7 +164,7 @@ export class ResizeHandler extends LV2HtmlComponentBase {
                     height: `${cornerSize}px`
                 })
                 .addDivEventListener('pointerdown', (e) => this.startResize(e, 'bottomRight'))
-                .bind((handle) => { this._resizeHandles = { ...this._resizeHandles, bottomRight: handle }; })
+                .tap((handle) => { this._resizeHandles = { ...this._resizeHandles, bottomRight: handle }; })
         ]);
     }
 

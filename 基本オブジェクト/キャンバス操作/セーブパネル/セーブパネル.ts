@@ -151,10 +151,10 @@ export class セーブパネル extends LV2HtmlComponentBase {
                 .setStyleCSS({ display: 'none' })
                 .childs([
                     div({ class: overlayBackdrop })
-                        .bind(self => this._backdrop = self)
+                        .tap(self => this._backdrop = self)
                         .addDivEventListener('click', () => this.閉じる()),
                     div({ class: savePanelContainer })
-                        .bind(self => this._panel = self)
+                        .tap(self => this._panel = self)
                         .childs([
                             this.Header(),
                             this.Content()
@@ -197,12 +197,12 @@ export class セーブパネル extends LV2HtmlComponentBase {
                     div({ class: modeSelector })
                         .child(
                             button({ text: "ローカル", class: [modeButton, modeButtonActive] })
-                                .bind(self => this._localModeBtn = self)
+                                .tap(self => this._localModeBtn = self)
                                 .addTypedEventListener('click', () => this.switchMode("local"))
                         ).childIf({
                             If: this._events.onIsServerModeAvailable(),
                             True: button({ text: "サーバー", class: modeButton })
-                                .bind(self => this._serverModeBtn = self)
+                                .tap(self => this._serverModeBtn = self)
                                 .addTypedEventListener('click', () => this.switchMode("server"))
                         })
                 ])
@@ -219,7 +219,7 @@ export class セーブパネル extends LV2HtmlComponentBase {
                             div().setStyleCSS({ flex: '1', position: 'relative' })
                                 .childs([
                                     span({ text: this._currentCanvasName ?? "（未保存）" })
-                                        .bind(self => this._currentCanvasNameSpan = self)
+                                        .tap(self => this._currentCanvasNameSpan = self)
                                         .setStyleCSS({
                                             display: 'block',
                                             padding: '8px',
@@ -232,7 +232,7 @@ export class セーブパネル extends LV2HtmlComponentBase {
                                         })
                                         .addTypedEventListener('dblclick', () => this.startRenaming()),
                                     input({ type: 'text', class: textInput })
-                                        .bind(self => this._currentCanvasNameInput = self)
+                                        .tap(self => this._currentCanvasNameInput = self)
                                         .setStyleCSS({
                                             display: 'none',
                                             width: '100%',
@@ -243,7 +243,7 @@ export class セーブパネル extends LV2HtmlComponentBase {
                                         .addTypedEventListener('blur', () => this.confirmRenaming())
                                 ]),
                             button({ text: "上書き保存", class: primaryButton })
-                                .bind(self => this._overwriteSaveButton = self)
+                                .tap(self => this._overwriteSaveButton = self)
                                 .setStyleCSS({ display: this._currentCanvasName ? 'block' : 'none' })
                                 .addTypedEventListener('click', () => this.handleOverwriteSave())
                         ])
@@ -259,10 +259,10 @@ export class セーブパネル extends LV2HtmlComponentBase {
                     div().setStyleCSS({ display: 'flex', gap: '8px' })
                         .childs([
                             input({ type: 'text', placeholder: 'キャンバスの名前を入力...', class: textInput })
-                                .bind(self => this._newSaveNameInput = self)
+                                .tap(self => this._newSaveNameInput = self)
                                 .setStyleCSS({ flex: '1' }),
                             button({ text: "新規保存", class: primaryButton })
-                                .bind(self => this._newSaveButton = self)
+                                .tap(self => this._newSaveButton = self)
                                 .addTypedEventListener('click', () => this.handleNewSave())
                         ])
                 ])
@@ -284,7 +284,7 @@ export class セーブパネル extends LV2HtmlComponentBase {
             div({ class: actionButtonGroup })
                 .childs([
                     button({ text: "読込", class: secondaryButton })
-                        .bind(self => this._loadButton = self)
+                        .tap(self => this._loadButton = self)
                         .addTypedEventListener('click', () => this.handleLoad())
                 ])
         );
@@ -302,11 +302,11 @@ export class セーブパネル extends LV2HtmlComponentBase {
                     width: '48px',
                     height: '48px'
                 })
-                .bind(self => this._trashToggleBtn = self)
+                .tap(self => this._trashToggleBtn = self)
                 .addTypedEventListener('click', () => this.toggleTrashView())
                 .child(
                     span({ text: "0", class: trashBadge })
-                        .bind(self => this._trashBadgeSpan = self)
+                        .tap(self => this._trashBadgeSpan = self)
                 )
         );
     }

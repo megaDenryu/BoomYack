@@ -79,11 +79,11 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                             this._initialX = this._x;
                             this._initialY = this._y;
                         }
-                    }).bind((dragHandler) => { this._dragHandler = dragHandler; }),
+                    }).tap((dragHandler) => { this._dragHandler = dragHandler; }),
                     
                     // メインコンテナ
                     div({ class: main_container })
-                        .bind((container) => { this._mainContainer = container; })
+                        .tap((container) => { this._mainContainer = container; })
                         .childs([
                             // テキストエリアコンポーネント
                             new StickyNoteTextArea({
@@ -92,7 +92,7 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                                 onTextChange: (text: string) => {
                                     this._text = text;
                                 }
-                            }).bind((textAreaComponent) => { this._textAreaComponent = textAreaComponent; })
+                            }).tap((textAreaComponent) => { this._textAreaComponent = textAreaComponent; })
                         ]),
                     
                     // リサイズハンドラーコンポーネント
@@ -109,7 +109,7 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
                             // リサイズ開始時の初期値をResizeHandlerに設定
                             this._resizeHandler.setInitialValues(this._width, this._height, this._x, this._y);
                         }
-                    }).bind((resizeHandler) => { this._resizeHandler = resizeHandler; })
+                    }).tap((resizeHandler) => { this._resizeHandler = resizeHandler; })
                 ])
         );
     }

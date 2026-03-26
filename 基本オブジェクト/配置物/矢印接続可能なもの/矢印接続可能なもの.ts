@@ -76,7 +76,7 @@ export class 矢印接続可能なもの<座標点T extends 配置物座標点> 
               position: "absolute",
               opacity: "0",
               transition: "opacity 0.2s ease-in-out"
-          }).bind(self => this._ホバー用四角形 = self)
+          }).tap(self => this._ホバー用四角形 = self)
           .childs(this.接続点リスト())
         );
     }

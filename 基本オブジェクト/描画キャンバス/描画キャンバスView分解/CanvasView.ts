@@ -219,13 +219,13 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         return (
           div({class: キャンバスコンテナ})
             .setTabIndex(0)
-            .bind(div => { canvasContainer = div; })
+            .tap(div => { canvasContainer = div; })
             .addDivEventListener('keydown', (e: KeyboardEvent) => this.onKeyDown(e))
             .childs([
                     div({class: 描画キャンバスViewcss}).setStyleCSS({
                                 position: 'absolute',top: '0',left: '0',width: '100%',height: '100%',
                                 zIndex: 配置物zIndex.キャンバス.描画キャンバス,
-                            }).bind((self) => {this._mouseWife = new PointerWife(self)
+                            }).tap((self) => {this._mouseWife = new PointerWife(self)
                                 .ドラッグ連動登録({
                                     onドラッグ開始: (e) => {},
                                     onドラッグ中: (e: Drag中値) => this.onCanvasDrag(e),
@@ -273,17 +273,17 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                                 zIndex: 配置物zIndex.キャンバス.配置物コンテナ,
                                 position: 'absolute', top: '0',left: '0',width: '10px',height: '10px',
                             })
-                            .bind(self => {this._配置物コンテナ = self;}),
+                            .tap(self => {this._配置物コンテナ = self;}),
 
                     this.contextMenuContainer
-                        .bind(self => {
+                        .tap(self => {
                             self.コンテキストメニュー追加(new 多段格子コンテキストメニュー({
                                 mode: "clickable",
                                 opacity: 0.85,
                                 showCenterButton: false,
                                 layer1Items: layer1Items,
                                 layer2Items: layer2Items
-                            }).bind((self: Iコンテキストメニュー) => this.menu = self))
+                            }).tap((self: Iコンテキストメニュー) => this.menu = self))
                         })
                         .zIndex(配置物zIndex.キャンバス.コンテキストメニューコンテナ),
 
@@ -309,7 +309,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                             pointerEvents: 'none',
                             animation: 'pulse 1.5s infinite' // cssアニメーションがあれば適用される
                         })
-                        .bind(self => { this._recordingIndicator = self; })
+                        .tap(self => { this._recordingIndicator = self; })
         ])
         );
     }

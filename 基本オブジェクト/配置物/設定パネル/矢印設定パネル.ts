@@ -46,7 +46,7 @@ export class 矢印設定パネル<座標点T extends 配置物座標点> extend
                     div({ class: 設定パネルヘッダー }).childs([
                         div({ class: 設定パネルタイトル, text: "矢印設定" }),
                         button({ class: 閉じるボタン, text: "×" }).addTypedEventListener("click", () => {this._on閉じる();})
-                    ]).bind(self => {
+                    ]).tap(self => {
                         this._mouseWife = new PointerWife(self).ドラッグ連動登録({
                             onドラッグ開始: (e) => {self.setStyleCSS({ cursor: "grabbing" });},
                             onドラッグ中: (e) => {

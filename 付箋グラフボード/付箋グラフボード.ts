@@ -152,13 +152,13 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
         return (
             div({ class: sticky_graph_board_container }).childs([
                     new CanvasView(canvasOptions, {api: this._apiリポジトリ, local: this._ローカルリポジトリ})
-                        .bind(self => {
+                        .tap(self => {
                             this._描画キャンバスView = self;
                             self.onDropFile = this.onDropFile;
                         }).setStyleCSS({
                             zIndex:配置物zIndex.キャンバス.描画キャンバス
                         }),
-                    canvas().bind(self => {
+                    canvas().tap(self => {
                         this.testCanvas = self;
                         self.setWidth(window.innerWidth);
                         self.setHeight(window.innerHeight);
