@@ -1,4 +1,4 @@
-import { div, DivC, HtmlComponentBase, I描画空間, LV2HtmlComponentBase, Px2DVector, VectorN, VectorNと見なせる, dotVectorN, 配置物座標点 } from "SengenUI/index";
+import { div, DivC, HtmlComponentBase, I描画空間, LV2HtmlComponentBase, Px2DVector, VectorN, VectorNと見なせる, dotVectorN, 表示切替, 配置物座標点 } from "SengenUI/index";
 
 import { 矢印ホバー用四角形 } from "./style.css";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
@@ -101,14 +101,14 @@ export class 矢印接続可能なもの<座標点T extends 配置物座標点> 
     public アニメーションさせながらshow():void {
         this._ホバー用四角形.setStyleCSS({ opacity: "1" });
         for (const 接続点 of this.接続点リスト()){
-            接続点.show();
+            接続点.removeAttribute(表示切替.attribute);
         }
     }
 
     public アニメーションさせながらhide():void {
         this._ホバー用四角形.setStyleCSS({ opacity: "0" });
         for (const 接続点 of this.接続点リスト()){
-            接続点.hide();
+            接続点.setAttribute(表示切替.attribute, 表示切替.value.hidden);
         }
     }
 
