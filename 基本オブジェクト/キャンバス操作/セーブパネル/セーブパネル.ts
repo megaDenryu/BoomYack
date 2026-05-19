@@ -201,7 +201,7 @@ export class セーブパネル extends LV2HtmlComponentBase {
                                 .addTypedEventListener('click', () => this.switchMode("local"))
                         ).childIf({
                             If: this._events.onIsServerModeAvailable(),
-                            True: button({ text: "サーバー", class: modeButton })
+                            True: () => button({ text: "サーバー", class: modeButton })
                                 .tap(self => this._serverModeBtn = self)
                                 .addTypedEventListener('click', () => this.switchMode("server"))
                         })
