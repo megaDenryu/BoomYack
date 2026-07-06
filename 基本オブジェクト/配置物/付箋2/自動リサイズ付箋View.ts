@@ -18,6 +18,7 @@ import { コンテキストメニューコンテナ } from "BoomYack/基本オ�
 import { 付箋設定状態 } from "../設定パネル";
 import { I接続点親情報 } from "../矢印接続可能なもの/接続点";
 import { テキストフォーマット適用 } from "./テキストフォーマッタサービス";
+import { リサイズハンドル } from "./リサイズハンドル";
 import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?url';
 import SaveIcon from '../../../SVGImg/SaveIcon.svg?url';
 import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
@@ -486,20 +487,4 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
 }
 
 
-class リサイズハンドル extends LV2HtmlComponentBase{
-    protected _componentRoot: HtmlComponentBase;
-    private _mouseWife!: PointerWife;
-    public get mouseWife(): PointerWife { return this._mouseWife; }
 
-    public constructor(左右: 'left' | 'right') {
-        super();
-        this._componentRoot = this.createComponentRoot(左右);
-    }
-
-    protected createComponentRoot(左右: 'left' | 'right'): HtmlComponentBase {
-        return (
-            div({ class: 左右 == 'left' ? auto_resize_handle_left : auto_resize_handle_right })
-                .tap((handle) => {this._mouseWife = new PointerWife(handle) })
-        );
-    }
-}
