@@ -20,9 +20,9 @@ export class 矢印View extends LV2HtmlComponentBase {
         this.始点ハンドルView = 始点ハンドルView;
         this.終点ハンドルView = 終点ハンドルView;
         this.線分ハンドルView = 線分ハンドルView;
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         return (
             div({class: 矢印コンテナ}).setStyleCSS({
                         position: "absolute",

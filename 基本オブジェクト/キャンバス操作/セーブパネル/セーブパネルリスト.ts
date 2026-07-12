@@ -43,10 +43,10 @@ export class セーブパネルリスト extends LV2HtmlComponentBase {
         super();
         this._trash = trash;
         this._events = events;
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         return (
           div({ class: saveListContainer })
               .child(

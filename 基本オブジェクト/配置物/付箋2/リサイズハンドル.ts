@@ -12,10 +12,10 @@ export class リサイズハンドル extends LV2HtmlComponentBase {
 
     public constructor(左右: 'left' | 'right') {
         super();
-        this._componentRoot = this.createComponentRoot(左右);
+        this._componentRoot = this._ルートを構築する(左右);
     }
 
-    protected createComponentRoot(左右: 'left' | 'right'): HtmlComponentBase {
+    protected _ルートを構築する(左右: 'left' | 'right'): HtmlComponentBase {
         return (
             div({ class: 左右 == 'left' ? auto_resize_handle_left : auto_resize_handle_right })
                 .tap((handle) => { this._mouseWife = new PointerWife(handle); })

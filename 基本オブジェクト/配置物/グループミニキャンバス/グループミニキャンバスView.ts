@@ -8,10 +8,10 @@ export class グループミニキャンバスView extends LV2HtmlComponentBase 
 
     constructor() {
         super();
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         return (
           div({}).childs([
               // グループミニキャンバスの基本的な表示要素をここに追加

@@ -39,10 +39,10 @@ export class 円状コンテキストメニュー extends LV2HtmlComponentBase i
 
     constructor(items: 円状メニューアイテムオプション[]) {
         super();
-        this._componentRoot = this.createComponentRoot(items);
+        this._componentRoot = this._ルートを構築する(items);
     }
 
-    protected createComponentRoot(items: 円状メニューアイテムオプション[]): DivC {
+    protected _ルートを構築する(items: 円状メニューアイテムオプション[]): DivC {
         return (
           div({ class: 円状メニューコンテナ })
               .setStyleCSS({ display: 'none' })
@@ -135,10 +135,10 @@ export class 円状メニューアイテムボタン extends LV2HtmlComponentBas
     constructor(option: 円状メニューアイテムオプション) {
         super();
         this._option = option;
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
 
-    protected createComponentRoot(): ButtonC {
+    protected _ルートを構築する(): ButtonC {
         const btn = button({ text: this._option.label ?? "", class: 円状メニューアイテム })
                     .addTypedEventListener("click", (e: MouseEvent) => { 
                         e.preventDefault();

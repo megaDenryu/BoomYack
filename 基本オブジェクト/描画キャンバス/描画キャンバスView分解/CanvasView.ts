@@ -134,13 +134,13 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         
         this.persistence = new CanvasPersistenceManager(this.model, this.factory, repository);
         
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
         
         this.model.subscribe((e) => this.handleGraphEvent(e));
         
         document.addEventListener('keydown', this.handleKeyDown);
         
-        // _mouseWifeの初期化はcreateComponentRoot内のbindで行われるため、ここではプロパティへの代入待ち、あるいは再度ラップする。
+        // _mouseWifeの初期化は_ルートを構築する内のbindで行われるため、ここではプロパティへの代入待ち、あるいは再度ラップする。
         // Original: bindで_mouseWife生成。
         // ここでは型定義上 _mouseWife!: PointerWife とするか、bind内で代入する。
     }
@@ -183,7 +183,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         });
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         const imgBg = "rgba(255, 255, 255, 0.5)";
 
         const layer1Items: 格子メニュー1層オプション[] = [

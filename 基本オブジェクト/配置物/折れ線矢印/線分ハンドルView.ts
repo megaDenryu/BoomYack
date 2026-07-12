@@ -16,10 +16,10 @@ export class 線分ハンドルView extends LV2HtmlComponentBase implements Iド
     constructor(ハンドル操作実行時コマンドlist: Iハンドル操作実行時コマンド[]) {
         super();
         this._ハンドル操作実行時コマンドlist = ハンドル操作実行時コマンドlist;
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         return (
             div({ class: 線分ハンドルコンテナ })
                 .setStyleCSS({

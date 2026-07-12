@@ -65,11 +65,11 @@ export class 自動リサイズ付箋View extends LV2HtmlComponentBase implement
 
         this._mouseStateManager = MouseStateManager.instance()//new MouseStateManager();
 
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
         this.updatePosition();
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         return (
             div({ class: [sticky_note_container, auto_resize_sticky_note] })
             .setStyleCSS({

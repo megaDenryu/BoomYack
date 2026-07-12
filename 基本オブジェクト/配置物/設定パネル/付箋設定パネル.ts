@@ -27,10 +27,10 @@ export class 付箋設定パネル extends LV2HtmlComponentBase {
         this._on設定変更 = options.on設定変更;
         this._on閉じる = options.on閉じる;
         this._position = options.position;
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         return (
             div({ class: 設定パネルコンテナ })
                 .setViewportPosition(this._position)

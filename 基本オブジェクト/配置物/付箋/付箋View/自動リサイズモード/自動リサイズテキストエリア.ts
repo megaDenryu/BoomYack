@@ -41,13 +41,13 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
         this._テキストエリアサイズパラメータ管理 = new テキストエリアサイズパラメータ管理(
             options.初期テキストエリアサイズパラメータ ?? new テキストエリアサイズパラメータ()
         );
-        this._componentRoot = this.createComponentRoot(options.placeholder);
+        this._componentRoot = this._ルートを構築する(options.placeholder);
         
         // 初期高さを設定（遅延実行で親コンポーネントの初期化を待つ）
         setTimeout(() => this.adjustHeight(), 0);
     }
 
-    protected createComponentRoot(placeholder?: string): TextAreaC {
+    protected _ルートを構築する(placeholder?: string): TextAreaC {
         return new TextAreaC({
             value: this._text,
             placeholder: placeholder ?? "付箋のテキストを入力...",

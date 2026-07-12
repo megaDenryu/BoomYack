@@ -29,10 +29,10 @@ export class StickyNoteTextArea extends LV2HtmlComponentBase {
         this._onFocus = options.onFocus ?? (() => { });
         this._onBlur = options.onBlur ?? (() => { });
 
-        this._componentRoot = this.createComponentRoot(options.placeholder);
+        this._componentRoot = this._ルートを構築する(options.placeholder);
     }
 
-    protected createComponentRoot(placeholder?: string): TextAreaC {
+    protected _ルートを構築する(placeholder?: string): TextAreaC {
         return new TextAreaC({
             value: this._text,
             placeholder: placeholder ?? "付箋のテキストを入力...",

@@ -19,10 +19,10 @@ export class 点ハンドルViewBase extends LV2HtmlComponentBase implements I�
     constructor(ハンドル操作実行時コマンドlist: Iハンドル操作実行時コマンド[]) {
         super();
         this._ハンドル操作実行時コマンドlist = ハンドル操作実行時コマンドlist;
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         // 外側のコンテナ: 位置管理用（transform適用なし）
         return (
             div()

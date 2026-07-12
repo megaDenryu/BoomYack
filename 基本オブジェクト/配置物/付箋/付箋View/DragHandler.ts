@@ -31,13 +31,13 @@ export class DragHandler extends LV2HtmlComponentBase {
         this._onDragMove = options.onDragMove;
         this._onDragStart = options.onDragStart ?? (() => {});
         this._onDragEnd = options.onDragEnd ?? (() => {});
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
         
         document.addEventListener('pointermove', this.handleMouseMove.bind(this));
         document.addEventListener('pointerup', this.handleMouseUp.bind(this));
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         return (
             div({ class: drag_handle })
                 .addDivEventListener('pointerdown', (e) => {

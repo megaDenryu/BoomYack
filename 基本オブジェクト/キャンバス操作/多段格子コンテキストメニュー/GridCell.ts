@@ -32,14 +32,14 @@ export class GridCell extends LV2HtmlComponentBase {
         super();
         this._baseOpacity = options.opacity ?? 0.85;
         this._hoverOpacity = Math.min(1, this._baseOpacity + 0.15); 
-        this._componentRoot = this.createComponentRoot(options);
+        this._componentRoot = this._ルートを構築する(options);
     }
 
     public getRoot(): DivC {
         return this._componentRoot;
     }
 
-    protected createComponentRoot(options: GridCellOptions): DivC {
+    protected _ルートを構築する(options: GridCellOptions): DivC {
         const bgColors = {
             layer1: { base: options.backgroundColor || `rgba(52, 73, 94, ${this._baseOpacity})`, hover: `rgba(44, 62, 80, ${this._hoverOpacity})` },
             layer2: { base: options.backgroundColor || `rgba(41, 128, 185, ${this._baseOpacity})`, hover: `rgba(52, 152, 219, ${this._hoverOpacity})` }

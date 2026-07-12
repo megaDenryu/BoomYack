@@ -67,10 +67,10 @@ export class 矢印接続可能なもの<座標点T extends 配置物座標点> 
         this._接続点_右 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.右, this), 依存.i矢印生成先, 依存.i描画空間, "右", 親情報);
         this._接続点_下 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.下, this), 依存.i矢印生成先, 依存.i描画空間, "下", 親情報);
         this._接続点_左 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.左, this), 依存.i矢印生成先, 依存.i描画空間, "左", 親情報);
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
 
-    protected createComponentRoot(): HtmlComponentBase {
+    protected _ルートを構築する(): HtmlComponentBase {
         return (
           div({class: 矢印ホバー用四角形}).setStyleCSS({
               position: "absolute",

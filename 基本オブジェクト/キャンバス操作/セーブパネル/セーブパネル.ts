@@ -73,7 +73,7 @@ export class セーブパネル extends LV2HtmlComponentBase {
         super();
         this._events = events;
         this.initializeSubComponents();
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
 
     private initializeSubComponents(): void {
@@ -133,7 +133,7 @@ export class セーブパネル extends LV2HtmlComponentBase {
         }
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         window.addEventListener('keydown', (e) => {
                 if (e.key === "s" && e.ctrlKey == true) {
                     e.preventDefault();

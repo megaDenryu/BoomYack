@@ -79,10 +79,10 @@ export class 多段格子コンテキストメニュー extends LV2HtmlComponent
             opacity: options.opacity ?? 0.85,
             showCenterButton: options.showCenterButton ?? false
         };
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         const gridContainer = div({class: 多段格子メニューコンテナ})
             .setStyleCSS({
                 display: "none",

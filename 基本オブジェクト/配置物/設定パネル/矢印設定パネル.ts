@@ -32,10 +32,10 @@ export class 矢印設定パネル<座標点T extends 配置物座標点> extend
         this._on設定変更 = options.on設定変更;
         this._on閉じる = options.on閉じる;
         this._position = options.position;
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         return (
             div({ class: 設定パネルコンテナ })
                 .setStyleCSS({

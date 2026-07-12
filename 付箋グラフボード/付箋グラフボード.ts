@@ -45,11 +45,11 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
         this._ローカルリポジトリ = new 描画キャンバスローカルリポジトリ();
         
         this._windowSizeScaleObserver = new WindowSizeScaleObserver();
-        // サンクで遅延評価する。componentRootはこの後のcreateComponentRoot()内で
+        // サンクで遅延評価する。componentRootはこの後の_ルートを構築する()内で
         // 構築されるが、実際にルート要素へアクセスするのはユーザー操作時（マウス移動等）
         // まで先送りされるため、この時点で未構築でも問題ない。
         this._座標変換 = new ボード基準座標変換(() => this._componentRoot.dom.element);
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
         this._一番上の付箋 = this._描画キャンバスView.add付箋(Px2DVector.fromNumbers(0,0)).view;
         this._一番上の付箋.付箋をめくる動作を登録( this.付箋をめくる動作.bind(this) );
         this._json読み込みサービス = new JSON読み込みサービス(
@@ -145,7 +145,7 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
         
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         // セーブパネルを先に作成（コンテキストメニューから参照するため）
         this._セーブパネル = new セーブパネル(this.createSavePanelEvents());
 

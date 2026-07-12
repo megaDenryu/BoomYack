@@ -93,10 +93,10 @@ export class 自動リサイズ付箋View2<座標点T extends 配置物座標点
         this._onDrag = option.onDrag;
         this._onResize = option.onResize;
         this._onTextChange = option.onTextChange;
-        this._componentRoot = this.createComponentRoot(option, 矢印接続可能なもの依存関係);
+        this._componentRoot = this._ルートを構築する(option, 矢印接続可能なもの依存関係);
     }
 
-    protected createComponentRoot(
+    protected _ルートを構築する(
         option: 自動リサイズ付箋View2オプション<座標点T>,
         矢印接続可能なもの依存関係: 矢印接続可能なもの依存関係<座標点T>
     ): DivC {
@@ -379,10 +379,10 @@ class 付箋ヘッダー extends LV2HtmlComponentBase{
     public constructor(ヘッダー高さ: Px長さ,onDelete?: () => void) {
         super();
         this._onDelete = onDelete;
-        this._componentRoot = this.createComponentRoot(ヘッダー高さ);
+        this._componentRoot = this._ルートを構築する(ヘッダー高さ);
     }
 
-    protected createComponentRoot(ヘッダー高さ: Px長さ): HtmlComponentBase {
+    protected _ルートを構築する(ヘッダー高さ: Px長さ): HtmlComponentBase {
         return (
             div({ class: sticky_note_header }).setStyleCSS({
                         height: ヘッダー高さ.toStr(),})
@@ -406,10 +406,10 @@ class リサイズハンドル extends LV2HtmlComponentBase{
 
     public constructor(左右: 'left' | 'right') {
         super();
-        this._componentRoot = this.createComponentRoot(左右);
+        this._componentRoot = this._ルートを構築する(左右);
     }
 
-    protected createComponentRoot(左右: 'left' | 'right'): HtmlComponentBase {
+    protected _ルートを構築する(左右: 'left' | 'right'): HtmlComponentBase {
         return (
             div({ class: 左右 == 'left' ? auto_resize_handle_left : auto_resize_handle_right })
                 .tap((handle) => {this._mouseWife = new PointerWife(handle) })

@@ -127,7 +127,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
         this._onDrag = option.onDrag;
         this._onResize = option.onResize;
         this._onTextChange = option.onTextChange;
-        this._componentRoot = this.createComponentRoot(option, 矢印接続可能なもの依存関係, コンテキストメニュー依存関係);
+        this._componentRoot = this._ルートを構築する(option, 矢印接続可能なもの依存関係, コンテキストメニュー依存関係);
         const imgBg = "rgba(255, 255, 255, 0.5)";
 
         this._コンテキストメニューコンテナ.コンテキストメニュー追加(
@@ -186,7 +186,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
 
     }
 
-    protected createComponentRoot(
+    protected _ルートを構築する(
         option: 自動リサイズ付箋Viewオプション<座標点T>,
         矢印接続可能なもの依存関係: 矢印接続可能なもの依存関係<座標点T>,
         コンテキストメニュー依存関係: 自動リサイズ付箋用コンテキストメニュー依存関係

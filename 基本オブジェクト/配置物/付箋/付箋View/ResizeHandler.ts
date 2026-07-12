@@ -61,13 +61,13 @@ export class ResizeHandler extends LV2HtmlComponentBase {
         this._onResizeMove = options.onResizeMove;
         this._onResizeStart = options.onResizeStart ?? (() => {});
         this._onResizeEnd = options.onResizeEnd ?? (() => {});
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
         
         document.addEventListener('pointermove', this.handleMouseMove.bind(this));
         document.addEventListener('pointerup', this.handleMouseUp.bind(this));
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         return (
             div().childs(this.createResizeHandles())
         );

@@ -51,10 +51,10 @@ export class 付箋View extends LV2HtmlComponentBase implements I付箋View操�
         this._x = options?.x ?? 0;
         this._y = options?.y ?? 0;
         
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         // 直接returnするように努めることで、宣言的になり、可読性が極大化される
         return (
             div({ class: sticky_note_container })

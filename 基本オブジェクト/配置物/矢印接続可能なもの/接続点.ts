@@ -42,7 +42,7 @@ export class 接続点<座標点T extends 配置物座標点> extends LV2HtmlCom
         this.i描画基準座標を持つ = i描画基準座標を持つ;
         this._接続位置 = 接続位置;
         this.親interface = 親情報;
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
 
     /** この接続点の親配置物ID */
@@ -71,7 +71,7 @@ export class 接続点<座標点T extends 配置物座標点> extends LV2HtmlCom
         }
     }
 
-    protected createComponentRoot(): DivC {
+    protected _ルートを構築する(): DivC {
         // 2層構造:
         // 外側Div: ビューポート座標で位置管理（0px×0pxの基準点）
         // SVG: setStyleCSSでtranslate(-50%, -50%)を適用して中心配置

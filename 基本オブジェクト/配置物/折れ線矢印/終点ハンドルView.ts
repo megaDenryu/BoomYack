@@ -10,10 +10,10 @@ export class 終点ハンドルView extends LV2HtmlComponentBase implements I点
     constructor(ハンドル操作実行時コマンドlist: Iハンドル操作実行時コマンド[]) {
         super();
         this._ハンドル操作実行時コマンドlist = ハンドル操作実行時コマンドlist;
-        this._componentRoot = this.createComponentRoot();
+        this._componentRoot = this._ルートを構築する();
     }
 
-    protected createComponentRoot(): 終点矢印ハンドルView {
+    protected _ルートを構築する(): 終点矢印ハンドルView {
         return new 終点矢印ハンドルView(this._ハンドル操作実行時コマンドlist);
     }
 
