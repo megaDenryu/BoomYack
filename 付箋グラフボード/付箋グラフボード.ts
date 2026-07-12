@@ -1,5 +1,6 @@
 import { canvas, div, DivC, LV2HtmlComponentBase, MouseEventData, Px2DVector, Px長さ, CanvasC, 描画座標点, 画面座標点 } from "SengenUI/index";
 import { sticky_graph_board_container } from './style.css';
+import { ボード基準座標変換 } from 'BoomYack/基本オブジェクト/キャンバス操作/座標変換/ボード基準座標変換';
 import { 自動リサイズ付箋View2 } from 'BoomYack/基本オブジェクト/配置物/付箋2/自動リサイズ付箋View2';
 import { CanvasView, CanvasViewOptions, 拡縮入力 } from 'BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasView';
 import { 配置物zIndex } from 'BoomYack/基本オブジェクト/I配置物';
@@ -32,6 +33,7 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
     private _apiリポジトリ: I描画キャンバスAPIリポジトリ;
     private _ローカルリポジトリ: 描画キャンバスローカルリポジトリ;
     private _json読み込みサービス: JSON読み込みサービス;
+    private readonly _座標変換: ボード基準座標変換;
 
         constructor(props: {
             apiリポジトリ: I描画キャンバスAPIリポジトリ, // デフォルトでサーバーモード利用可能
@@ -43,6 +45,10 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
         this._ローカルリポジトリ = new 描画キャンバスローカルリポジトリ();
         
         this._windowSizeScaleObserver = new WindowSizeScaleObserver();
+        // サンクで遅延評価する。componentRootはこの後のcreateComponentRoot()内で
+        // 構築されるが、実際にルート要素へアクセスするのはユーザー操作時（マウス移動等）
+        // まで先送りされるため、この時点で未構築でも問題ない。
+        this._座標変換 = new ボード基準座標変換(() => this._componentRoot.dom.element);
         this._componentRoot = this.createComponentRoot();
         this._一番上の付箋 = this._描画キャンバスView.add付箋(Px2DVector.fromNumbers(0,0)).view;
         this._一番上の付箋.付箋をめくる動作を登録( this.付箋をめくる動作.bind(this) );
@@ -53,7 +59,7 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
         // this.マウスキーボードイベントバインディング()
         window.addEventListener("resize",this.ブラウザのウインドウが拡縮したときマウスを中心に拡縮したように見せるために座標中心を移動させる.bind(this))
         // スクロールしたときにresizeToを使うようにする
-        this._mouseGlobal = new GlobalMouseManager(input => {this._描画キャンバスView.scaleUpdate(input);});
+        this._mouseGlobal = new GlobalMouseManager(input => {this._描画キャンバスView.scaleUpdate(input);}, this._座標変換);
         
     }
 
@@ -151,7 +157,7 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
 
         return (
             div({ class: sticky_graph_board_container }).childs([
-                    new CanvasView(canvasOptions, {api: this._apiリポジトリ, local: this._ローカルリポジトリ})
+                    new CanvasView(canvasOptions, {api: this._apiリポジトリ, local: this._ローカルリポジトリ}, this._座標変換)
                         .tap(self => {
                             this._描画キャンバスView = self;
                             self.onDropFile = this.onDropFile;
@@ -200,9 +206,11 @@ export class GlobalMouseManager {
     public scale: number;
     public mousePos: 画面座標点;
     private _onScale: Action<拡縮入力>;
+    private readonly _座標変換: ボード基準座標変換;
 
-    constructor(onScale: Action<拡縮入力>) {
+    constructor(onScale: Action<拡縮入力>, 座標変換: ボード基準座標変換) {
         this.scale = 1;
+        this._座標変換 = 座標変換;
         document.addEventListener("pointermove", (e) => this.onGlobalPointerMove(e));
         window.addEventListener('wheel', (e: WheelEvent) => this.onWheel(e), { passive: false });
         this._onScale = onScale;
@@ -216,13 +224,18 @@ export class GlobalMouseManager {
             const newScale = this.scale + deltaRatio;
             if (newScale <= 0.1 || newScale >= 5.0) return;
             this.scale = newScale;
-            this._onScale({ 拡縮率: this.scale, 中心X: e.clientX, 中心Y: e.clientY });
+            // ズーム中心はボードルート基準へ補正する。CSSのtransformOrigin適用先
+            // （配置物コンテナ）はボードルート配下の要素であり、raw clientX/Yを
+            // そのまま渡すとタブ埋め込み時にボードルート左上とのズレ分だけ
+            // ズーム中心がずれる。
+            const 補正済み中心 = this._座標変換.viewportPointを補正する(e.clientX, e.clientY);
+            this._onScale({ 拡縮率: this.scale, 中心X: 補正済み中心.x.値, 中心Y: 補正済み中心.y.値 });
         }
     }
 
     private onGlobalPointerMove(e: MouseEvent | PointerEvent): void {
         const mouseEvent = new MouseEventData(e);
-        this.mousePos = 画面座標点.fromNumbers(mouseEvent.position.x, mouseEvent.position.y);
+        this.mousePos = this._座標変換.画面座標点を補正する(mouseEvent.position.x, mouseEvent.position.y);
     }
 }
 

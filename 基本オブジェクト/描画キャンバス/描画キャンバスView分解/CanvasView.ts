@@ -23,6 +23,7 @@ import MicOnIcon from '../../../SVGImg/MicOn.svg?url';
 import MicOffIcon from '../../../SVGImg/MicOff.svg?url';
 import { キャンバスグラフ操作サービス } from "./キャンバスグラフ操作サービス";
 import { まとめて移動サービス } from "./まとめて移動サービス";
+import { ボード基準座標変換 } from "../../キャンバス操作/座標変換/ボード基準座標変換";
 import { キャンバスコマンドリポジトリ } from "../../キャンバス操作/コマンドリポジトリ/キャンバスコマンドリポジトリ";
 import { 配置物追加コマンド, 配置物削除コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
 import { VoiceRecognitionService } from "../../キャンバス操作/音声認識サービス";
@@ -72,6 +73,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     private _再描画予約済み = false;
     private _再描画リクエストID: number | null = null;
     private _currentScale: number = 1;
+    private readonly _座標変換: ボード基準座標変換;
 
     // UI Elements
     private menu!: Iコンテキストメニュー;
@@ -92,16 +94,16 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
 
     public onDropFile?: (e: DragEvent) => Promise<void>;
 
-    constructor(options: CanvasViewOptions, repository: 描画キャンバスリポジトリ) {
+    constructor(options: CanvasViewOptions, repository: 描画キャンバスリポジトリ, 座標変換: ボード基準座標変換) {
         super();
         this._options = options;
-        
-        
+        this._座標変換 = 座標変換;
+
         this.選択物まとめて移動サービス = new まとめて移動サービス();
         this.selectionManager = new 配置物選択機能集約(this, this.選択物まとめて移動サービス);
         this.model = new CanvasGraphModel();
         this.contextMenuContainer = new コンテキストメニューコンテナ();
-        this.グラフ操作サービス = new キャンバスグラフ操作サービス(this.model, () => this.model.metadata.name);
+        this.グラフ操作サービス = new キャンバスグラフ操作サービス(this.model, () => this.model.metadata.name, this._座標変換);
         this.voiceRecognitionService = new VoiceRecognitionService(this.selectionManager);
         
         this.voiceRecognitionService.onStateChange((isRecording) => {
@@ -119,13 +121,14 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         });
 
         this.factory = new CanvasItemFactory(
-            this.model, 
-            this.selectionManager, 
+            this.model,
+            this.selectionManager,
             this.contextMenuContainer,
             this.グラフ操作サービス,
             this.voiceRecognitionService,
             () => this.deleteSelectedItem(),
-            (cmd) => this.commandRepository.push(cmd)
+            (cmd) => this.commandRepository.push(cmd),
+            this._座標変換
         );
         this.model.setFactory(this.factory);
         
@@ -236,15 +239,21 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
                                     const newScale = this._currentScale + deltaRatio;
                                     if (newScale <= 0.1 || newScale >= 5.0) return;
                                     this._currentScale = newScale;
-                                    this.scaleUpdate({ 拡縮率: this._currentScale, 中心X, 中心Y });
+                                    // 中心X/中心Yはタッチ点のclientX/Y平均（ビューポート基準）なので
+                                    // ボードルート基準へ補正してから拡縮中心として使う。
+                                    const 補正済み中心 = this._座標変換.viewportPointを補正する(中心X, 中心Y);
+                                    this.scaleUpdate({ 拡縮率: this._currentScale, 中心X: 補正済み中心.x.値, 中心Y: 補正済み中心.y.値 });
                                 });
                             })
                             .addDivEventListener('contextmenu', (e: MouseEvent) => {
                                 e.preventDefault();
-                                this.menu.表示(new MouseEventData(e).position);
+                                const position = new MouseEventData(e).position;
+                                const 補正済み位置 = this._座標変換.viewportPointを補正する(position.x, position.y);
+                                this.menu.表示({ x: 補正済み位置.x.値, y: 補正済み位置.y.値 });
                             })
                             .onLongPress((pos) => {
-                                this.menu.表示({ x: pos.x, y: pos.y });
+                                const 補正済み位置 = this._座標変換.viewportPointを補正する(pos.x, pos.y);
+                                this.menu.表示({ x: 補正済み位置.x.値, y: 補正済み位置.y.値 });
                             })
                             .addDivEventListener('click', (e: MouseEvent) => {
                                 if (canvasContainer) {
@@ -325,14 +334,16 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     
     private onAddStickyNote(e: MouseEvent): void { 
          const data = new MouseEventData(e);
-         const pos = new 画面座標点(data.pos2DVector).to描画座標点(this.model.描画基準座標);
+         const 補正済み画面座標点 = this._座標変換.画面座標点を補正する(data.position.x, data.position.y);
+         const pos = 補正済み画面座標点.to描画座標点(this.model.描画基準座標);
          const item = this.model.描画座標点でadd付箋(pos);
          this.commandRepository.push(new 配置物追加コマンド(this.model, item));
     }
     
     private onAddArrow(e: MouseEvent): void {
         const data = new MouseEventData(e);
-        const 始点 = new 画面座標点(data.pos2DVector).to描画座標点(this.model.描画基準座標);
+        const 補正済み画面座標点 = this._座標変換.画面座標点を補正する(data.position.x, data.position.y);
+        const 始点 = 補正済み画面座標点.to描画座標点(this.model.描画基準座標);
         const 終点 = 始点.plus(new Px2DVector(new Px長さ(100), new Px長さ(0)));
         
         const vm = new 折れ線矢印VM<描画座標点>(

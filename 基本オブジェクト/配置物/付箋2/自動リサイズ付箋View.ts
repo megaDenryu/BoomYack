@@ -19,6 +19,7 @@ import { 付箋設定状態 } from "../設定パネル";
 import { I接続点親情報 } from "../矢印接続可能なもの/接続点";
 import { テキストフォーマット適用 } from "./テキストフォーマッタサービス";
 import { リサイズハンドル } from "./リサイズハンドル";
+import { ボード基準座標変換 } from "BoomYack/基本オブジェクト/キャンバス操作/座標変換/ボード基準座標変換";
 import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?url';
 import SaveIcon from '../../../SVGImg/SaveIcon.svg?url';
 import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
@@ -50,6 +51,7 @@ export interface 自動リサイズ付箋Viewオプション<座標点T extends 
 }
 
 export interface 自動リサイズ付箋用コンテキストメニュー依存関係 {
+    座標変換: ボード基準座標変換;
     on削除: () => void;
     on設定パネル表示: (現在位置: 描画座標点) => void;
     onAI生成?: () => void;
@@ -208,7 +210,9 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                                                                     })
                                                                             .addDivEventListener('contextmenu', (e: MouseEvent) => {
                                                                                 e.preventDefault();
-                                                                                this._コンテキストメニュー.表示(new MouseEventData(e).position);
+                                                                                const position = new MouseEventData(e).position;
+                                                                                const 補正済み位置 = コンテキストメニュー依存関係.座標変換.viewportPointを補正する(position.x, position.y);
+                                                                                this._コンテキストメニュー.表示({ x: 補正済み位置.x.値, y: 補正済み位置.y.値 });
                                                                             })
                                                                             .addDivEventListener('click', (e: MouseEvent) => {
                                                                                 this._コンテキストメニュー.非表示();

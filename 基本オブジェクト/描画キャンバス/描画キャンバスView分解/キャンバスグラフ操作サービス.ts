@@ -9,6 +9,7 @@ import { テキスト用グラフからキャンバスに配置するサービ�
 import { Iキャンバスコマンド } from "BoomYack/基本オブジェクト/キャンバス操作/コマンドリポジトリ/Iキャンバスコマンド";
 import { 配置物追加コマンド } from "BoomYack/基本オブジェクト/キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
 import { CanvasGraphModel } from "./CanvasGraphModel";
+import { ボード基準座標変換 } from "BoomYack/基本オブジェクト/キャンバス操作/座標変換/ボード基準座標変換";
 
 export class キャンバスグラフ操作サービス {
     private readonly Json出力サービス: JSONファイル出力サービス = JSONファイル出力サービス.create();
@@ -16,7 +17,8 @@ export class キャンバスグラフ操作サービス {
 
     constructor(
         private readonly 配置先: Iグラフ配置先,
-        private readonly ファイル名: () => string
+        private readonly ファイル名: () => string,
+        private readonly 座標変換: ボード基準座標変換
     ) {}
 
     public グラフを抽出(): 配置物連結グラフ群 {
@@ -71,7 +73,8 @@ export class キャンバスグラフ操作サービス {
         let pos: 描画座標点;
         if (e) {
             const data = new MouseEventData(e);
-            pos = new 画面座標点(data.pos2DVector).to描画座標点(this.配置先.描画基準座標);
+            const 補正済み画面座標点 = this.座標変換.画面座標点を補正する(data.position.x, data.position.y);
+            pos = 補正済み画面座標点.to描画座標点(this.配置先.描画基準座標);
         } else {
             const centerPx = Px2DVector.fromNumbers(window.innerWidth / 2, window.innerHeight / 2); // 画面中央
             pos = new 画面座標点(centerPx).to描画座標点(this.配置先.描画基準座標);

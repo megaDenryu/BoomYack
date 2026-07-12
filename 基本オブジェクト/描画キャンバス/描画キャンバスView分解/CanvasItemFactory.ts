@@ -17,6 +17,7 @@ import { I付箋View } from "../../I配置物";
 import { Iキャンバスコマンド } from "../../キャンバス操作/コマンドリポジトリ/Iキャンバスコマンド";
 import { 配置物テキスト変更コマンド, 配置物移動コマンド, 配置物追加コマンド, 配置物矢印変更コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
 import { VoiceRecognitionService } from "../../キャンバス操作/音声認識サービス";
+import { ボード基準座標変換 } from "../../キャンバス操作/座標変換/ボード基準座標変換";
 
 export class CanvasItemFactory implements ICanvasItemFactory {
     private 衝突判定サービス: 配置物衝突判定サービス;
@@ -29,7 +30,8 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         private graphService: キャンバスグラフ操作サービス,
         private voiceRecognitionService: VoiceRecognitionService,
         private onDeleteItem: () => void, // 削除コールバック
-        private onCommandPush?: (cmd: Iキャンバスコマンド) => void
+        private onCommandPush: ((cmd: Iキャンバスコマンド) => void) | undefined,
+        private 座標変換: ボード基準座標変換
     ) {
         this.衝突判定サービス = new 配置物衝突判定サービス();
         this._aiOperation = new AiOperationService(this.model, this.onCommandPush);
@@ -73,6 +75,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
             },
             new 付箋ID(),
             {
+                座標変換: this.座標変換,
                 on削除: this.onDeleteItem,
                 on設定パネル表示: (位置: 描画座標点) => this.設定パネルを表示する(付箋, 位置),
                 onAI生成: () => { this._aiOperation.executeGenerate(付箋); },
@@ -137,6 +140,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
             },
             data.id,
             {
+                座標変換: this.座標変換,
                 on削除: this.onDeleteItem,
                 on設定パネル表示: (位置: 描画座標点) => this.設定パネルを表示する(付箋, 位置),
                 onAI生成: () => { this._aiOperation.executeGenerate(付箋); },
@@ -235,6 +239,9 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 設定パネル.dom.element.remove();
             }
         });
-        document.body.appendChild(設定パネル.dom.element);
+        // document.bodyへ直接appendするとボードルートのtransformが確立する
+        // 包含ブロックの外に出てしまい、タブ埋め込み時にoverflow:hiddenのクリップが
+        // 効かなくなる。ボードルート配下へ取り付けることで恒等transformの傘下に収める。
+        this.座標変換.ルート要素().appendChild(設定パネル.dom.element);
     }
 }
