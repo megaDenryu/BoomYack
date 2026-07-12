@@ -108,15 +108,12 @@ export class GridCell extends LV2HtmlComponentBase {
            root.child(this._iconContainer);
         }
 
-        if (options.label && (!options.iconUrl || Array.isArray(options.label) || options.label.length > 0)) {
-            if (!options.iconUrl) {
-                const texts = Array.isArray(options.label) ? options.label : [options.label];
-                texts.forEach(t => {
-                    root.child(span({text: t}).setStyleCSS({ pointerEvents: 'none', lineHeight: '1.2' }));
-                });
-            }
+        if (options.label && !options.iconUrl && (Array.isArray(options.label) || options.label.length > 0)) {
+            const texts = Array.isArray(options.label) ? options.label : [options.label];
+            root.childs(
+                texts.map(t => span({ text: t }).setStyleCSS({ pointerEvents: 'none', lineHeight: '1.2' })));
         }
-        
+
         return root;
     }
 
@@ -136,17 +133,17 @@ export class GridCell extends LV2HtmlComponentBase {
     }
 
     public onClick(listener: (e: MouseEvent) => void): this {
-        this._componentRoot.addDivEventListener("click", listener as any);
+        this._componentRoot.addDivEventListener("click", listener);
         return this;
     }
 
     public onMouseEnter(listener: (e: MouseEvent) => void): this {
-        this._componentRoot.addDivEventListener("mouseenter", listener as any);
+        this._componentRoot.addDivEventListener("mouseenter", listener);
         return this;
     }
-    
+
     public onMouseLeave(listener: (e: MouseEvent) => void): this {
-        this._componentRoot.addDivEventListener("mouseleave", listener as any);
+        this._componentRoot.addDivEventListener("mouseleave", listener);
         return this;
     }
 
