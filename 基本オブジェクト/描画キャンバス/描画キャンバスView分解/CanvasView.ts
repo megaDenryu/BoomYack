@@ -1,4 +1,4 @@
-import { div, span, DivC, Drag中値, LV2HtmlComponentBase, MouseEventData, PointerWife, Px2DVector, Px長さ, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
+import { div, span, DivC, Drag中値, LV2HtmlComponentBase, MouseEventData, PointerWife, Px2DVector, Px長さ, ビューポート座標値, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
 import { 配置物zIndex } from "../../I配置物";
 
 
@@ -32,6 +32,8 @@ import { micIcon } from "OneONetUIComponents/Svg/Icons";
 import { 描画キャンバスリポジトリ } from "../../API/I描画キャンバスAPIリポジトリ";
 import { キャンバスコンテナ, 描画キャンバスView as 描画キャンバスViewcss, 配置物コンテナ as 配置物コンテナcss, 録音インジケータ } from "./style.css";
 import { グローバルイベントを購読する, グローバルイベント購読ハンドル } from "../../グローバルイベント購読";
+import { FudabaAPIクライアント } from "../../Fudaba連携/FudabaAPIクライアント";
+import { Fudaba札検索ダイアログ } from "../../Fudaba連携/Fudaba札検索ダイアログ";
 
 export interface 全ての接続点を表示非表示切り替え可能 {
     全ての接続点を表示非表示切り替え(表示する: boolean): void;
@@ -77,11 +79,13 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     private _currentScale: number = 1;
     private readonly _座標変換: ボード基準座標変換;
     private _keydown購読: グローバルイベント購読ハンドル;
+    private readonly _fudabaAPIクライアント: FudabaAPIクライアント = new FudabaAPIクライアント();
 
     // UI Elements
     private menu!: Iコンテキストメニュー;
     private contextMenuContainer: コンテキストメニューコンテナ;
     private _配置物コンテナ!: DivC;
+    private _fudaba検索ダイアログ: Fudaba札検索ダイアログ | null = null;
     
     // State
     private readonly _options: CanvasViewOptions;
@@ -130,7 +134,8 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             this.voiceRecognitionService,
             () => this.deleteSelectedItem(),
             (cmd) => this.commandRepository.push(cmd),
-            this._座標変換
+            this._座標変換,
+            this._fudabaAPIクライアント
         );
         this.model.setFactory(this.factory);
         
@@ -189,8 +194,11 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         const imgBg = "rgba(255, 255, 255, 0.5)";
 
         const layer1Items: 格子メニュー1層オプション[] = [
-            // メインアクション（アイコン系）を十字方向に配置
-            { id: "L1-sticky", iconUrl: 付箋Icon, backgroundColor: imgBg, Position: 'top', onClick: (e: MouseEvent) => this.onAddStickyNote(e) },
+            // メインアクション（アイコン系）を十字方向に配置。
+            // 付箋生成はonClickを持たずカテゴリ化し、種類(自由テキスト/タイトル付き/Fudaba札参照)を
+            // layer2で選ぶ形にした。8方向の格子が埋まっているため、種類追加のたびにL1を増やせない
+            // (2026-07-15: Fudaba札参照の追加でL1-sticky-titledのL1専有をやめて統合)。
+            { id: "L1-sticky", iconUrl: 付箋Icon, backgroundColor: imgBg, Position: 'top' },
             { id: "L1-delete", iconUrl: ゴミ箱Icon, backgroundColor: imgBg, Position: 'bottom', onClick: (e: MouseEvent) => this.deleteSelectedItem() },
             { id: "L1-arrow", iconUrl: 折れ線矢印Icon, backgroundColor: imgBg, Position: 'left' },
             { id: "L1-save", iconUrl: SaveIcon, backgroundColor: imgBg, Position: 'right', onClick: (e: MouseEvent) => this._options.onSaveClick?.() },
@@ -199,10 +207,14 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             { id: "L1-ai", label: ["分解", "生成"], Position: 'lt' },
             { id: "L1-graph", label: ["グラフ", "操作"], Position: 'rt' },
             { id: "L1-mic", iconUrl: MicOffIcon, backgroundColor: imgBg, Position: 'lb', onClick: (e: MouseEvent) => { e.stopPropagation(); this.voiceRecognitionService.toggleRecording(); } },
-            { id: "L1-sticky-titled", label: ["タイトル付き", "付箋"], Position: 'rb', onClick: (e: MouseEvent) => this.onAddTitledStickyNote(e) },
         ];
 
         const layer2Items: 格子メニュー2層オプション[] = [
+            // 付箋の種類選択 (top)
+            { parentId: "L1-sticky", label: "自由テキスト", onClick: (e: MouseEvent) => this.onAddStickyNote(e) },
+            { parentId: "L1-sticky", label: ["タイトル付き", "付箋"], onClick: (e: MouseEvent) => this.onAddTitledStickyNote(e) },
+            { parentId: "L1-sticky", label: ["Fudaba札を", "貼り付け"], onClick: (e: MouseEvent) => this.onPasteFudabaCard(e) },
+
             // 分解生成 (LT)
             // TODO: 必要に応じてAI操作を追加
 
@@ -355,7 +367,35 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
          const item = this.model.描画座標点でタイトル付き付箋をadd(pos);
          this.commandRepository.push(new 配置物追加コマンド(this.model, item));
     }
-    
+
+    /**
+     * 「Fudaba札を貼り付け」の入り口。簡易検索ダイアログを開き、選択された札IDで
+     * 札参照付箋を生成する(素朴なID直接入力は不採用、2026-07-15ユーザー決定)。
+     */
+    private onPasteFudabaCard(e: MouseEvent): void {
+        this._fudaba検索ダイアログ?.delete();
+        const data = new MouseEventData(e);
+        const 補正済み画面座標点 = this._座標変換.画面座標点を補正する(data.position.x, data.position.y);
+        const pos = 補正済み画面座標点.to描画座標点(this.model.描画基準座標);
+        const 補正済みビューポート位置 = this._座標変換.viewportPointを補正する(data.position.x, data.position.y);
+
+        const ダイアログを閉じる = (): void => {
+            this._fudaba検索ダイアログ?.delete();
+            this._fudaba検索ダイアログ = null;
+        };
+
+        this._fudaba検索ダイアログ = new Fudaba札検索ダイアログ({
+            position: ビューポート座標値.fromNumbers(補正済みビューポート位置.x.値, 補正済みビューポート位置.y.値),
+            fudabaAPIクライアント: this._fudabaAPIクライアント,
+            on選択: (札ID: string) => {
+                const item = this.model.描画座標点で札参照付箋をadd(pos, 札ID);
+                this.commandRepository.push(new 配置物追加コマンド(this.model, item));
+            },
+            on閉じる: ダイアログを閉じる
+        });
+        this._座標変換.ルート要素().appendChild(this._fudaba検索ダイアログ.dom.element);
+    }
+
     private onAddArrow(e: MouseEvent): void {
         const data = new MouseEventData(e);
         const 補正済み画面座標点 = this._座標変換.画面座標点を補正する(data.position.x, data.position.y);
@@ -457,6 +497,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         super.delete();
         this.contextMenuContainer.delete();
         this._keydown購読.解除する();
+        this._fudaba検索ダイアログ?.delete();
     }
 
     private 選択中配置物をコピー(): void {
