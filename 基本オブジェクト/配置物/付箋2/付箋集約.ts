@@ -1,4 +1,4 @@
-import { I描画空間, LV2HtmlComponentBase, Px2DVector, 描画座標点, 配置物座標点 } from "SengenUI/index";
+import { Canvas座標Base, I描画空間, LV2HtmlComponentBase, Px2DVector, 配置物座標点, 描画座標点 } from "SengenUI/index";
 import { I付箋シリアライズ可能, I付箋VM, I付箋集約, I選択可能配置物, I接触点登録先, Iドラッグ移動可能 } from "../../I配置物";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 
@@ -18,7 +18,7 @@ import { 付箋設定状態 } from "../設定パネル";
  * ✅ 3. リサイズ時（leftHandleドラッグ中、rightHandleドラッグ中、onHeightChange）にも接続点座標を更新
  * ✅ 4. 矢印接続可能なものViewの再レンダリングメソッドを実装
  */
-export class 付箋集約<座標点T extends 配置物座標点> implements I付箋集約, I選択可能配置物, I付箋シリアライズ可能, I接続点親情報<座標点T> {
+export class 付箋集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I付箋集約, I選択可能配置物, I付箋シリアライズ可能, I接続点親情報<座標点T> {
     public type: "付箋" = "付箋";
     public readonly view: 自動リサイズ付箋View<座標点T>;
     public readonly vm: I付箋VM;

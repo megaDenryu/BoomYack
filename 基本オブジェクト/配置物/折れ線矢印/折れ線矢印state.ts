@@ -1,16 +1,16 @@
-import { MousePosition, Px2DVector, Px長さ, 配置物座標点 } from "SengenUI/index";
+import { Canvas座標Base, MousePosition, Px2DVector, Px長さ, 配置物座標点 } from "SengenUI/index";
 import { 中点ID } from "../../ID";
 
 
 
 
 
-export interface I点state<座標点T extends 配置物座標点> {
+export interface I点state<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     pos: 座標点T;
     setPosition(newPos: 座標点T): void;
 }
 
-export class 中点State<座標点T extends 配置物座標点> implements I点state<座標点T> {
+export class 中点State<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I点state<座標点T> {
     public readonly 中点ID: 中点ID;
     private _pos: 座標点T;
     public get pos(): 座標点T {
@@ -26,7 +26,7 @@ export class 中点State<座標点T extends 配置物座標点> implements I点s
     }
 }
 
-export class 始点State<座標点T extends 配置物座標点> implements I点state<座標点T> {
+export class 始点State<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I点state<座標点T> {
     private _pos: 座標点T;
     public get pos(): 座標点T {
         return this._pos;
@@ -40,7 +40,7 @@ export class 始点State<座標点T extends 配置物座標点> implements I点s
     }
 }
 
-export class 終点State<座標点T extends 配置物座標点> implements I点state<座標点T> {
+export class 終点State<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I点state<座標点T> {
     private _pos: 座標点T;
     public get pos(): 座標点T {
         return this._pos;

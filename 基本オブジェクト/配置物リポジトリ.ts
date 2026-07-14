@@ -1,4 +1,4 @@
-import { Px2DVector, 図形内座標点, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
+import { Canvas座標Base, Px2DVector, 図形内座標点, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
 
 import { I配置物集約, 接触判定可能な点 } from "./I配置物";
 import { 折れ線矢印VM } from "./配置物/折れ線矢印/折れ線矢印VM";
@@ -9,7 +9,7 @@ import { なめらか曲線矢印集約 } from "./配置物/なめらか曲線�
 import { 付箋集約 } from "./配置物/付箋2/付箋集約";
 import { 接続点 } from "./配置物/矢印接続可能なもの/接続点";
 
-export interface I配置物リポジトリ<座標点T extends 図形内座標点 | 描画座標点> {
+export interface I配置物リポジトリ<座標点T extends Canvas座標Base<座標点T> & (図形内座標点 | 描画座標点)> {
     配置物リスト: I配置物集約[];
     add付箋(pos: Px2DVector): 付箋集約<座標点T>;
     add折れ線矢印(折れ線矢印vm:折れ線矢印VM<座標点T>): 折れ線矢印集約<座標点T>;
@@ -19,7 +19,7 @@ export interface I配置物リポジトリ<座標点T extends 図形内座標点
 }
 
 /** 接続点・矢印接続可能なものが要求する最小インターフェース（ISP分割済み） */
-export interface I矢印生成先<座標点T extends 図形内座標点 | 描画座標点> {
+export interface I矢印生成先<座標点T extends Canvas座標Base<座標点T> & (図形内座標点 | 描画座標点)> {
     add折れ線矢印(折れ線矢印vm: 折れ線矢印VM<座標点T>): 折れ線矢印集約<座標点T>;
     addなめらか曲線矢印(vm: なめらか曲線矢印VM<座標点T>): なめらか曲線矢印集約<座標点T>;
     未接続の点ハンドルを接続点と接続をtryする(接続点: 接続点<座標点T>): void;

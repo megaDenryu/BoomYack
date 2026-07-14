@@ -1,4 +1,4 @@
-import { div, DivC, Drag中値, Drag終了値, Drag開始値, HtmlComponentBase, LV2HtmlComponentBase, MouseEventData, PointerWife, Px2DVector, Px長さ, TypedEventListener, 図形内座標点, 描画座標点, 配置物座標点 } from "SengenUI/index";
+import { Canvas座標Base, div, DivC, Drag開始値, Drag終了値, Drag中値, HtmlComponentBase, LV2HtmlComponentBase, MouseEventData, PointerWife, Px2DVector, Px長さ, TypedEventListener, 図形内座標点, 配置物座標点, 描画座標点 } from "SengenUI/index";
 
 
 
@@ -36,7 +36,7 @@ export enum 付箋選択状態 {
     選択 = "selected"        // 赤
 }
 
-export interface 自動リサイズ付箋Viewオプション<座標点T extends 配置物座標点> {
+export interface 自動リサイズ付箋Viewオプション<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     position: 座標点T;
     size: Px2DVector;
     minHeight: Px長さ;
@@ -68,7 +68,7 @@ export interface 自動リサイズ付箋用コンテキストメニュー依存
     onマイク状態監視登録?: (callback: (isRecording: boolean) => void) => void;
 }
 
-export class 自動リサイズ付箋View<座標点T extends 配置物座標点> extends LV2HtmlComponentBase implements I付箋View,I接続点親情報<座標点T> {
+export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends LV2HtmlComponentBase implements I付箋View,I接続点親情報<座標点T> {
     protected _componentRoot: DivC;
     private 付箋ホバー領域: DivC;
     private _content!: I付箋コンテンツView;
@@ -275,7 +275,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
             delta.x / 拡縮率,
             delta.y / 拡縮率
         );
-        this.set付箋ボードTransform({position:this._position.plus(補正されたdelta) as 座標点T})
+        this.set付箋ボードTransform({position:this._position.plus(補正されたdelta)})
         this.update接続点座標();
 
         return this;
@@ -288,7 +288,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
         const 補正されたdeltaX = deltaX / 拡縮率;
         const newWidth = this._size.x.minus(new Px長さ(補正されたdeltaX));
         this._componentRoot.setViewportPositionByTransform(this._position.toビューポート座標値());
-        this.set付箋ボードTransform({size:new Px2DVector(newWidth, this._size.y), position:this._position.plus(Px2DVector.fromNumbers(補正されたdeltaX,0)) as 座標点T});
+        this.set付箋ボードTransform({size:new Px2DVector(newWidth, this._size.y), position:this._position.plus(Px2DVector.fromNumbers(補正されたdeltaX,0))});
         this.onResize();
     }
 

@@ -1,4 +1,4 @@
-import { Drag中値, Drag終了値, Drag開始値, I描画空間, Px2DVector, 描画座標点, 配置物座標点 } from "SengenUI/index";
+import { Canvas座標Base, Drag開始値, Drag終了値, Drag中値, I描画空間, Px2DVector, 配置物座標点, 描画座標点 } from "SengenUI/index";
 
 import { I点と線のリポジトリ, I点ハンドル, I線分ハンドル, 接触判定可能な点, I接触点を教えてくれる人, I接続点, I接続点と接続可能, I折れ線矢印集約 } from "../../I配置物";
 import { 始点State, 終点State } from "./折れ線矢印state";
@@ -8,7 +8,7 @@ import { 矢印ID } from "../../ID";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 import { 矢印データ, 座標データ, 接続参照データ } from "../../描画キャンバス/データクラス";
 
-export class 矢印VM<座標点T extends 配置物座標点> {
+export class 矢印VM<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     public readonly id: 矢印ID;
     public readonly start: 座標点T;
     public readonly end: 座標点T;
@@ -38,7 +38,7 @@ export class 矢印VM<座標点T extends 配置物座標点> {
     /**
      * データクラスから矢印VMを作成
      */
-    public static fromデータ<座標点T extends 配置物座標点>(
+    public static fromデータ<座標点T extends Canvas座標Base<座標点T> & 配置物座標点>(
         data: 矢印データ,
         座標変換: (座標: 座標データ) => 座標点T
     ): 矢印VM<座標点T> {
@@ -51,7 +51,7 @@ export class 矢印VM<座標点T extends 配置物座標点> {
 }
 
 
-export class 始点ハンドル<座標点T extends 配置物座標点> implements I点ハンドル<座標点T>,接触判定可能な点,I接続点と接続可能 {
+export class 始点ハンドル<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I点ハンドル<座標点T>,接触判定可能な点,I接続点と接続可能 {
     private _view: 始点ハンドルView;
     public get view(): 始点ハンドルView { return this._view; }
     private _state: 始点State<座標点T>;
@@ -122,7 +122,7 @@ export class 始点ハンドル<座標点T extends 配置物座標点> implement
             delta.x / 拡縮率,
             delta.y / 拡縮率
         );
-        this._state.setPosition(this._state.pos.plus(補正されたdelta) as 座標点T);
+        this._state.setPosition(this._state.pos.plus(補正されたdelta));
         this.render(); // 自分自身のビューも更新
         this.next線分ハンドル.render();
         return this;
@@ -135,7 +135,7 @@ export class 始点ハンドル<座標点T extends 配置物座標点> implement
     }
 
     public move(diff: Px2DVector): this {
-        return this.setPosition(this._state.pos.plus(diff) as 座標点T);
+        return this.setPosition(this._state.pos.plus(diff));
     }
 
     public setPosition(pos: 座標点T): this {
@@ -181,7 +181,7 @@ export class 始点ハンドル<座標点T extends 配置物座標点> implement
     }
 }
 
-export class 終点ハンドル<座標点T extends 配置物座標点> implements I点ハンドル<座標点T>, 接触判定可能な点 {
+export class 終点ハンドル<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I点ハンドル<座標点T>, 接触判定可能な点 {
     private _view: 終点ハンドルView;
     public get view(): 終点ハンドルView { return this._view; }
     private _state: 終点State<座標点T>;
@@ -242,7 +242,7 @@ export class 終点ハンドル<座標点T extends 配置物座標点> implement
             delta.x / 拡縮率,
             delta.y / 拡縮率
         );
-        this._state.setPosition(this._state.pos.plus(補正されたdelta) as 座標点T);
+        this._state.setPosition(this._state.pos.plus(補正されたdelta));
         this.render(); // 自分自身のビューも更新
         this.prev線分ハンドル.render();
         return this;
@@ -255,7 +255,7 @@ export class 終点ハンドル<座標点T extends 配置物座標点> implement
     }
 
     public move(diff: Px2DVector): this {
-        return this.setPosition(this._state.pos.plus(diff) as 座標点T);
+        return this.setPosition(this._state.pos.plus(diff));
     }
 
     public setPosition(pos: 座標点T): this {
@@ -299,7 +299,7 @@ export class 終点ハンドル<座標点T extends 配置物座標点> implement
     }
 }
 
-export class 線分ハンドル<座標点T extends 配置物座標点> implements I線分ハンドル<座標点T> {
+export class 線分ハンドル<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I線分ハンドル<座標点T> {
     private _view: 線分ハンドルView;
     public get view(): 線分ハンドルView { return this._view; }
     public readonly 始点: I点ハンドル<座標点T>;
@@ -377,7 +377,7 @@ export class 線分ハンドル<座標点T extends 配置物座標点> implement
         const 始点pos = this.始点.state.pos;
         const 終点pos = this.終点.state.pos;
 
-        const 中点pos = 始点pos.plus(終点pos.px2DVector).divide(2) as 座標点T;
+        const 中点pos = 始点pos.plus(終点pos.px2DVector).divide(2);
 
         // insert中点を呼び出す
         this._親の集約.insert中点(this._線分の位置, 中点pos);

@@ -1,4 +1,4 @@
-import { circle, div, DivC, I描画空間, LV2HtmlComponentBase, Px2DVector, svg, 図形内座標点, 描画座標点, 配置物座標点 } from "SengenUI/index";
+import { Canvas座標Base, circle, div, DivC, I描画空間, LV2HtmlComponentBase, Px2DVector, svg, 図形内座標点, 配置物座標点, 描画座標点 } from "SengenUI/index";
 
 import { 矢印接続可能なもの接続点View as 矢印接続可能なもの接続点Viewcss } from "./style.css";
 
@@ -13,13 +13,13 @@ import { 矢印接続可能なもの } from "./矢印接続可能なもの";
 
 
 /** 接続点の親情報を提供するインターフェース */
-export interface I接続点親情報<座標点T extends 配置物座標点> {
+export interface I接続点親情報<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     /** 親配置物のID */
     get 配置物ID(): 付箋ID;
     get 矢印接続可能なもの(): 矢印接続可能なもの<座標点T>;
 }
 
-export class 接続点<座標点T extends 配置物座標点> extends LV2HtmlComponentBase implements 接触判定可能な点, I接続点<座標点T>{
+export class 接続点<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends LV2HtmlComponentBase implements 接触判定可能な点, I接続点<座標点T>{
     private i矢印生成先: I矢印生成先<座標点T>;
     private _接続点state: 接続点State<座標点T>;
     private i描画基準座標を持つ: I描画空間;
@@ -170,11 +170,11 @@ export class 接続点<座標点T extends 配置物座標点> extends LV2HtmlCom
 }
 
 
-export interface I矢印接続可能なもの中央PositionState<座標点T extends 配置物座標点> {
+export interface I矢印接続可能なもの中央PositionState<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     中央pos: 座標点T;
 }
 
-export class 接続点State<座標点T extends 配置物座標点> {
+export class 接続点State<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     public pos: 座標点T;
     public i矢印接続可能なもの中央PositionState:I矢印接続可能なもの中央PositionState<座標点T>;
     public constructor(pos: 座標点T, i矢印接続可能なもの中央PositionState:I矢印接続可能なもの中央PositionState<座標点T>) {
@@ -183,7 +183,7 @@ export class 接続点State<座標点T extends 配置物座標点> {
     }
 
     public get 矢印vm():矢印VM<座標点T> {
-            return new 矢印VM<座標点T>(new 矢印ID(), this.pos, this.pos.times(2).minus(this.i矢印接続可能なもの中央PositionState.中央pos.px2DVector) as 座標点T);
+            return new 矢印VM<座標点T>(new 矢印ID(), this.pos, this.pos.times(2).minus(this.i矢印接続可能なもの中央PositionState.中央pos.px2DVector));
         
     }
 
@@ -192,7 +192,7 @@ export class 接続点State<座標点T extends 配置物座標点> {
                 new 折れ線矢印ID(),
                 this.pos,
                 [],
-                this.pos.times(2).minus(this.i矢印接続可能なもの中央PositionState.中央pos.px2DVector) as 座標点T,
+                this.pos.times(2).minus(this.i矢印接続可能なもの中央PositionState.中央pos.px2DVector),
             );
     }
 }

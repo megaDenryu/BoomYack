@@ -1,4 +1,4 @@
-import { Drag中値, LV2HtmlComponentBase, Px2DVector, 描画座標点, 配置物座標点, 描画基準座標 } from "SengenUI/index";
+import { Canvas座標Base, Drag中値, LV2HtmlComponentBase, Px2DVector, 配置物座標点, 描画基準座標, 描画座標点 } from "SengenUI/index";
 
 
 
@@ -110,7 +110,7 @@ export interface Iまっすぐ矢印View extends LV2HtmlComponentBase {
  * 接続点・付箋リサイズ追従の仕組み(接続点.ts / 矢印接続可能なもの.ts / カスケード削除)は
  * この共通契約だけを要求するよう一般化してあり、矢印の種類が増えても書き換え不要。
  */
-export interface I始終点矢印集約<座標点T extends 配置物座標点> extends I配置物集約 {
+export interface I始終点矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends I配置物集約 {
     type: "折れ線矢印" | "なめらか曲線矢印";
     始点と終点の付箋の接続点を最短のものに切り替える(): void;
     /** 始点に接続している付箋のID。未接続のnull */
@@ -121,7 +121,7 @@ export interface I始終点矢印集約<座標点T extends 配置物座標点> e
     onハンドルドラッグ終了?: () => void;
 }
 
-export interface Iなめらか曲線矢印集約<座標点T extends 配置物座標点> extends I始終点矢印集約<座標点T> {
+export interface Iなめらか曲線矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends I始終点矢印集約<座標点T> {
     type: "なめらか曲線矢印";
     readonly view: Iなめらか曲線矢印View;
     readonly 始点ハンドル: I点ハンドル<座標点T>;
@@ -140,14 +140,14 @@ export interface Iなめらか曲線矢印シリアライズ可能 extends Iシ�
 
 
 
-export interface I点と線のリポジトリ<座標点T extends 配置物座標点> {
+export interface I点と線のリポジトリ<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     get点ハンドルByIndex(index: number): I点ハンドル<座標点T> | null;
     get線分ハンドルByIndex(index: number): I線分ハンドル<座標点T> | null;
     insert中点(insertIndex: number, pos: 座標点T): this;
     delete中点(index: number): this;
 }
 
-export interface I点ハンドル<座標点T extends 配置物座標点> extends Iドラッグ移動可能{
+export interface I点ハンドル<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends Iドラッグ移動可能{
     ドラッグ移動処理(e: Drag中値): this;
     render(): this;
     移動終了(e: Drag中値): void;
@@ -167,11 +167,11 @@ export interface I接続点と接続可能 {
 
 }
 
-export interface I矢印集約<座標点T extends 配置物座標点> extends I配置物集約, I点と線のリポジトリ<座標点T> {
+export interface I矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends I配置物集約, I点と線のリポジトリ<座標点T> {
     type: "まっすぐ矢印";
 }
 
-export interface I線分ハンドル<座標点T extends 配置物座標点> extends Iドラッグ移動可能{
+export interface I線分ハンドル<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends Iドラッグ移動可能{
     ドラッグ移動処理(e: Drag中値): this;
     render(): this;
     set親の集約(親: I点と線のリポジトリ<座標点T>): void;
@@ -184,13 +184,13 @@ export interface I折れ線矢印VM {
 export interface I折れ線矢印View extends LV2HtmlComponentBase {
 }
 
-export interface I折れ線矢印集約<座標点T extends 配置物座標点> extends I始終点矢印集約<座標点T>, I点と線のリポジトリ<座標点T> {
+export interface I折れ線矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends I始終点矢印集約<座標点T>, I点と線のリポジトリ<座標点T> {
     type: "折れ線矢印";
     updateStateFromData(data: 折れ線矢印データ, モデルの描画基準座標: 描画基準座標): void;
 }
 
 /** I配置物集約をtype判別子でI折れ線矢印集約へ絞り込む型ガード */
-export function is折れ線矢印集約<座標点T extends 配置物座標点>(item: I配置物集約): item is I折れ線矢印集約<座標点T> {
+export function is折れ線矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点>(item: I配置物集約): item is I折れ線矢印集約<座標点T> {
     return item.type === "折れ線矢印";
 }
 
@@ -198,13 +198,13 @@ export function is折れ線矢印集約<座標点T extends 配置物座標点>(i
  * I配置物集約をtype判別子でI始終点矢印集約(折れ線矢印/なめらか曲線矢印の共通契約)へ絞り込む型ガード。
  * カスケード削除・グラフ走査など「矢印の種類を問わず始点/終点接続だけ見たい」処理で使う。
  */
-export function is始終点矢印集約<座標点T extends 配置物座標点>(item: I配置物集約): item is I始終点矢印集約<座標点T> {
+export function is始終点矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点>(item: I配置物集約): item is I始終点矢印集約<座標点T> {
     return item.type === "折れ線矢印" || item.type === "なめらか曲線矢印";
 }
 
 
 
-export interface I接触点を教えてくれる人<座標点T extends 配置物座標点> {
+export interface I接触点を教えてくれる人<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     接触点を取得(pos: 描画座標点):接触判定可能な点|null;
     接続点を取得(pos: 描画座標点): I接続点<座標点T>|null;
     未接続の点ハンドルを接続点と接続をtryする(接続点:接続点<座標点T>):void;
@@ -215,12 +215,12 @@ export interface I接触点を教えてくれる人<座標点T extends 配置物
     
 }
 
-export interface リスト配置可能<座標点T extends 配置物座標点> {
+export interface リスト配置可能<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     add配置物リスト(nodes: Iterable<接触判定可能な点>):void;
     add接続点リスト(接続点リスト: Iterable<接続点<座標点T>>):void;
 }
 
-export interface I接続点<座標点T extends 配置物座標点> {
+export interface I接続点<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     接続(点ハンドル: I点ハンドル<座標点T>): void;
     接続解除(点ハンドル: I点ハンドル<座標点T>): void;
     親interface: I接続点親情報<座標点T>;

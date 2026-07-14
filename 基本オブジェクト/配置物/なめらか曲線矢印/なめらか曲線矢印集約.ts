@@ -1,4 +1,4 @@
-import { I描画空間, LV2HtmlComponentBase, Px2DVector, 描画基準座標, 描画座標点, 配置物座標点, 画面座標点 } from "SengenUI/index";
+import { Canvas座標Base, I描画空間, LV2HtmlComponentBase, Px2DVector, 画面座標点, 配置物座標点, 描画基準座標, 描画座標点 } from "SengenUI/index";
 
 import { Iなめらか曲線矢印集約, Iなめらか曲線矢印シリアライズ可能, I接触点を教えてくれる人, I接触点登録先, Iドラッグ移動可能 } from "../../I配置物";
 import { 始点State, 終点State } from "../折れ線矢印/折れ線矢印state";
@@ -17,7 +17,7 @@ import { I接続点親情報 } from "../矢印接続可能なもの/接続点";
  * 曲線の制御点は集約が持たず、再描画のたびにView側で始点/終点から自動計算する
  * (曲線制御点.ts参照。設計2026-07-14の「制御点は自動計算でよい」方針)。
  */
-export class なめらか曲線矢印集約<座標点T extends 配置物座標点> implements Iなめらか曲線矢印集約<座標点T>, Iなめらか曲線矢印シリアライズ可能 {
+export class なめらか曲線矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements Iなめらか曲線矢印集約<座標点T>, Iなめらか曲線矢印シリアライズ可能 {
     public type: "なめらか曲線矢印" = "なめらか曲線矢印";
     public readonly view: なめらか曲線矢印View;
     public readonly 始点ハンドル: 始点ハンドル<座標点T>;

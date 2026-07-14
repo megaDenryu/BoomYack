@@ -1,4 +1,4 @@
-import { Drag中値, Drag開始値, I描画空間, LV2HtmlComponentBase, Px2DVector, 描画基準座標, 描画座標点, 画面座標点, 配置物座標点 } from "SengenUI/index";
+import { Canvas座標Base, Drag開始値, Drag中値, I描画空間, LV2HtmlComponentBase, Px2DVector, 画面座標点, 配置物座標点, 描画基準座標, 描画座標点 } from "SengenUI/index";
 
 import {  I折れ線矢印集約, I点ハンドル, I線分ハンドル, I点と線のリポジトリ, I接触点を教えてくれる人, I折れ線矢印シリアライズ可能, I接触点登録先, Iドラッグ移動可能 } from "../../I配置物";
 import { 中点ハンドルView, 折れ線矢印View } from "./折れ線矢印View";
@@ -22,7 +22,7 @@ import { 矢印設定状態 } from "../設定パネル";
  *      1. 点kの前の線分k-1と点kの後の線分k+1を動かす
  */
 
-export class 折れ線矢印集約<座標点T extends 配置物座標点> implements I折れ線矢印集約<座標点T>, I折れ線矢印シリアライズ可能 {
+export class 折れ線矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I折れ線矢印集約<座標点T>, I折れ線矢印シリアライズ可能 {
     public type: "折れ線矢印" = "折れ線矢印";
     public readonly view: 折れ線矢印View;
     public readonly 始点ハンドル: 始点ハンドル<座標点T>;
@@ -385,7 +385,7 @@ export class 折れ線矢印集約<座標点T extends 配置物座標点> implem
 
 
 
-export class 中点ハンドル<座標点T extends 配置物座標点> implements I点ハンドル<座標点T> {
+export class 中点ハンドル<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I点ハンドル<座標点T> {
     private _view: 中点ハンドルView;
     public get view(): 中点ハンドルView { return this._view; }
     private _state: 中点State<座標点T>;
@@ -443,7 +443,7 @@ export class 中点ハンドル<座標点T extends 配置物座標点> implement
             delta.x / 拡縮率,
             delta.y / 拡縮率
         );
-        this._state.setPosition(this._state.pos.plus(補正されたdelta) as 座標点T);
+        this._state.setPosition(this._state.pos.plus(補正されたdelta));
         this.render();
         // 接続している前後の線分を再描画
         this.prev線分ハンドル.render();
@@ -458,7 +458,7 @@ export class 中点ハンドル<座標点T extends 配置物座標点> implement
     }
 
     public move(diff: Px2DVector): this {
-        return this.setPosition(this._state.pos.plus(diff) as 座標点T);
+        return this.setPosition(this._state.pos.plus(diff));
     }
 
     public 移動終了(e: Drag中値): void {

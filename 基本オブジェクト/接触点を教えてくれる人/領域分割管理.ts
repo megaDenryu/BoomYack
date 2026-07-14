@@ -1,4 +1,4 @@
-import { Px2DVector, Px長さ, ビューポート座標値, 描画座標点, 配置物座標点 } from "SengenUI/index";
+import { Canvas座標Base, Px2DVector, Px長さ, ビューポート座標値, 配置物座標点, 描画座標点 } from "SengenUI/index";
 /**
  * 点が生成されるたびにここに登録される必要がある。
  * そして点は範囲を持っていて、接続判定をする。なので判定用のインターフェースを実装させるようにする
@@ -10,7 +10,7 @@ import { I接触点を教えてくれる人, 接触判定可能な点, リスト
 import { 接続点 } from "../配置物/矢印接続可能なもの/接続点";
 
 
-export class 領域セル<座標点T extends 配置物座標点> implements I接触点を教えてくれる人<座標点T> {
+export class 領域セル<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I接触点を教えてくれる人<座標点T> {
     public readonly 領域長方形対角の始点: Px2DVector;
     public readonly 領域長方形対角の終点: Px2DVector;
     private 配置物リスト: 接触判定可能な点[] = [];
@@ -52,7 +52,7 @@ export class 領域セル<座標点T extends 配置物座標点> implements I接
     }
 }
 
-export class 領域分割管理<座標点T extends 配置物座標点> implements I接触点を教えてくれる人<座標点T>, リスト配置可能<座標点T> {
+export class 領域分割管理<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I接触点を教えてくれる人<座標点T>, リスト配置可能<座標点T> {
     private readonly 領域セルリスト: 領域セル<座標点T>[];
     private _セルの縦横: Px2DVector;
     private _原点: ビューポート座標値;

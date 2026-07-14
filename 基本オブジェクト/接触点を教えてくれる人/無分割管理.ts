@@ -1,11 +1,11 @@
-import { 描画座標点, 配置物座標点 } from "SengenUI/index";
+import { Canvas座標Base, 配置物座標点, 描画座標点 } from "SengenUI/index";
 import type { I接触点を教えてくれる人, リスト配置可能, 接触判定可能な点 } from "../I配置物";
 
 import { 接続点 } from "../配置物/矢印接続可能なもの/接続点";
 import { 始点ハンドル, 終点ハンドル } from "../配置物/折れ線矢印/矢印集約";
 
 
-export class 無分割管理<座標点T extends 配置物座標点> implements I接触点を教えてくれる人<座標点T>, リスト配置可能<座標点T> {
+export class 無分割管理<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I接触点を教えてくれる人<座標点T>, リスト配置可能<座標点T> {
     private 配置物リスト: 接触判定可能な点[] = [];
     private 接続点リスト: 接続点<座標点T>[] = [];
 

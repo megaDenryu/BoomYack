@@ -1,4 +1,4 @@
-import { div, DivC, HtmlComponentBase, I描画空間, LV2HtmlComponentBase, Px2DVector, VectorN, VectorNと見なせる, dotVectorN, 表示切替, 配置物座標点 } from "SengenUI/index";
+import { Canvas座標Base, div, DivC, dotVectorN, HtmlComponentBase, I描画空間, LV2HtmlComponentBase, Px2DVector, VectorN, VectorNと見なせる, 配置物座標点, 表示切替 } from "SengenUI/index";
 
 import { 矢印ホバー用四角形 } from "./style.css";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
@@ -6,7 +6,7 @@ import { I矢印生成先 } from "../../配置物リポジトリ";
 import { I接続点親情報, I矢印接続可能なもの中央PositionState, 接続点, 接続点State } from "./接続点";
 import { I接続点, I始終点矢印集約 } from "BoomYack/基本オブジェクト/I配置物";
 
-export interface 絶対矢印上下左右Position<座標点T extends 配置物座標点> {
+export interface 絶対矢印上下左右Position<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     上: 座標点T;
     右: 座標点T;
     下: 座標点T;
@@ -20,20 +20,20 @@ export interface 相対矢印上下左右Position {
     左: Px2DVector;
 }
 
-export interface 矢印上下左右Position<座標点T extends 配置物座標点>{
+export interface 矢印上下左右Position<座標点T extends Canvas座標Base<座標点T> & 配置物座標点>{
     絶対: 絶対矢印上下左右Position<座標点T>, 
     相対: 相対矢印上下左右Position
 }
 
 
 
-export interface 矢印接続可能なもの依存関係<座標点T extends 配置物座標点> {
+export interface 矢印接続可能なもの依存関係<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     i矢印生成先: I矢印生成先<座標点T>;
     i描画空間: I描画空間;
     i配置物選択機能集約:I配置物選択機能集約;
 }
 
-export class 矢印接続可能なもの<座標点T extends 配置物座標点> extends LV2HtmlComponentBase implements I矢印接続可能なもの中央PositionState<座標点T> {
+export class 矢印接続可能なもの<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends LV2HtmlComponentBase implements I矢印接続可能なもの中央PositionState<座標点T> {
     private _中央pos: 座標点T;
     public get 中央pos(): 座標点T {return this._中央pos;}
     private _接続点_上: 接続点<座標点T>;
@@ -62,7 +62,7 @@ export class 矢印接続可能なもの<座標点T extends 配置物座標点> 
     ) {
         super();
         this._i配置物選択機能集約 = 依存.i配置物選択機能集約;
-        this._中央pos = pos.上.plus(pos.下.px2DVector).divide(2) as 座標点T;
+        this._中央pos = pos.上.plus(pos.下.px2DVector).divide(2);
         this._接続点_上 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.上, this), 依存.i矢印生成先, 依存.i描画空間, "上", 親情報);
         this._接続点_右 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.右, this), 依存.i矢印生成先, 依存.i描画空間, "右", 親情報);
         this._接続点_下 = new 接続点<座標点T>(new 接続点State<座標点T>(pos.下, this), 依存.i矢印生成先, 依存.i描画空間, "下", 親情報);
@@ -90,7 +90,7 @@ export class 矢印接続可能なもの<座標点T extends 配置物座標点> 
 
     public update接続点座標(総合pos: 矢印上下左右Position<座標点T>): void {
         const pos = 総合pos.絶対;
-        this._中央pos = pos.上.plus(pos.下.px2DVector).divide(2) as 座標点T;
+        this._中央pos = pos.上.plus(pos.下.px2DVector).divide(2);
         this._接続点_上.update位置(pos.上, 総合pos.相対.上);
         this._接続点_右.update位置(pos.右, 総合pos.相対.右);
         this._接続点_下.update位置(pos.下, 総合pos.相対.下);

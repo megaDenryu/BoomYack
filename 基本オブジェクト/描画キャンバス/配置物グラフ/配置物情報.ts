@@ -1,4 +1,4 @@
-import { 配置物座標点 } from "SengenUI/index";
+import { Canvas座標Base, 配置物座標点 } from "SengenUI/index";
 import { I配置物集約, I折れ線矢印集約, I付箋シリアライズ可能, I折れ線矢印シリアライズ可能, Iなめらか曲線矢印集約, Iなめらか曲線矢印シリアライズ可能 } from "../../../../BoomYack/基本オブジェクト/I配置物";
 import { 配置物データ, 付箋データ, 折れ線矢印データ, なめらか曲線矢印データ } from "../データクラス";
 import { Func } from "TypeScriptBenriKakuchou/アーキテクチャBase";
@@ -9,7 +9,7 @@ interface I配置物情報 {
     readonly 配置物データ: 配置物データ
 }
 
-export class 付箋情報<座標点T extends 配置物座標点> implements I配置物情報 {
+export class 付箋情報<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I配置物情報 {
     public readonly type = "付箋データ";
     public readonly 配置物: I配置物集約 & I付箋シリアライズ可能
     public readonly 配置物データ: 付箋データ
@@ -23,7 +23,7 @@ export class 付箋情報<座標点T extends 配置物座標点> implements I配
     public exec<T>(func: Func<this,T>): T {return func(this);}
 }
 
-export class 折れ線矢印情報<座標点T extends 配置物座標点> implements I配置物情報 {
+export class 折れ線矢印情報<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I配置物情報 {
     public readonly type = "折れ線矢印";
     public readonly 配置物: I折れ線矢印集約<座標点T> & I折れ線矢印シリアライズ可能
     public readonly 配置物データ: 折れ線矢印データ
@@ -37,7 +37,7 @@ export class 折れ線矢印情報<座標点T extends 配置物座標点> implem
     public exec<T>(func: Func<this,T>): T {return func(this);}
 }
 
-export class なめらか曲線矢印情報<座標点T extends 配置物座標点> implements I配置物情報 {
+export class なめらか曲線矢印情報<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I配置物情報 {
     public readonly type = "なめらか曲線矢印";
     public readonly 配置物: Iなめらか曲線矢印集約<座標点T> & Iなめらか曲線矢印シリアライズ可能
     public readonly 配置物データ: なめらか曲線矢印データ

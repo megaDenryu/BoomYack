@@ -1,4 +1,4 @@
-import { Drag中値, Drag開始値, I描画空間, Px2DVector, 描画座標点, 配置物座標点 } from "SengenUI/index";
+import { Canvas座標Base, Drag開始値, Drag中値, I描画空間, Px2DVector, 配置物座標点, 描画座標点 } from "SengenUI/index";
 
 import { I点ハンドル, 接触判定可能な点, I接触点を教えてくれる人, I接続点, Iなめらか曲線矢印集約 } from "../../I配置物";
 import { 始点State } from "../折れ線矢印/折れ線矢印state";
@@ -11,7 +11,7 @@ import { 接続参照データ } from "../../描画キャンバス/データク�
  * ドラッグ・接続の流儀に乗るが、隣接する線分ハンドルを持たない
  * (曲線はSVG pathとして集約が一括描画するため、next/prev線分ハンドルは常にnull)。
  */
-export class 始点ハンドル<座標点T extends 配置物座標点> implements I点ハンドル<座標点T>, 接触判定可能な点 {
+export class 始点ハンドル<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> implements I点ハンドル<座標点T>, 接触判定可能な点 {
     private _view: 始点ハンドルView;
     public get view(): 始点ハンドルView { return this._view; }
     private _state: 始点State<座標点T>;
@@ -67,7 +67,7 @@ export class 始点ハンドル<座標点T extends 配置物座標点> implement
         const delta = e.data.直前のマウス位置から現在位置までの差分;
         const 拡縮率 = this._i描画基準座標を持つ.描画基準座標.拡縮率;
         const 補正されたdelta = Px2DVector.fromNumbers(delta.x / 拡縮率, delta.y / 拡縮率);
-        this._state.setPosition(this._state.pos.plus(補正されたdelta) as 座標点T);
+        this._state.setPosition(this._state.pos.plus(補正されたdelta));
         this.render();
         this.親の折れ線矢印集約.再描画();
         return this;
@@ -79,7 +79,7 @@ export class 始点ハンドル<座標点T extends 配置物座標点> implement
     }
 
     public move(diff: Px2DVector): this {
-        return this.setPosition(this._state.pos.plus(diff) as 座標点T);
+        return this.setPosition(this._state.pos.plus(diff));
     }
 
     public setPosition(pos: 座標点T): this {

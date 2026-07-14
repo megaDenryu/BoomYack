@@ -1,5 +1,5 @@
 import { NumberSliderInput } from "OneONetUIComponents/index";
-import { button, div, input, label, DivC, LV2HtmlComponentBase, PointerWife, Px2DVector, 配置物座標点 } from "SengenUI/index";
+import { button, Canvas座標Base, div, DivC, input, label, LV2HtmlComponentBase, PointerWife, Px2DVector, 配置物座標点 } from "SengenUI/index";
 ﻿
 
 
@@ -11,14 +11,14 @@ import { 矢印設定状態 } from "./設定状態データクラス";
 
 
 
-export interface 矢印設定パネルオプション<座標点T extends 配置物座標点> {
+export interface 矢印設定パネルオプション<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     position: 座標点T;
     初期設定: 矢印設定状態;
     on設定変更: (新設定: 矢印設定状態) => void;
     on閉じる: () => void;
 }
 
-export class 矢印設定パネル<座標点T extends 配置物座標点> extends LV2HtmlComponentBase {
+export class 矢印設定パネル<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends LV2HtmlComponentBase {
     protected _componentRoot: DivC;
     private _現在の設定: 矢印設定状態;
     private _on設定変更: (新設定: 矢印設定状態) => void;
