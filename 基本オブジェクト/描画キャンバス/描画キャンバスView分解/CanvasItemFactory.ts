@@ -65,7 +65,6 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         return this.付箋を構築する(
             pos,
             new Px2DVector(new Px長さ(220), new Px長さ(90)),
-            new Px長さ(90),
             札参照コンテンツを作る(札ID),
             new 付箋ID(id)
         );
