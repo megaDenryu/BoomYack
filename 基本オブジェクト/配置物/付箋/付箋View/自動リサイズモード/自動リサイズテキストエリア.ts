@@ -45,8 +45,29 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
         );
         this._componentRoot = this._ルートを構築する(options.placeholder, options.追加クラス);
 
-        // 初期高さを設定（遅延実行で親コンポーネントの初期化を待つ）
+        // 生成された瞬間から正しい高さで描画するため、DOM未接続でも計算できる
+        // 行数ベースの自然な高さを同期的に適用してから枠へ通知する。scrollHeightを
+        // 読むadjustHeight()はDOM接続後でないと正確に測れないため初期値には使えず、
+        // これを遅延実行(setTimeout)任せにすると外枠(背景)と中身の高さがずれた
+        // 状態が一瞬でも画面に出てしまう。
+        const 初期高さ = this.自然な初期高さを計算する();
+        this.element.style.height = 初期高さ.toCssValue();
+        this._onHeightChange(初期高さ.value);
+
+        // 単語折り返しによる実際の行数はDOM幅に依存するため、マウント後にscrollHeightで補正する
         setTimeout(() => this.adjustHeight(), 0);
+    }
+
+    /**
+     * 明示的な改行の数から自然な高さを計算する(padding*2 + lineHeight*行数)。
+     * scrollHeightと違いDOM未接続でも計算できるため、初回描画を同期的に正しい
+     * 高さにするために使う。単語折り返しによる追加行はここでは考慮できず、
+     * その補正はマウント後に実行されるadjustHeight()に委ねる。
+     */
+    private 自然な初期高さを計算する(): Px長さ {
+        const 行数 = Math.max(1, this._text.split("\n").length);
+        const パラメータ = this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ;
+        return パラメータ.padding.multiply(2).plus(パラメータ.lineHeight.multiply(行数));
     }
 
     protected _ルートを構築する(placeholder?: string, 追加クラス?: string): TextAreaC {
