@@ -167,19 +167,18 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
 
         if (コンテキストメニュー依存関係.onマイク状態監視登録) {
             コンテキストメニュー依存関係.onマイク状態監視登録((isRecording) => {
-                if (this._コンテキストメニュー && (this._コンテキストメニュー as 多段格子コンテキストメニュー).updateItem) {
-                    const multiMenu = this._コンテキストメニュー as 多段格子コンテキストメニュー;
+                if (this._コンテキストメニュー && this._コンテキストメニュー.updateItem) {
                     if (isRecording) {
-                        multiMenu.updateItem("L1-mic", { iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' });
+                        this._コンテキストメニュー.updateItem("L1-mic", { iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' });
                     } else {
-                        multiMenu.updateItem("L1-mic", { iconUrl: MicOffIcon });
+                        this._コンテキストメニュー.updateItem("L1-mic", { iconUrl: MicOffIcon });
                     }
                 }
             });
             // 初期状態反映
             if (コンテキストメニュー依存関係.getマイク入力状態 && コンテキストメニュー依存関係.getマイク入力状態()) {
                  requestAnimationFrame(() => {
-                     (this._コンテキストメニュー as 多段格子コンテキストメニュー).updateItem?.("L1-mic", { iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' });
+                     this._コンテキストメニュー.updateItem?.("L1-mic", { iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' });
                  });
             }
         }

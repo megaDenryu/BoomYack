@@ -116,7 +116,7 @@ export class 多段格子コンテキストメニュー extends LV2HtmlComponent
 
             let cell: GridCell | SelectableGridCell;
             if (item.type === 'toggle') {
-                const toggleItem = item as 格子メニュー2層トグルオプション;
+                const toggleItem = item;
                 cell = new SelectableGridCell({
                     col, row, isLayer2: true, opacity: this._options.opacity,
                     label: toggleItem.toggleSeed.stateFalse.label,
@@ -124,7 +124,7 @@ export class 多段格子コンテキストメニュー extends LV2HtmlComponent
                     backgroundColor: toggleItem.toggleSeed.stateFalse.backgroundColor,
                 }, toggleItem.toggleSeed);
             } else {
-                const normalItem = item as 格子メニュー2層通常オプション;
+                const normalItem = item;
                 cell = new GridCell({
                     col, row, isLayer2: true, opacity: this._options.opacity,
                     label: normalItem.label, iconUrl: normalItem.iconUrl, backgroundColor: normalItem.backgroundColor

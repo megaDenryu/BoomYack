@@ -109,12 +109,11 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         this.voiceRecognitionService = new VoiceRecognitionService(this.selectionManager);
         
         this.voiceRecognitionService.onStateChange((isRecording) => {
-            if (this.menu && (this.menu as 多段格子コンテキストメニュー).updateItem) {
-                const multiMenu = this.menu as 多段格子コンテキストメニュー;
+            if (this.menu && this.menu.updateItem) {
                 if (isRecording) {
-                    multiMenu.updateItem("L1-mic", { iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' });
+                    this.menu.updateItem("L1-mic", { iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' });
                 } else {
-                    multiMenu.updateItem("L1-mic", { iconUrl: MicOffIcon });
+                    this.menu.updateItem("L1-mic", { iconUrl: MicOffIcon });
                 }
             }
             if (this._recordingIndicator) {
