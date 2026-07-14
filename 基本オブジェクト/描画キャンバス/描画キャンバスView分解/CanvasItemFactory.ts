@@ -12,8 +12,9 @@ import { CanvasGraphModel, ICanvasItemFactory } from "./CanvasGraphModel";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 import { コンテキストメニューコンテナ } from "../../キャンバス操作/円状コンテキストメニュー/コンテキストメニューコンテナ";
 import { 付箋データ, 矢印データ, 折れ線矢印データ, なめらか曲線矢印データ, 配置物データ } from "../データクラス";
-import { 付箋コンテンツデータ, 自由テキストコンテンツを作る, タイトル付きコンテンツを作る } from "../付箋コンテンツデータ";
+import { 付箋コンテンツデータ, 自由テキストコンテンツを作る, タイトル付きコンテンツを作る, 札参照コンテンツを作る } from "../付箋コンテンツデータ";
 import { 付箋設定パネル, 付箋設定状態 } from "../../配置物/設定パネル";
+import { FudabaAPIクライアント } from "../../Fudaba連携/FudabaAPIクライアント";
 import { 配置物衝突判定サービス } from "./配置物衝突判定サービス";
 import { AiOperationService } from "../../AI連携/AiOperationService";
 import { キャンバスグラフ操作サービス } from "./キャンバスグラフ操作サービス";
@@ -35,7 +36,8 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         private voiceRecognitionService: VoiceRecognitionService,
         private onDeleteItem: () => void, // 削除コールバック
         private onCommandPush: ((cmd: Iキャンバスコマンド) => void) | undefined,
-        private 座標変換: ボード基準座標変換
+        private 座標変換: ボード基準座標変換,
+        private fudabaAPIクライアント: FudabaAPIクライアント
     ) {
         this.衝突判定サービス = new 配置物衝突判定サービス();
         this._aiOperation = new AiOperationService(this.model, this.onCommandPush);
@@ -57,6 +59,16 @@ export class CanvasItemFactory implements ICanvasItemFactory {
             new Px2DVector(new Px長さ(220), new Px長さ(70)),
             new Px長さ(70),
             タイトル付きコンテンツを作る("", ""),
+            new 付箋ID(id)
+        );
+    }
+
+    public create札参照付箋(pos: 描画座標点, 札ID: string, id?: string): 付箋集約<描画座標点> {
+        return this.付箋を構築する(
+            pos,
+            new Px2DVector(new Px長さ(220), new Px長さ(90)),
+            new Px長さ(90),
+            札参照コンテンツを作る(札ID),
             new 付箋ID(id)
         );
     }
@@ -87,6 +99,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
             minHeight,
             初期コンテンツ,
             コンテキストメニューコンテナ: this.contextMenuContainer,
+            fudabaAPIクライアント: this.fudabaAPIクライアント,
             onTextCommit: (oldText: string, newText: string) => {
                 this.onCommandPush?.(new 配置物テキスト変更コマンド(付箋, oldText, newText));
             },

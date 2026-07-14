@@ -19,6 +19,7 @@ import { I接続点親情報 } from "../矢印接続可能なもの/接続点";
 import { I付箋コンテンツView } from "./I付箋コンテンツView";
 import { 付箋コンテンツViewを生成する } from "./付箋コンテンツViewファクトリ";
 import { 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
+import { FudabaAPIクライアント } from "../../Fudaba連携/FudabaAPIクライアント";
 import { リサイズハンドル } from "./リサイズハンドル";
 import { ボード基準座標変換 } from "BoomYack/基本オブジェクト/キャンバス操作/座標変換/ボード基準座標変換";
 import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?url';
@@ -42,6 +43,7 @@ export interface 自動リサイズ付箋Viewオプション<座標点T extends 
     minHeight: Px長さ;
     初期コンテンツ: 付箋コンテンツデータ;
     コンテキストメニューコンテナ: コンテキストメニューコンテナ;
+    fudabaAPIクライアント: FudabaAPIクライアント;
     onDelete?: () => void;
     onDrag?: (e: Drag中値, ドラッグしたコンポーネント: 自動リサイズ付箋View<座標点T>) => void;
     onResize?: () => void;
@@ -127,6 +129,9 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
         this._onTextChange = option.onTextChange;
         this._componentRoot = this._ルートを構築する(option, 矢印接続可能なもの依存関係, コンテキストメニュー依存関係);
         const imgBg = "rgba(255, 255, 255, 0.5)";
+        // 札参照コンテンツ等、外部データの投影であるコンテンツはLLMへ渡すと実体と乖離した
+        // 平文が独り歩きするためAI分解/AI生成を無効化する(設計2026-07-14_付箋コンテンツ設計.md 7.3節)
+        const AI操作対応 = this._content.AI操作に対応しているか();
 
         this._コンテキストメニューコンテナ.コンテキストメニュー追加(
             new 多段格子コンテキストメニュー({
@@ -148,10 +153,10 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
                     { id: 'L1-settings', label: '設定', Position: 'rb', onClick: () => { コンテキストメニュー依存関係.on設定パネル表示?.(this._position as 描画座標点); } },
                 ],
                 layer2Items: [
-                    // 分解生成 (LT)
-                    { parentId: 'L1-decomp', label: "LLM分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_LLM?.(); } },
-                    { parentId: 'L1-decomp', label: "区切り分解", onClick: () => { コンテキストメニュー依存関係.onAI分解_区切り文字?.(); } },
-                    { parentId: 'L1-decomp', label: "続き生成", onClick: () => { コンテキストメニュー依存関係.onAI生成?.(); } },
+                    // 分解生成 (LT)。AI操作対応可否はコンテンツ種別ごとに決まる(I付箋コンテンツView.AI操作に対応しているか)
+                    { parentId: 'L1-decomp', label: "LLM分解", onClick: () => { if (AI操作対応) { コンテキストメニュー依存関係.onAI分解_LLM?.(); } } },
+                    { parentId: 'L1-decomp', label: "区切り分解", onClick: () => { if (AI操作対応) { コンテキストメニュー依存関係.onAI分解_区切り文字?.(); } } },
+                    { parentId: 'L1-decomp', label: "続き生成", onClick: () => { if (AI操作対応) { コンテキストメニュー依存関係.onAI生成?.(); } } },
 
                     // グラフ操作 (RT)
                     { parentId: 'L1-graph', label: "グラフ選択", onClick: () => { コンテキストメニュー依存関係.onグラフ選択?.(); } },
@@ -162,6 +167,13 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
                 ]
             }).tap((menu) => { this._コンテキストメニュー = menu; })
         );
+
+        if (!AI操作対応) {
+            // 分解生成カテゴリボタン自体を無効相当の見た目(灰色)にして、対応不可であることを一目で示す
+            requestAnimationFrame(() => {
+                this._コンテキストメニュー.updateItem?.('L1-decomp', { backgroundColor: 'rgba(120, 120, 120, 0.4)' });
+            });
+        }
 
         if (コンテキストメニュー依存関係.onマイク状態監視登録) {
             コンテキストメニュー依存関係.onマイク状態監視登録((isRecording) => {
@@ -246,7 +258,7 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
                                                 this.選択する(new MouseEvent('mousedown'));
                                             }
                                         }
-                                    }).tap((content) => { this._content = content; })
+                                    }, { fudabaAPIクライアント: option.fudabaAPIクライアント }).tap((content) => { this._content = content; })
                                 ]),
                             new リサイズハンドル("left").tap((handle) => { handle.mouseWife.ドラッグ連動登録({
                                                                                                 onドラッグ開始: (e: Drag開始値)=> {},
