@@ -2,7 +2,7 @@ import { div, DivC, LV2HtmlComponentBase } from "SengenUI/index";
 
 
 import { resize_handle, resize_handle_top, resize_handle_bottom, resize_handle_left, resize_handle_right, resize_handle_top_left, resize_handle_top_right, resize_handle_bottom_left, resize_handle_bottom_right } from "./style.css";
-import { グローバルイベントを購読する } from "BoomYack/基本オブジェクト/グローバルイベント購読";
+import { グローバルイベント購読ハンドル, グローバルイベントを購読する } from "BoomYack/基本オブジェクト/グローバルイベント購読";
 
 /**
  * リサイズタイプの定義
@@ -53,6 +53,10 @@ export class ResizeHandler extends LV2HtmlComponentBase {
     private _onResizeStart: (resizeType: ResizeType) => void;
     private _onResizeEnd: () => void;
 
+    // グローバルイベント購読ハンドル（delete時に解除するため保持する）
+    private readonly _pointerMove購読: グローバルイベント購読ハンドル;
+    private readonly _pointerUp購読: グローバルイベント購読ハンドル;
+
     constructor(options: {
         onResizeMove: (result: ResizeResult) => void;
         onResizeStart?: (resizeType: ResizeType) => void;
@@ -63,9 +67,9 @@ export class ResizeHandler extends LV2HtmlComponentBase {
         this._onResizeStart = options.onResizeStart ?? (() => {});
         this._onResizeEnd = options.onResizeEnd ?? (() => {});
         this._componentRoot = this._ルートを構築する();
-        
-        グローバルイベントを購読する(document, 'pointermove', this.handleMouseMove.bind(this));
-        グローバルイベントを購読する(document, 'pointerup', this.handleMouseUp.bind(this));
+
+        this._pointerMove購読 = グローバルイベントを購読する(document, 'pointermove', this.handleMouseMove.bind(this));
+        this._pointerUp購読 = グローバルイベントを購読する(document, 'pointerup', this.handleMouseUp.bind(this));
     }
 
     protected _ルートを構築する(): DivC {
@@ -258,8 +262,8 @@ export class ResizeHandler extends LV2HtmlComponentBase {
     
     // リソース解放
     public delete(): void {
-        document.removeEventListener('pointermove', this.handleMouseMove.bind(this));
-        document.removeEventListener('pointerup', this.handleMouseUp.bind(this));
+        this._pointerMove購読.解除する();
+        this._pointerUp購読.解除する();
         super.delete();
     }
 }
