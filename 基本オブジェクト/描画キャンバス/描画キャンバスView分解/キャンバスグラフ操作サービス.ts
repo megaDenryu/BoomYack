@@ -1,6 +1,5 @@
 import { MouseEventData, 画面座標点, 描画座標点, Px2DVector } from "SengenUI/index";
 import { I付箋シリアライズ可能, I配置物集約 } from "../../I配置物";
-import { Iグラフ配置先 } from "../../配置物リポジトリ";
 import { 配置物連結グラフ, 配置物連結グラフをすべて抽出, 配置物連結グラフ群 } from "../配置物グラフ/配置物連結グラフ";
 import { テキスト用グラフ, テキスト用グラフノード, テキスト用グラフ_付箋textfromJson, 付箋text, 配置物連結グラフtoテキスト用グラフノード } from "../配置物グラフ/テキスト化情報";
 import { 付箋コンテンツをtextへ変換 } from "../付箋コンテンツデータ";
@@ -17,7 +16,7 @@ export class キャンバスグラフ操作サービス {
     private readonly クリップボードサービス: クリップボードサービス = クリップボードサービス.create();
 
     constructor(
-        private readonly 配置先: Iグラフ配置先,
+        private readonly 配置先: CanvasGraphModel,
         private readonly ファイル名: () => string,
         private readonly 座標変換: ボード基準座標変換
     ) {}
@@ -88,7 +87,7 @@ export class キャンバスグラフ操作サービス {
             console.warn('[BoomYack貼り付け] グラフ情報のパースに失敗しました。通常のテキストとして付箋に貼り付けます。');
             const item = this.配置先.描画座標点でadd付箋(pos, text);
             if (onCommandPush && item) {
-                onCommandPush(new 配置物追加コマンド(this.配置先 as CanvasGraphModel, item));
+                onCommandPush(new 配置物追加コマンド(this.配置先, item));
             }
             return;
         }
@@ -99,7 +98,7 @@ export class キャンバスグラフ操作サービス {
                 addedItems = new テキスト用グラフからキャンバスに配置するサービス(this.配置先, グラフ, pos).グラフを配置する();
             });
             if (onCommandPush && addedItems.length > 0) {
-                onCommandPush(new 配置物追加コマンド(this.配置先 as CanvasGraphModel, addedItems));
+                onCommandPush(new 配置物追加コマンド(this.配置先, addedItems));
             }
             console.log('[BoomYack貼り付け] ✓ 貼り付け完了');
         } catch (error) {
