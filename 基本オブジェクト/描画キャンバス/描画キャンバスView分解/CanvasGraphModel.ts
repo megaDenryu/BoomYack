@@ -17,7 +17,7 @@ export type GraphEvent =
     | { type: 'UPDATED' }; 
 
 export interface ICanvasItemFactory {
-    create付箋(pos: 描画座標点, text?: string): 付箋集約<描画座標点>;
+    create付箋(pos: 描画座標点, text?: string, id?: string): 付箋集約<描画座標点>;
     create折れ線矢印(折れ線矢印vm: 折れ線矢印VM<描画座標点>): 折れ線矢印集約<描画座標点>;
 }
 
@@ -64,11 +64,24 @@ export class CanvasGraphModel implements I描画空間, I配置物リポジト�
         return this.描画座標点でadd付箋(描画座標点.fromPx2DVector(pos, this.描画基準座標), text);
     }
 
-    public 描画座標点でadd付箋(pos: 描画座標点, text?: string): 付箋集約<描画座標点> {
+    public 描画座標点でadd付箋(pos: 描画座標点, text?: string, 希望ID?: string): 付箋集約<描画座標点> {
         if (!this._factory) throw new Error("Factory not set");
-        const item = this._factory.create付箋(pos, text);
+        const 採用ID = this.衝突しない場合に限り希望IDを採用する(希望ID);
+        const item = this._factory.create付箋(pos, text, 採用ID);
         this.add配置物(item);
         return item;
+    }
+
+    /**
+     * 希望IDがボード内の既存配置物と衝突する場合はundefinedを返し、呼び出し側で新規ID発行させる。
+     * ボード内でID文字列が重複すると、削除カスケードやUndo/Redoの矢印再接続がID文字列一致で
+     * 対象を特定しているため、無関係な配置物を巻き込んで壊す（同一ボードへのコピー&貼り付けは
+     * 必ず既存付箋とIDが衝突するため、この安全策なしでは通常操作が壊れる）。
+     */
+    private 衝突しない場合に限り希望IDを採用する(希望ID?: string): string | undefined {
+        if (希望ID === undefined) return undefined;
+        const 衝突している = this.配置物リスト.some(item => item.idString === 希望ID);
+        return 衝突している ? undefined : 希望ID;
     }
 
     public add折れ線矢印(折れ線矢印vm: 折れ線矢印VM<描画座標点>): 折れ線矢印集約<描画座標点> {

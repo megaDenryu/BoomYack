@@ -69,7 +69,7 @@ export class テキスト用グラフからキャンバスに配置するサー�
 
         // 前処理Strategyから位置を取得
         const pos = this.先行位置調整サービス.ノード位置を計算(node);
-        const node付箋 = new node付箋pair(node, this.配置先.描画座標点でadd付箋(pos, node.nodeData.text));
+        const node付箋 = new node付箋pair(node, this.配置先.描画座標点でadd付箋(pos, node.nodeData.text, node.id));
         this.node付箋pairMap.set(node付箋.付箋.id, node付箋);
         this.nodeID別node付箋pairMap.set(node.id, node付箋);
 

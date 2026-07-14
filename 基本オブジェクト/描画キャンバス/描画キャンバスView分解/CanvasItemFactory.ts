@@ -37,7 +37,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         this._aiOperation = new AiOperationService(this.model, this.onCommandPush);
     }
 
-    public create付箋(pos: 描画座標点, text?: string): 付箋集約<描画座標点> {
+    public create付箋(pos: 描画座標点, text?: string, id?: string): 付箋集約<描画座標点> {
         let dragStartPos: 描画座標点 | null = null;
         const 付箋 = new 付箋集約<描画座標点>(
             {
@@ -73,7 +73,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 i描画空間: this.model,
                 i配置物選択機能集約: this.selectionManager
             },
-            new 付箋ID(),
+            new 付箋ID(id),
             {
                 座標変換: this.座標変換,
                 on削除: this.onDeleteItem,
@@ -100,7 +100,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         );
         return 付箋;
     }
-    
+
     public create付箋FromData(data: 付箋データ): 付箋集約<描画座標点> {
         let dragStartPos: 描画座標点 | null = null;
         const pos = 描画座標点.fromPx2DVector(data.position.toPx2DVector(), this.model.描画基準座標);
