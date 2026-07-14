@@ -198,6 +198,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             { id: "L1-ai", label: ["分解", "生成"], Position: 'lt' },
             { id: "L1-graph", label: ["グラフ", "操作"], Position: 'rt' },
             { id: "L1-mic", iconUrl: MicOffIcon, backgroundColor: imgBg, Position: 'lb', onClick: (e: MouseEvent) => { e.stopPropagation(); this.voiceRecognitionService.toggleRecording(); } },
+            { id: "L1-sticky-titled", label: ["タイトル付き", "付箋"], Position: 'rb', onClick: (e: MouseEvent) => this.onAddTitledStickyNote(e) },
         ];
 
         const layer2Items: 格子メニュー2層オプション[] = [
@@ -333,11 +334,19 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         this.selectionManager.選択解除();
     }
     
-    private onAddStickyNote(e: MouseEvent): void { 
+    private onAddStickyNote(e: MouseEvent): void {
          const data = new MouseEventData(e);
          const 補正済み画面座標点 = this._座標変換.画面座標点を補正する(data.position.x, data.position.y);
          const pos = 補正済み画面座標点.to描画座標点(this.model.描画基準座標);
          const item = this.model.描画座標点でadd付箋(pos);
+         this.commandRepository.push(new 配置物追加コマンド(this.model, item));
+    }
+
+    private onAddTitledStickyNote(e: MouseEvent): void {
+         const data = new MouseEventData(e);
+         const 補正済み画面座標点 = this._座標変換.画面座標点を補正する(data.position.x, data.position.y);
+         const pos = 補正済み画面座標点.to描画座標点(this.model.描画基準座標);
+         const item = this.model.描画座標点でタイトル付き付箋をadd(pos);
          this.commandRepository.push(new 配置物追加コマンド(this.model, item));
     }
     

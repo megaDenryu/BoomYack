@@ -4,6 +4,7 @@ import { 配置物連結グラフ } from "./配置物連結グラフ";
 import { 付箋情報 } from "./配置物情報";
 import { Func } from "TypeScriptBenriKakuchou/アーキテクチャBase";
 import { レコードとして扱えるか } from "../../オブジェクト型ガード";
+import { 付箋コンテンツをtextへ変換 } from "../付箋コンテンツデータ";
 
 // テキスト埋め込み用情報
 export interface GraphNode<T>{id:string;nodeData:T;linkNode:{nextIDs:string[];prevIDs:string[];}}
@@ -81,7 +82,7 @@ export class テキスト用グラフ<T> implements Graph<T> {
 
 export function 付箋情報toテキスト用付箋ノード(付箋: 付箋情報<配置物座標点>): テキスト用グラフノード<付箋text> {
     return new テキスト用グラフノード<付箋text>(
-        { text: 付箋.配置物データ.text },
+        { text: 付箋コンテンツをtextへ変換(付箋.配置物データ.コンテンツ) },
         付箋.配置物データ.id.id,
         付箋.始点が接続している矢印.map(矢印 => 矢印.終点接続付箋 ? 矢印.終点接続付箋.配置物データ.id.id : "").filter(id => id !== ""),
         付箋.終点が接続している矢印.map(矢印 => 矢印.始点接続付箋 ? 矢印.始点接続付箋.配置物データ.id.id : "").filter(id => id !== ""),

@@ -1,8 +1,9 @@
 import { MouseEventData, 画面座標点, 描画座標点, Px2DVector } from "SengenUI/index";
-import { I配置物集約 } from "../../I配置物";
+import { I付箋シリアライズ可能, I配置物集約 } from "../../I配置物";
 import { Iグラフ配置先 } from "../../配置物リポジトリ";
 import { 配置物連結グラフ, 配置物連結グラフをすべて抽出, 配置物連結グラフ群 } from "../配置物グラフ/配置物連結グラフ";
 import { テキスト用グラフ, テキスト用グラフノード, テキスト用グラフ_付箋textfromJson, 付箋text, 配置物連結グラフtoテキスト用グラフノード } from "../配置物グラフ/テキスト化情報";
+import { 付箋コンテンツをtextへ変換 } from "../付箋コンテンツデータ";
 import { JSONファイル出力サービス } from "BoomYack/基本オブジェクト/ファイル入出力/JSONファイル出力サービス";
 import { クリップボードサービス } from "BoomYack/基本オブジェクト/ファイル入出力/クリップボードサービス";
 import { テキスト用グラフからキャンバスに配置するサービス } from "BoomYack/基本オブジェクト/グラフ計算サービス/グラフ計算サービス";
@@ -51,12 +52,14 @@ export class キャンバスグラフ操作サービス {
      */
     public 選択中の配置物をコピー(選択配置物リスト: I配置物集約[]): void {
         // 付箋のみを対象とする（矢印は単独コピーの意味がないため除外）
-        const 付箋リスト = 選択配置物リスト.filter(item => item.type === "付箋");
+        const 付箋リスト = 選択配置物リスト.filter(
+            (item): item is I付箋シリアライズ可能 & I配置物集約 => item.type === "付箋"
+        );
         if (付箋リスト.length === 0) return;
 
         const ノードリスト = 付箋リスト.map(付箋 => {
-            const データ = 付箋.toシリアライズデータ() as any;
-            const text: string = データ.text ?? "";
+            const データ = 付箋.toシリアライズデータ();
+            const text = 付箋コンテンツをtextへ変換(データ.コンテンツ);
             const id: string = 付箋.idString;
             return new テキスト用グラフノード<付箋text>({ text }, id, [], []);
         });

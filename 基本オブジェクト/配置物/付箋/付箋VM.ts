@@ -4,6 +4,7 @@ import { I配置物 } from "../../グラフモデル/グラフVM標準";
 import { I付箋VM } from "../../I配置物";
 
 import { 付箋データ, 座標データ, サイズデータ } from "../../描画キャンバス/データクラス";
+import { 付箋コンテンツをtextへ変換, 自由テキストコンテンツを作る } from "../../描画キャンバス/付箋コンテンツデータ";
 import { 付箋設定状態 } from "../設定パネル";
 
 export class 付箋VM implements I配置物, I付箋VM {
@@ -38,7 +39,7 @@ export class 付箋VM implements I配置物, I付箋VM {
             this.id,
             座標データ.fromPx2DVector(this.position),
             サイズデータ.fromPx2DVector(this.size),
-            this.text,
+            自由テキストコンテンツを作る(this.text),
             this.設定状態
         );
     }
@@ -51,7 +52,7 @@ export class 付箋VM implements I配置物, I付箋VM {
             data.id,
             data.position.toPx2DVector(),
             data.size.toPx2DVector(),
-            data.text,
+            付箋コンテンツをtextへ変換(data.コンテンツ),
             data.設定状態
         );
     }

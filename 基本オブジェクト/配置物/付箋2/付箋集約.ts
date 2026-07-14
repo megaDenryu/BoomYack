@@ -157,7 +157,7 @@ export class 付箋集約<座標点T extends 配置物座標点> implements I付
             this.id,
             座標データ.fromPx2DVector(position),
             サイズデータ.create(size.x.値, size.y.値),
-            this.text,
+            this.view.コンテンツデータ,
             this._設定状態
         );
     }

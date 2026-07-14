@@ -3,6 +3,7 @@ import { LV2HtmlComponentBase } from "SengenUI/index";
 import { テキストエリアサイズパラメータ, 自動リサイズテキストエリア } from "../付箋/付箋View/自動リサイズモード/自動リサイズテキストエリア";
 import { I付箋コンテンツView, 付箋コンテンツView依存関係 } from "./I付箋コンテンツView";
 import { テキストフォーマット適用 } from "./テキストフォーマッタサービス";
+import { 自由テキストコンテンツを作る, 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
 import { 付箋設定状態 } from "../設定パネル";
 
 const 自由テキストのプレースホルダー = "付箋の内容を入力...";
@@ -35,6 +36,10 @@ export class 自由テキストコンテンツView extends LV2HtmlComponentBase 
 
     public setText(text: string): void {
         this._componentRoot.setValue(text);
+    }
+
+    public get コンテンツデータ(): 付箋コンテンツデータ {
+        return 自由テキストコンテンツを作る(this.text);
     }
 
     public 設定を適用(設定: 付箋設定状態): void {

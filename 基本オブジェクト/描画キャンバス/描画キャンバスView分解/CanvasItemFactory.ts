@@ -1,5 +1,6 @@
 import { Px2DVector, Px長さ, ビューポート座標値, 描画座標点 } from "SengenUI/index";
 import { 付箋集約 } from "../../配置物/付箋2/付箋集約";
+import { 自動リサイズ付箋Viewオプション } from "../../配置物/付箋2/自動リサイズ付箋View";
 import { 矢印VM } from "../../配置物/折れ線矢印/矢印集約";
 import { 折れ線矢印VM, 折れ線矢印集約 } from "../../配置物";
 
@@ -9,6 +10,7 @@ import { CanvasGraphModel, ICanvasItemFactory } from "./CanvasGraphModel";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 import { コンテキストメニューコンテナ } from "../../キャンバス操作/円状コンテキストメニュー/コンテキストメニューコンテナ";
 import { 付箋データ, 矢印データ, 折れ線矢印データ, 配置物データ } from "../データクラス";
+import { 付箋コンテンツデータ, 自由テキストコンテンツを作る, タイトル付きコンテンツを作る } from "../付箋コンテンツデータ";
 import { 付箋設定パネル, 付箋設定状態 } from "../../配置物/設定パネル";
 import { 配置物衝突判定サービス } from "./配置物衝突判定サービス";
 import { AiOperationService } from "../../AI連携/AiOperationService";
@@ -38,94 +40,68 @@ export class CanvasItemFactory implements ICanvasItemFactory {
     }
 
     public create付箋(pos: 描画座標点, text?: string, id?: string): 付箋集約<描画座標点> {
-        let dragStartPos: 描画座標点 | null = null;
-        const 付箋 = new 付箋集約<描画座標点>(
-            {
-                position: pos,
-                size: new Px2DVector(new Px長さ(200), new Px長さ(50)),
-                minHeight: new Px長さ(50),
-                text: text ?? "",
-                コンテキストメニューコンテナ: this.contextMenuContainer,
-                onTextCommit: (oldText: string, newText: string) => {
-                    this.onCommandPush?.(new 配置物テキスト変更コマンド(付箋, oldText, newText));
-                },
-                onDragStart: () => {
-                    dragStartPos = 付箋.描画座標点;
-                },
-                onDragEnd: () => {
-                    if (dragStartPos) {
-                        const dragEndPos = 付箋.描画座標点;
-                        if (!dragStartPos.px2DVector.equals(dragEndPos.px2DVector)) {
-                            this.onCommandPush?.(new 配置物移動コマンド(付箋, dragStartPos, dragEndPos));
-                        }
-                    }
-                }
-            }, 
-            {
-                i矢印生成先: {
-                    add折れ線矢印: (vm) => {
-                        const arrow = this.model.add折れ線矢印(vm);
-                        this.onCommandPush?.(new 配置物追加コマンド(this.model, arrow));
-                        return arrow;
-                    },
-                    未接続の点ハンドルを接続点と接続をtryする: (接続点) => this.model.未接続の点ハンドルを接続点と接続をtryする(接続点)
-                },
-                i描画空間: this.model,
-                i配置物選択機能集約: this.selectionManager
-            },
-            new 付箋ID(id),
-            {
-                座標変換: this.座標変換,
-                on削除: this.onDeleteItem,
-                on設定パネル表示: (位置: 描画座標点) => this.設定パネルを表示する(付箋, 位置),
-                onAI生成: () => { this._aiOperation.executeGenerate(付箋); },
-                onAI分解_LLM: () => { this._aiOperation.executeDecompose(付箋, "意味クラスタ"); },
-                onAI分解_区切り文字: () => { this._aiOperation.executeDecompose(付箋, "文単位"); },
-                onグラフをテキストとしてコピー: () => { this.graphService.グラフをテキストとしてコピー(付箋); },
-                onグラフをJSON出力: () => { this.graphService.グラフを選択してjsonファイル出力(付箋); },
-                on選択配置物をコピー: () => { this.graphService.選択中の配置物をコピー(this.selectionManager.選択中配置物); },
-                onクリップボードから貼り付け: (e: MouseEvent) => { this.graphService.クリップボードから貼り付け(e, this.onCommandPush); },
-                onグラフ選択: () => {
-                    const グラフ = this.graphService.グラフを選択(付箋);
-                    if (グラフ) {
-                        for (const item of グラフ.配置物集約リスト) {
-                            this.selectionManager.追加選択(item);
-                        }
-                    }
-                },
-                onマイク入力トグル: () => { this.voiceRecognitionService.toggleRecording(); },
-                getマイク入力状態: () => this.voiceRecognitionService.getIsRecording(),
-                onマイク状態監視登録: (callback) => { this.voiceRecognitionService.onStateChange(callback); }
-            }
+        return this.付箋を構築する(
+            pos,
+            new Px2DVector(new Px長さ(200), new Px長さ(50)),
+            new Px長さ(50),
+            自由テキストコンテンツを作る(text ?? ""),
+            new 付箋ID(id)
         );
-        return 付箋;
+    }
+
+    public createタイトル付き付箋(pos: 描画座標点, id?: string): 付箋集約<描画座標点> {
+        return this.付箋を構築する(
+            pos,
+            new Px2DVector(new Px長さ(220), new Px長さ(70)),
+            new Px長さ(70),
+            タイトル付きコンテンツを作る("", ""),
+            new 付箋ID(id)
+        );
     }
 
     public create付箋FromData(data: 付箋データ): 付箋集約<描画座標点> {
-        let dragStartPos: 描画座標点 | null = null;
         const pos = 描画座標点.fromPx2DVector(data.position.toPx2DVector(), this.model.描画基準座標);
-        const 付箋 = new 付箋集約<描画座標点>(
-            {
-                position: pos,
-                size: data.size.toPx2DVector(),
-                minHeight: new Px長さ(50),
-                text: data.text,
-                コンテキストメニューコンテナ: this.contextMenuContainer,
-                onTextCommit: (oldText: string, newText: string) => {
-                    this.onCommandPush?.(new 配置物テキスト変更コマンド(付箋, oldText, newText));
-                },
-                onDragStart: () => {
-                    dragStartPos = 付箋.描画座標点;
-                },
-                onDragEnd: () => {
-                    if (dragStartPos) {
-                        const dragEndPos = 付箋.描画座標点;
-                        if (!dragStartPos.px2DVector.equals(dragEndPos.px2DVector)) {
-                            this.onCommandPush?.(new 配置物移動コマンド(付箋, dragStartPos, dragEndPos));
-                        }
+        const 付箋 = this.付箋を構築する(pos, data.size.toPx2DVector(), new Px長さ(50), data.コンテンツ, data.id);
+        付箋.設定を適用(data.設定状態);
+        return 付箋;
+    }
+
+    /**
+     * 付箋集約の生成ロジックの共通部分(コンテキストメニュー依存関係の組み立て等)。
+     * position/size/初期コンテンツ/idだけを呼び出し側で分岐させ、コンテンツ種別が
+     * 増えても生成ロジックの重複が線形に増えない構造にする(設計2026-07-14_付箋コンテンツ設計.md 4.4節)。
+     */
+    private 付箋を構築する(
+        pos: 描画座標点,
+        size: Px2DVector,
+        minHeight: Px長さ,
+        初期コンテンツ: 付箋コンテンツデータ,
+        id: 付箋ID
+    ): 付箋集約<描画座標点> {
+        let dragStartPos: 描画座標点 | null = null;
+        const オプション: 自動リサイズ付箋Viewオプション<描画座標点> = {
+            position: pos,
+            size,
+            minHeight,
+            初期コンテンツ,
+            コンテキストメニューコンテナ: this.contextMenuContainer,
+            onTextCommit: (oldText: string, newText: string) => {
+                this.onCommandPush?.(new 配置物テキスト変更コマンド(付箋, oldText, newText));
+            },
+            onDragStart: () => {
+                dragStartPos = 付箋.描画座標点;
+            },
+            onDragEnd: () => {
+                if (dragStartPos) {
+                    const dragEndPos = 付箋.描画座標点;
+                    if (!dragStartPos.px2DVector.equals(dragEndPos.px2DVector)) {
+                        this.onCommandPush?.(new 配置物移動コマンド(付箋, dragStartPos, dragEndPos));
                     }
                 }
-            },
+            }
+        };
+        const 付箋 = new 付箋集約<描画座標点>(
+            オプション,
             {
                 i矢印生成先: {
                     add折れ線矢印: (vm) => {
@@ -138,7 +114,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 i描画空間: this.model,
                 i配置物選択機能集約: this.selectionManager
             },
-            data.id,
+            id,
             {
                 座標変換: this.座標変換,
                 on削除: this.onDeleteItem,
@@ -163,7 +139,6 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                 onマイク状態監視登録: (callback) => { this.voiceRecognitionService.onStateChange(callback); }
             }
         );
-        付箋.設定を適用(data.設定状態);
         return 付箋;
     }
 

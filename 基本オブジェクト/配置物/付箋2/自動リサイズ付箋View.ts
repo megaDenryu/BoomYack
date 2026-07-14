@@ -17,7 +17,8 @@ import { コンテキストメニューコンテナ } from "BoomYack/基本オ�
 import { 付箋設定状態 } from "../設定パネル";
 import { I接続点親情報 } from "../矢印接続可能なもの/接続点";
 import { I付箋コンテンツView } from "./I付箋コンテンツView";
-import { 自由テキストコンテンツView } from "./自由テキストコンテンツView";
+import { 付箋コンテンツViewを生成する } from "./付箋コンテンツViewファクトリ";
+import { 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
 import { リサイズハンドル } from "./リサイズハンドル";
 import { ボード基準座標変換 } from "BoomYack/基本オブジェクト/キャンバス操作/座標変換/ボード基準座標変換";
 import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?url';
@@ -39,7 +40,7 @@ export interface 自動リサイズ付箋Viewオプション<座標点T extends 
     position: 座標点T;
     size: Px2DVector;
     minHeight: Px長さ;
-    text: string;
+    初期コンテンツ: 付箋コンテンツデータ;
     コンテキストメニューコンテナ: コンテキストメニューコンテナ;
     onDelete?: () => void;
     onDrag?: (e: Drag中値, ドラッグしたコンポーネント: 自動リサイズ付箋View<座標点T>) => void;
@@ -226,8 +227,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                     zIndex: 配置物zIndex.付箋内部構造.コンテナ
                                 })
                                 .childs([
-                                    new 自由テキストコンテンツView({
-                                        初期テキスト: option.text ?? "",
+                                    付箋コンテンツViewを生成する(option.初期コンテンツ, {
                                         最小高さ: this._minHeight,
                                         onTextChange: (text: string) => {
                                             this._onTextChange?.(text);
@@ -434,6 +434,11 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
     public setText(text: string): void {
         this._content.setText(text);
         this._onTextChange?.(text);
+    }
+
+    /** シリアライズ用のコンテンツデータを取得（コンテンツ種別ごとの構造を保ったまま） */
+    public get コンテンツデータ(): 付箋コンテンツデータ {
+        return this._content.コンテンツデータ;
     }
 
     /** 状態に応じたアウトラインスタイルを取得 */

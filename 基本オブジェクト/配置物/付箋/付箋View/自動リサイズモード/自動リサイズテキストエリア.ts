@@ -24,6 +24,8 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
     constructor(options: {
         initialText?: string;
         placeholder?: string;
+        /** 付箋種別ごとの見た目差分(タイトル行の下線等)を追加するための任意クラス */
+        追加クラス?: string;
         初期テキストエリアサイズパラメータ?: テキストエリアサイズパラメータ;
         onTextChange: (text: string) => void;
         onHeightChange: (newHeight: number) => void;
@@ -41,17 +43,17 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
         this._テキストエリアサイズパラメータ管理 = new テキストエリアサイズパラメータ管理(
             options.初期テキストエリアサイズパラメータ ?? new テキストエリアサイズパラメータ()
         );
-        this._componentRoot = this._ルートを構築する(options.placeholder);
-        
+        this._componentRoot = this._ルートを構築する(options.placeholder, options.追加クラス);
+
         // 初期高さを設定（遅延実行で親コンポーネントの初期化を待つ）
         setTimeout(() => this.adjustHeight(), 0);
     }
 
-    protected _ルートを構築する(placeholder?: string): TextAreaC {
+    protected _ルートを構築する(placeholder?: string, 追加クラス?: string): TextAreaC {
         return new TextAreaC({
             value: this._text,
             placeholder: placeholder ?? "付箋のテキストを入力...",
-            class: sticky_note_textarea,
+            class: 追加クラス ? [sticky_note_textarea, 追加クラス] : sticky_note_textarea,
             spellcheck: false
         })
         .setStyleCSS({
