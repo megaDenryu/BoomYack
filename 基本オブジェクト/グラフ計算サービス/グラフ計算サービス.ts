@@ -54,7 +54,7 @@ export class テキスト用グラフからキャンバスに配置するサー�
 
         const addedItems: I配置物集約[] = [];
         for (const pair of this.node付箋pairMap.values()) {
-            addedItems.push(pair.付箋 as unknown as I配置物集約);
+            addedItems.push(pair.付箋);
         }
         addedItems.push(...this.addedArrows);
         return addedItems;
@@ -79,7 +79,7 @@ export class テキスト用グラフからキャンバスに配置するサー�
             const nextNodePair = nextノード?.exec(this.テキスト用グラフノードに対して作業を実行する.bind(this));
             if (nextNodePair === undefined) return;
             const arrow = node付箋.付箋.別の付箋へ矢印を作る(nextNodePair.付箋);
-            this.addedArrows.push(arrow as unknown as I配置物集約);
+            this.addedArrows.push(arrow);
         });
 
         // 前ノードからの矢印接続

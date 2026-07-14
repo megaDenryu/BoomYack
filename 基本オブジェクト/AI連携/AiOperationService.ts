@@ -41,7 +41,7 @@ export class AiOperationService {
                 // 矢印で繋ぐ（内部でCanvasGraphModelに追加される）
                 const 矢印 = 起点付箋.別の付箋へ矢印を作る(新付箋);
                 if (this._onCommandPush) {
-                    this._onCommandPush(new 配置物追加コマンド(this._model, [新付箋 as unknown as I配置物集約, 矢印 as unknown as I配置物集約]));
+                    this._onCommandPush(new 配置物追加コマンド(this._model, [新付箋, 矢印]));
                 }
                 Toast.success("AI生成が完了しました");
             } else {
@@ -84,7 +84,7 @@ export class AiOperationService {
                     // 矢印で繋ぐ（内部でCanvasGraphModelに追加される）
                     const 矢印 = 対象付箋.別の付箋へ矢印を作る(新付箋);
 
-                    addedItems.push(新付箋 as unknown as I配置物集約, 矢印 as unknown as I配置物集約);
+                    addedItems.push(新付箋, 矢印);
                     currentYOffset = currentYOffset.plus(new Px長さ(200));
                 }
                 if (this._onCommandPush && addedItems.length > 0) {
