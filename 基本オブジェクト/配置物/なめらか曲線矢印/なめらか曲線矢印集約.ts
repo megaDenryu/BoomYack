@@ -2,6 +2,7 @@ import { Canvas座標Base, I描画空間, LV2HtmlComponentBase, Px2DVector, 画�
 
 import { Iなめらか曲線矢印集約, Iなめらか曲線矢印シリアライズ可能, I接触点を教えてくれる人, I接触点登録先, Iドラッグ移動可能 } from "../../I配置物";
 import { 始点State, 終点State } from "../折れ線矢印/折れ線矢印state";
+import { 曲線制御点 } from "./曲線制御点";
 import { なめらか曲線矢印View } from "./なめらか曲線矢印View";
 import { なめらか曲線矢印VM } from "./なめらか曲線矢印VM";
 import { 始点ハンドル } from "./なめらか曲線矢印始点ハンドル";
@@ -73,7 +74,12 @@ export class なめらか曲線矢印集約<座標点T extends Canvas座標Base<
     public 再描画(): void {
         this.始点ハンドル.render();
         this.終点ハンドル.render();
-        this.view.pathを更新する(this.始点ハンドル.state.pos, this.終点ハンドル.state.pos);
+        const 始点 = this.始点ハンドル.state.pos;
+        const 終点 = this.終点ハンドル.state.pos;
+        this.view.pathを更新する(始点, 終点);
+        // 終点矢印(三角形)は曲線の向きが変わるたびに接線方向へ回転させる。始点ハンドルは
+        // 円形で向きを持たないため回転不要(終点ハンドルViewの回転角度を設定のみ効果がある)。
+        this.終点ハンドル.view.回転角度を設定(曲線制御点.終点の接線角度を計算する(始点, 終点));
     }
 
     public 選択された時の処理(): void {

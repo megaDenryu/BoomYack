@@ -1,4 +1,5 @@
-import { Px2DVector, 配置物座標点 } from "SengenUI/index";
+import { Degree角度, Px2DVector, 配置物座標点 } from "SengenUI/index";
+import { 始点中心線分情報 } from "../折れ線矢印/始点中心線分情報";
 
 /**
  * なめらか曲線矢印の3次ベジェ制御点。始点/終点だけから自動計算する
@@ -32,5 +33,14 @@ export class 曲線制御点 {
             : 終点.plus(Px2DVector.fromNumbers(0, -押し出し量));
 
         return new 曲線制御点(始点側, 終点側);
+    }
+
+    /**
+     * 曲線の終点における接線の向き。終点矢印ハンドル(三角形)の回転角度に使う。
+     * 3次ベジェの終点での接線は「終点側制御点→終点」の向きに一致する。
+     */
+    public static 終点の接線角度を計算する(始点: 配置物座標点, 終点: 配置物座標点): Degree角度 {
+        const 制御点 = 曲線制御点.計算する(始点, 終点);
+        return 始点中心線分情報.計算(制御点.終点側, 終点).angle;
     }
 }
