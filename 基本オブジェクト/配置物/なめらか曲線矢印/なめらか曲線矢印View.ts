@@ -2,6 +2,7 @@ import { div, DivC, LV2HtmlComponentBase, svg, TypedEventListener, ビューポ�
 import { Iなめらか曲線矢印View, 配置物zIndex } from "../../I配置物";
 import { 始点ハンドルView } from "../折れ線矢印/始点ハンドルView";
 import { 終点ハンドルView } from "../折れ線矢印/終点ハンドルView";
+import { 中点ハンドルView } from "../折れ線矢印/中点ハンドルView";
 import { 曲線パス } from "./曲線パス";
 
 /**
@@ -65,9 +66,21 @@ export class なめらか曲線矢印View extends LV2HtmlComponentBase implement
         );
     }
 
-    /** 始点/終点(配置物座標点)からベジェ曲線を再計算してpathへ反映する */
-    public pathを更新する(始点: 配置物座標点, 終点: 配置物座標点): this {
-        this._曲線パス.曲線を設定する(始点, 終点);
+    /** 始点/終点(配置物座標点)からベジェ曲線を再計算してpathへ反映する。中間点ハンドルがあればその形状を優先する */
+    public pathを更新する(始点: 配置物座標点, 終点: 配置物座標点, 中間点: 配置物座標点 | null): this {
+        this._曲線パス.曲線を設定する(始点, 終点, 中間点);
+        return this;
+    }
+
+    /** 曲線上での右クリックを購読する(中間点ハンドル生成のトリガー) */
+    public on曲線右クリック(callback: TypedEventListener<'contextmenu'>): this {
+        this._曲線パス.addSvgEventListener('contextmenu', callback);
+        return this;
+    }
+
+    /** 中間点ハンドルのViewをDOMへ追加する */
+    public add中間点ハンドル(中間点ハンドルView: 中点ハンドルView): this {
+        this._componentRoot.child(中間点ハンドルView);
         return this;
     }
 

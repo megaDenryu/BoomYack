@@ -18,11 +18,14 @@ export class 曲線パス extends PathC {
             strokeWidth: 3,
             strokeLinecap: "round"
         });
+        // 祖先のdivがpointerEvents:"none"でも、この要素自身にautoを指定すれば
+        // ストローク上のポインタ操作(右クリックでの中間点ハンドル生成)を受け取れる。
+        this.setStyleCSS({ pointerEvents: "auto" });
     }
 
-    /** 始点/終点(配置物座標点)からベジェ曲線を再計算してpathへ反映する */
-    public 曲線を設定する(始点: 配置物座標点, 終点: 配置物座標点): this {
-        const 制御点 = 曲線制御点.計算する(始点, 終点);
+    /** 始点/終点(配置物座標点)からベジェ曲線を再計算してpathへ反映する。中間点ハンドルがあればその形状を優先する */
+    public 曲線を設定する(始点: 配置物座標点, 終点: 配置物座標点, 中間点: 配置物座標点 | null): this {
+        const 制御点 = 曲線制御点.計算する(始点, 終点, 中間点);
         const 始点px = 始点.toビューポート座標値();
         const 終点px = 終点.toビューポート座標値();
         const 始点側px = 制御点.始点側.toビューポート座標値();
