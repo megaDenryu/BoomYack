@@ -6,7 +6,6 @@ import { div, DivC, Drag中値, Drag終了値, Drag開始値, HtmlComponentBase,
 
 
 import { auto_resize_handle_left, auto_resize_handle_right, auto_resize_sticky_note, 付箋ホバー領域, 付箋コンテンツコンテナ } from "../付箋/付箋View/style.css";
-import { テキストエリアサイズパラメータ, 自動リサイズテキストエリア } from "../付箋/付箋View/自動リサイズモード/自動リサイズテキストエリア";
 import { I付箋View, 配置物zIndex } from "../../I配置物";
 
 import { 多段格子コンテキストメニュー, 格子メニュー1層オプション, 格子メニュー2層オプション } from "../../キャンバス操作/多段格子コンテキストメニュー/多段格子コンテキストメニュー";
@@ -17,7 +16,8 @@ import { Iコンテキストメニュー } from "../../キャンバス操作/円
 import { コンテキストメニューコンテナ } from "BoomYack/基本オブジェクト/キャンバス操作/円状コンテキストメニュー/コンテキストメニューコンテナ";
 import { 付箋設定状態 } from "../設定パネル";
 import { I接続点親情報 } from "../矢印接続可能なもの/接続点";
-import { テキストフォーマット適用 } from "./テキストフォーマッタサービス";
+import { I付箋コンテンツView } from "./I付箋コンテンツView";
+import { 自由テキストコンテンツView } from "./自由テキストコンテンツView";
 import { リサイズハンドル } from "./リサイズハンドル";
 import { ボード基準座標変換 } from "BoomYack/基本オブジェクト/キャンバス操作/座標変換/ボード基準座標変換";
 import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?url';
@@ -70,8 +70,7 @@ export interface 自動リサイズ付箋用コンテキストメニュー依存
 export class 自動リサイズ付箋View<座標点T extends 配置物座標点> extends LV2HtmlComponentBase implements I付箋View,I接続点親情報<座標点T> {
     protected _componentRoot: DivC;
     private 付箋ホバー領域: DivC;
-    private _textArea!: 自動リサイズテキストエリア;
-    private _formatterCleanup?: () => void;
+    private _content!: I付箋コンテンツView;
     private _position: 座標点T;
     public get position(): 描画座標点|図形内座標点{ return this._position;}
     private _size: Px2DVector;
@@ -102,7 +101,6 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
         return 図形内座標点.fromPx2DVector(vec,this._position.図形内基準座標);
     }
     private _minHeight: Px長さ;
-    private _text: string;
     private _onDrag?: (e: Drag中値, ドラッグしたコンポーネント: 自動リサイズ付箋View<座標点T>) => void;
     private _onResize?: () => void;
     private _onTextChange?: (text: string) => void;
@@ -122,7 +120,6 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
         this._position = option.position;
         this._minHeight = option.minHeight;
         this._size = option.size;
-        this._text = option.text ?? "";
         this._コンテキストメニューコンテナ = option.コンテキストメニューコンテナ;
         this._onDrag = option.onDrag;
         this._onResize = option.onResize;
@@ -229,12 +226,10 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                     zIndex: 配置物zIndex.付箋内部構造.コンテナ
                                 })
                                 .childs([
-                                    new 自動リサイズテキストエリア({
-                                        initialText: this._text,
-                                        placeholder: "付箋の内容を入力...",
-                                        初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(this._minHeight),
+                                    new 自由テキストコンテンツView({
+                                        初期テキスト: option.text ?? "",
+                                        最小高さ: this._minHeight,
                                         onTextChange: (text: string) => {
-                                            this._text = text;
                                             this._onTextChange?.(text);
                                         },
                                         onBlurTextCommit: (oldText: string, newText: string) => {
@@ -248,11 +243,10 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
                                         onFocus: () => {
                                             // フォーカス時に自身を選択状態にする（バグ修正）
                                             if (this.選択する) {
-                                                const mockEvent = new MouseEvent('mousedown');
-                                                this.選択する(mockEvent as any);
+                                                this.選択する(new MouseEvent('mousedown'));
                                             }
                                         }
-                                    }).tap((textArea) => { this._textArea = textArea; this._formatterCleanup = テキストフォーマット適用(textArea.element); })
+                                    }).tap((content) => { this._content = content; })
                                 ]),
                             new リサイズハンドル("left").tap((handle) => { handle.mouseWife.ドラッグ連動登録({
                                                                                                 onドラッグ開始: (e: Drag開始値)=> {},
@@ -433,13 +427,12 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
 
     /** テキストを取得 */
     public get text(): string {
-        return this._text;
+        return this._content.text;
     }
 
     /** テキストを設定（音声認識など外部からの直接書き換え用） */
     public setText(text: string): void {
-        this._text = text;
-        this._textArea?.setValue(text);
+        this._content.setText(text);
         this._onTextChange?.(text);
     }
 
@@ -468,7 +461,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
     public delete(): void {
         super.delete();
         this._コンテキストメニュー.delete();
-        this._formatterCleanup?.();
+        this._content.delete();
     }
 
     public 選択状態のzIndexにする(): void {
@@ -485,7 +478,7 @@ export class 自動リサイズ付箋View<座標点T extends 配置物座標点>
             background: `linear-gradient(${設定.背景色}, ${設定.背景色}) content-box`,
             backgroundColor: "transparent"
         });
-        this._textArea?.setTextSize(設定.文字サイズ).set文字色(設定.文字色);
+        this._content.設定を適用(設定);
     }
 }
 

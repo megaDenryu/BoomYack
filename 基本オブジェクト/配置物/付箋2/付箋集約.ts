@@ -4,10 +4,9 @@ import { I配置物選択機能集約 } from "../../キャンバス操作/配置
 
 import { I接続点親情報, 接続点 } from "../矢印接続可能なもの/接続点";
 import { 矢印接続可能なもの, 矢印接続可能なもの依存関係 } from "../矢印接続可能なもの/矢印接続可能なもの";
-import { 付箋選択状態, 自動リサイズ付箋View2, 自動リサイズ付箋View2オプション } from "./自動リサイズ付箋View2";
 import { 付箋データ, 座標データ, サイズデータ } from "../../描画キャンバス/データクラス";
 import { 付箋ID } from "../../ID";
-import { 自動リサイズ付箋View, 自動リサイズ付箋Viewオプション, 自動リサイズ付箋用コンテキストメニュー依存関係 } from "./自動リサイズ付箋View";
+import { 付箋選択状態, 自動リサイズ付箋View, 自動リサイズ付箋Viewオプション, 自動リサイズ付箋用コンテキストメニュー依存関係 } from "./自動リサイズ付箋View";
 import { 折れ線矢印集約 } from "../折れ線矢印";
 import { 付箋設定状態 } from "../設定パネル";
 
@@ -21,7 +20,7 @@ import { 付箋設定状態 } from "../設定パネル";
  */
 export class 付箋集約<座標点T extends 配置物座標点> implements I付箋集約, I選択可能配置物, I付箋シリアライズ可能, I接続点親情報<座標点T> {
     public type: "付箋" = "付箋";
-    public readonly view: 自動リサイズ付箋View<座標点T> | 自動リサイズ付箋View2<座標点T>;
+    public readonly view: 自動リサイズ付箋View<座標点T>;
     public readonly vm: I付箋VM;
     public get 矢印接続可能なもの(): 矢印接続可能なもの<座標点T> { return this.view.矢印接続可能なもの; }
     private _i描画基準座標を持つ: I描画空間;
@@ -38,7 +37,6 @@ export class 付箋集約<座標点T extends 配置物座標点> implements I付
         this._設定状態 = 付箋設定状態.create();
         // ドラッグ・リサイズイベントをフックするためのオプション拡張
         const enhancedOptions = this.options強化(options);
-        // this.view = new 自動リサイズ付箋View2(enhancedOptions,矢印接続可能なもの依存関係,id)
         this.view = new 自動リサイズ付箋View(enhancedOptions, 矢印接続可能なもの依存関係, id, コンテキストメニュー依存関係)
             .選択するを登録((e) => {
                 if (e.ctrlKey) {

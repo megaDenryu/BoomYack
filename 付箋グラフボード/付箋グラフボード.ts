@@ -1,7 +1,6 @@
 import { canvas, div, DivC, LV2HtmlComponentBase, MouseEventData, Px2DVector, Px長さ, CanvasC, 描画座標点, 画面座標点 } from "SengenUI/index";
 import { sticky_graph_board_container } from './style.css';
 import { ボード基準座標変換 } from 'BoomYack/基本オブジェクト/キャンバス操作/座標変換/ボード基準座標変換';
-import { 自動リサイズ付箋View2 } from 'BoomYack/基本オブジェクト/配置物/付箋2/自動リサイズ付箋View2';
 import { CanvasView, CanvasViewOptions, 拡縮入力 } from 'BoomYack/基本オブジェクト/描画キャンバス/描画キャンバスView分解/CanvasView';
 import { 配置物zIndex } from 'BoomYack/基本オブジェクト/I配置物';
 import { Action } from 'TypeScriptBenriKakuchou/アーキテクチャBase';
@@ -25,7 +24,7 @@ import { グローバルイベントを購読する } from 'BoomYack/基本オ�
  */
 export class StickyGraphBoard extends LV2HtmlComponentBase {
     protected _componentRoot: DivC;
-    private _一番上の付箋: 自動リサイズ付箋View<描画座標点>|自動リサイズ付箋View2<描画座標点>;
+    private _一番上の付箋: 自動リサイズ付箋View<描画座標点>;
     private _mouseGlobal: GlobalMouseManager;
     private _windowSizeScaleObserver: WindowSizeScaleObserver;
     private _描画キャンバスView: CanvasView;
