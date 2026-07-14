@@ -9,13 +9,7 @@ import { 付箋設定状態 } from "../設定パネル";
 
 const タイトルのプレースホルダー = "タイトルを入力...";
 const 本文のプレースホルダー = "本文を入力...";
-/**
- * タイトル欄・本文欄いずれもテキストエリア自身には人為的な最小高さを
- * 設けない(0を指定)。ブラウザが自然に計算する1行分の高さ(padding+行の
- * 高さ)だけに初期高さを委ねることで、タイトル・本文とも常に1行分の高さ
- * で表示され、入力量が増えれば自動リサイズで伸びる。
- */
-const テキストエリア自身の最小高さ = new Px長さ(0);
+const タイトル欄の最小高さ = new Px長さ(30);
 
 /** タイトル付きコンテンツViewを構築するために枠から渡す依存関係 */
 export interface タイトル付きコンテンツView依存関係 extends 付箋コンテンツView共通依存関係 {
@@ -53,7 +47,7 @@ export class タイトル付きコンテンツView extends LV2HtmlComponentBase 
                     initialText: 依存関係.初期タイトル,
                     placeholder: タイトルのプレースホルダー,
                     追加クラス: タイトル入力欄,
-                    初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(テキストエリア自身の最小高さ),
+                    初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(タイトル欄の最小高さ),
                     onTextChange: () => { 依存関係.onTextChange(this.text); },
                     onHeightChange: (newHeight) => {
                         this._タイトル高さ = newHeight;
@@ -70,7 +64,7 @@ export class タイトル付きコンテンツView extends LV2HtmlComponentBase 
                 new 自動リサイズテキストエリア({
                     initialText: 依存関係.初期本文,
                     placeholder: 本文のプレースホルダー,
-                    初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(テキストエリア自身の最小高さ),
+                    初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(依存関係.最小高さ),
                     onTextChange: () => { 依存関係.onTextChange(this.text); },
                     onHeightChange: (newHeight) => {
                         this._本文高さ = newHeight;

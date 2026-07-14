@@ -1,4 +1,4 @@
-import { LV2HtmlComponentBase } from "SengenUI/index";
+import { LV2HtmlComponentBase, Px長さ } from "SengenUI/index";
 
 import { 付箋設定状態 } from "../設定パネル";
 import { 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
@@ -8,6 +8,7 @@ import { 付箋コンテンツデータ } from "../../描画キャンバス/付�
  * 種別ごとに形が異なるため含めず、種別ごとの依存関係interfaceがこれを拡張する。
  */
 export interface 付箋コンテンツView共通依存関係 {
+    最小高さ: Px長さ;
     onTextChange: (text: string) => void;
     onHeightChange: (newHeight: number) => void;
     onBlurTextCommit: (oldText: string, newText: string) => void;
