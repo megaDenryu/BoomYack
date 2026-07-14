@@ -1,5 +1,5 @@
 import { I描画空間, Px2DVector, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
-import { I接触点を教えてくれる人, I配置物集約, リスト配置可能, 接触判定可能な点, I接続点, I接触点登録先, I折れ線矢印集約 } from "../../I配置物";
+import { I接触点を教えてくれる人, I配置物集約, リスト配置可能, 接触判定可能な点, I接続点, I接触点登録先, is折れ線矢印集約 } from "../../I配置物";
 
 import { 無分割管理 } from "../../接触点を教えてくれる人/無分割管理";
 import { I配置物リポジトリ, Iグラフ配置先 } from "../../配置物リポジトリ";
@@ -109,8 +109,8 @@ export class CanvasGraphModel implements I描画空間, I配置物リポジト�
             // カスケード削除対象の特定と削除
             // 削除対象（item）に接続している矢印を抽出し連鎖削除する
             const 削除対象矢印群 = this.配置物リスト.filter(other => {
-                if (other.type === "折れ線矢印") {
-                    const arrow = other as unknown as I折れ線矢印集約<描画座標点>;
+                if (is折れ線矢印集約<描画座標点>(other)) {
+                    const arrow = other;
                     if (arrow.get始点接続付箋ID()?.id === item.idString || arrow.get終点接続付箋ID()?.id === item.idString) {
                         return true;
                     }

@@ -1,7 +1,7 @@
 import { Iキャンバスコマンド } from "./Iキャンバスコマンド";
 import { CanvasGraphModel } from "../../描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
 import { Px2DVector, 描画座標点 } from "SengenUI/index";
-import { I折れ線矢印集約, I配置物集約 } from "../../I配置物";
+import { I折れ線矢印集約, I配置物集約, is折れ線矢印集約 } from "../../I配置物";
 
 export class 配置物追加コマンド implements Iキャンバスコマンド {
     private readonly items: I配置物集約[];
@@ -51,8 +51,8 @@ export class 配置物削除コマンド implements Iキャンバスコマンド
         do {
             addedNew = false;
             for (const other of this.model.配置物リスト) {
-                if (other.type === "折れ線矢印" && !allItemsToRemove.has(other)) {
-                    const arrow = other as unknown as I折れ線矢印集約<描画座標点>;
+                if (is折れ線矢印集約<描画座標点>(other) && !allItemsToRemove.has(other)) {
+                    const arrow = other;
                     const startId = arrow.get始点接続付箋ID()?.id;
                     const endId = arrow.get終点接続付箋ID()?.id;
                     const isDependent = Array.from(allItemsToRemove).some(i => i.idString === startId || i.idString === endId);

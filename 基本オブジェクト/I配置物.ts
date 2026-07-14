@@ -174,6 +174,11 @@ export interface I折れ線矢印集約<座標点T extends 配置物座標点> e
     updateStateFromData(data: 折れ線矢印データ, モデルの描画基準座標: 描画基準座標): void;
 }
 
+/** I配置物集約をtype判別子でI折れ線矢印集約へ絞り込む型ガード */
+export function is折れ線矢印集約<座標点T extends 配置物座標点>(item: I配置物集約): item is I折れ線矢印集約<座標点T> {
+    return item.type === "折れ線矢印";
+}
+
 
 
 export interface I接触点を教えてくれる人<座標点T extends 配置物座標点> {
