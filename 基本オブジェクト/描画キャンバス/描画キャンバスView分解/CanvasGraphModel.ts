@@ -21,6 +21,7 @@ export type GraphEvent =
 export interface ICanvasItemFactory {
     create付箋(pos: 描画座標点, text?: string, id?: string): 付箋集約<描画座標点>;
     createタイトル付き付箋(pos: 描画座標点, id?: string): 付箋集約<描画座標点>;
+    create札参照付箋(pos: 描画座標点, 札ID: string, id?: string): 付箋集約<描画座標点>;
     create折れ線矢印(折れ線矢印vm: 折れ線矢印VM<描画座標点>): 折れ線矢印集約<描画座標点>;
     createなめらか曲線矢印(vm: なめらか曲線矢印VM<描画座標点>): なめらか曲線矢印集約<描画座標点>;
 }
@@ -80,6 +81,14 @@ export class CanvasGraphModel implements I描画空間, I配置物リポジト�
         if (!this._factory) throw new Error("Factory not set");
         const 採用ID = this.衝突しない場合に限り希望IDを採用する(希望ID);
         const item = this._factory.createタイトル付き付箋(pos, 採用ID);
+        this.add配置物(item);
+        return item;
+    }
+
+    public 描画座標点で札参照付箋をadd(pos: 描画座標点, 札ID: string, 希望ID?: string): 付箋集約<描画座標点> {
+        if (!this._factory) throw new Error("Factory not set");
+        const 採用ID = this.衝突しない場合に限り希望IDを採用する(希望ID);
+        const item = this._factory.create札参照付箋(pos, 札ID, 採用ID);
         this.add配置物(item);
         return item;
     }

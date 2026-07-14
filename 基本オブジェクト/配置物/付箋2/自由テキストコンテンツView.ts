@@ -55,6 +55,10 @@ export class 自由テキストコンテンツView extends LV2HtmlComponentBase 
         this._componentRoot.setTextSize(設定.文字サイズ).set文字色(設定.文字色);
     }
 
+    public AI操作に対応しているか(): boolean {
+        return true;
+    }
+
     public delete(): void {
         super.delete();
         this._formatterCleanup?.();

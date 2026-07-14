@@ -115,6 +115,10 @@ export class タイトル付きコンテンツView extends LV2HtmlComponentBase 
         this._本文エリア.setTextSize(設定.文字サイズ).set文字色(設定.文字色);
     }
 
+    public AI操作に対応しているか(): boolean {
+        return true;
+    }
+
     public delete(): void {
         super.delete();
         this._formatterCleanup?.();
