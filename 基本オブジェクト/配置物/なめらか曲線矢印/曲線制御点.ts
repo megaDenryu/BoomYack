@@ -56,12 +56,19 @@ export class 曲線制御点 {
     }
 
     /**
-     * 2次ベジェ(始点, 中間点, 終点)と同じ形状になる3次ベジェ制御点を求める標準変換式。
-     * cp1 = 始点 + (2/3)(中間点 - 始点)、cp2 = 終点 + (2/3)(中間点 - 終点)
+     * 中間点(ユーザーがドラッグしたハンドル位置)を「曲線がt=0.5で通過すべき点」として扱う。
+     * 2次ベジェの制御点P1は定義上曲線から外れた位置にあり(t=0.5点は(始点+2*P1+終点)/4)、
+     * ハンドル位置をそのままP1として使うとハンドルが曲線から外れて見えるバグになる
+     * (Fudaba札#49レビュー指摘)。そこでハンドル位置を「通過点」とみなし、
+     * P1 = 2*中間点 - (始点+終点)/2 で逆算してから標準変換式(cp1 = 始点+2/3(P1-始点)、
+     * cp2 = 終点+2/3(P1-終点))を適用することで、3次ベジェのt=0.5点が中間点と厳密に一致する。
      */
     private static 中間点から計算する(始点: 配置物座標点, 中間点: 配置物座標点, 終点: 配置物座標点): 曲線制御点 {
-        const 始点側 = 始点.plus(中間点.px2DVector.minus(始点.px2DVector).times(2 / 3));
-        const 終点側 = 終点.plus(中間点.px2DVector.minus(終点.px2DVector).times(2 / 3));
+        const 始点終点の中点ベクトル = 始点.px2DVector.plus(終点.px2DVector).times(0.5);
+        const 制御点P1ベクトル = 中間点.px2DVector.times(2).minus(始点終点の中点ベクトル);
+        const 制御点P1 = 始点.newFromPx2DVector(制御点P1ベクトル);
+        const 始点側 = 始点.plus(制御点P1.px2DVector.minus(始点.px2DVector).times(2 / 3));
+        const 終点側 = 終点.plus(制御点P1.px2DVector.minus(終点.px2DVector).times(2 / 3));
         return new 曲線制御点(始点側, 終点側);
     }
 }
