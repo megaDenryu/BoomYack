@@ -13,7 +13,8 @@ import { CanvasPersistenceManager } from "./CanvasPersistenceManager";
 
 import { キャンバスメタデータ } from "../データクラス";
 import { 折れ線矢印VM } from "../../配置物"; // export確認要
-import { 折れ線矢印ID, キャンバスID } from "../../ID";
+import { なめらか曲線矢印VM } from "../../配置物/なめらか曲線矢印/なめらか曲線矢印VM";
+import { 折れ線矢印ID, なめらか曲線矢印ID, キャンバスID } from "../../ID";
 import { 配置物連結グラフ } from "../配置物グラフ/配置物連結グラフ";
 import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?url';
 import SaveIcon from '../../../SVGImg/SaveIcon.svg?url';
@@ -191,7 +192,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
             // メインアクション（アイコン系）を十字方向に配置
             { id: "L1-sticky", iconUrl: 付箋Icon, backgroundColor: imgBg, Position: 'top', onClick: (e: MouseEvent) => this.onAddStickyNote(e) },
             { id: "L1-delete", iconUrl: ゴミ箱Icon, backgroundColor: imgBg, Position: 'bottom', onClick: (e: MouseEvent) => this.deleteSelectedItem() },
-            { id: "L1-arrow", iconUrl: 折れ線矢印Icon, backgroundColor: imgBg, Position: 'left', onClick: (e: MouseEvent) => this.onAddArrow(e) },
+            { id: "L1-arrow", iconUrl: 折れ線矢印Icon, backgroundColor: imgBg, Position: 'left' },
             { id: "L1-save", iconUrl: SaveIcon, backgroundColor: imgBg, Position: 'right', onClick: (e: MouseEvent) => this._options.onSaveClick?.() },
 
             // カテゴリ（テキスト系）を斜め方向に配置
@@ -204,6 +205,11 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         const layer2Items: 格子メニュー2層オプション[] = [
             // 分解生成 (LT)
             // TODO: 必要に応じてAI操作を追加
+
+            // 矢印の種類選択 (left)。8方向の格子が埋まっているため既存アイコンをカテゴリ化し、
+            // 種類を子項目で選ぶ形にした(設計2026-07-14: 「既存の矢印生成経路と同じ流儀で選べる形に」)。
+            { parentId: "L1-arrow", label: "折れ線矢印", onClick: (e: MouseEvent) => this.onAddArrow(e) },
+            { parentId: "L1-arrow", label: ["なめらか", "矢印"], onClick: (e: MouseEvent) => this.onAddSmoothArrow(e) },
 
             // グラフ操作 (RT)
             { parentId: "L1-graph", label: "グラフ選択", onClick: (e: MouseEvent) => this.executeGraphSelection() },
@@ -365,7 +371,22 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         const item = this.model.add折れ線矢印(vm);
         this.commandRepository.push(new 配置物追加コマンド(this.model, item));
     }
-    
+
+    private onAddSmoothArrow(e: MouseEvent): void {
+        const data = new MouseEventData(e);
+        const 補正済み画面座標点 = this._座標変換.画面座標点を補正する(data.position.x, data.position.y);
+        const 始点 = 補正済み画面座標点.to描画座標点(this.model.描画基準座標);
+        const 終点 = 始点.plus(new Px2DVector(new Px長さ(100), new Px長さ(0)));
+
+        const vm = new なめらか曲線矢印VM<描画座標点>(
+                new なめらか曲線矢印ID(),
+                始点,
+                終点
+            );
+        const item = this.model.addなめらか曲線矢印(vm);
+        this.commandRepository.push(new 配置物追加コマンド(this.model, item));
+    }
+
     private onCanvasDrag(e: Drag中値): void {
         const delta = e.data.直前のマウス位置から現在位置までの差分;
         const 補正されたdelta = Px2DVector.fromNumbers(

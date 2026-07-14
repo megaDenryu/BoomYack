@@ -1,10 +1,12 @@
 import { I描画空間, Px2DVector, 描画基準座標, 描画座標点, 画面座標点 } from "SengenUI/index";
-import { I接触点を教えてくれる人, I配置物集約, リスト配置可能, 接触判定可能な点, I接続点, I接触点登録先, is折れ線矢印集約 } from "../../I配置物";
+import { I接触点を教えてくれる人, I配置物集約, リスト配置可能, 接触判定可能な点, I接続点, I接触点登録先, is始終点矢印集約 } from "../../I配置物";
 
 import { 無分割管理 } from "../../接触点を教えてくれる人/無分割管理";
 import { I配置物リポジトリ, Iグラフ配置先 } from "../../配置物リポジトリ";
 import { 付箋集約 } from "../../配置物/付箋2/付箋集約";
 import { 折れ線矢印VM, 折れ線矢印集約 } from "../../配置物";
+import { なめらか曲線矢印VM } from "../../配置物/なめらか曲線矢印/なめらか曲線矢印VM";
+import { なめらか曲線矢印集約 } from "../../配置物/なめらか曲線矢印/なめらか曲線矢印集約";
 import { 接続点 } from "../../配置物/矢印接続可能なもの/接続点";
 import { キャンバスメタデータ } from "../データクラス";
 import { キャンバスID } from "../../ID";
@@ -20,6 +22,7 @@ export interface ICanvasItemFactory {
     create付箋(pos: 描画座標点, text?: string, id?: string): 付箋集約<描画座標点>;
     createタイトル付き付箋(pos: 描画座標点, id?: string): 付箋集約<描画座標点>;
     create折れ線矢印(折れ線矢印vm: 折れ線矢印VM<描画座標点>): 折れ線矢印集約<描画座標点>;
+    createなめらか曲線矢印(vm: なめらか曲線矢印VM<描画座標点>): なめらか曲線矢印集約<描画座標点>;
 }
 
 export class CanvasGraphModel implements I描画空間, I配置物リポジトリ<描画座標点>, I接触点を教えてくれる人<描画座標点>, リスト配置可能<描画座標点>, Iグラフ配置先 {
@@ -100,6 +103,13 @@ export class CanvasGraphModel implements I描画空間, I配置物リポジト�
         return item;
     }
 
+    public addなめらか曲線矢印(vm: なめらか曲線矢印VM<描画座標点>): なめらか曲線矢印集約<描画座標点> {
+        if (!this._factory) throw new Error("Factory not set");
+        const item = this._factory.createなめらか曲線矢印(vm);
+        this.add配置物(item);
+        return item;
+    }
+
     public add配置物(item: I配置物集約 | 接触判定可能な点) {
         if ('接触判定対象を登録する' in item) {
             this.配置物リスト.push(item);
@@ -118,7 +128,7 @@ export class CanvasGraphModel implements I描画空間, I配置物リポジト�
             // カスケード削除対象の特定と削除
             // 削除対象（item）に接続している矢印を抽出し連鎖削除する
             const 削除対象矢印群 = this.配置物リスト.filter(other => {
-                if (is折れ線矢印集約<描画座標点>(other)) {
+                if (is始終点矢印集約<描画座標点>(other)) {
                     const arrow = other;
                     if (arrow.get始点接続付箋ID()?.id === item.idString || arrow.get終点接続付箋ID()?.id === item.idString) {
                         return true;

@@ -51,7 +51,16 @@ export class グループミニキャンバスID extends IDBase自動採番<"グ
     }
 }
 
-export type 配置物ID = 中点ID | 付箋ID | 矢印ID | 折れ線矢印ID | グループミニキャンバスID;
+/**
+ * なめらか曲線矢印のID
+ */
+export class なめらか曲線矢印ID extends IDBase自動採番<"なめらか曲線矢印ID", なめらか曲線矢印ID> {
+    constructor(id?: string) {
+        super(id);
+    }
+}
+
+export type 配置物ID = 中点ID | 付箋ID | 矢印ID | 折れ線矢印ID | グループミニキャンバスID | なめらか曲線矢印ID;
 
 /**
  * キャンバスのID

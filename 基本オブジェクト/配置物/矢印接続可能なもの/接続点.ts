@@ -3,7 +3,7 @@ import { circle, div, DivC, I描画空間, LV2HtmlComponentBase, Px2DVector, svg
 import { 矢印接続可能なもの接続点View as 矢印接続可能なもの接続点Viewcss } from "./style.css";
 
 import { 矢印ID, 折れ線矢印ID, 配置物ID, 付箋ID } from "../../ID";
-import {  接触判定可能な点, I点ハンドル, I接続点, 配置物zIndex, I折れ線矢印集約 } from "../../I配置物";
+import {  接触判定可能な点, I点ハンドル, I接続点, 配置物zIndex, I始終点矢印集約 } from "../../I配置物";
 
 import { I矢印生成先 } from "../../配置物リポジトリ";
 import { 折れ線矢印VM, 折れ線矢印集約 } from "../折れ線矢印";
@@ -25,7 +25,7 @@ export class 接続点<座標点T extends 配置物座標点> extends LV2HtmlCom
     private i描画基準座標を持つ: I描画空間;
     private 接続している点ハンドルのリスト: I点ハンドル<座標点T>[] = [];
     public get 接続している点ハンドルのリスト_(): ReadonlyArray<I点ハンドル<座標点T>> {return this.接続している点ハンドルのリスト;}
-    public get 接続している矢印リスト(): ReadonlyArray<I折れ線矢印集約<座標点T>> {return this.接続している点ハンドルのリスト.map(点ハンドル=>点ハンドル.親の折れ線矢印集約);}
+    public get 接続している矢印リスト(): ReadonlyArray<I始終点矢印集約<座標点T>> {return this.接続している点ハンドルのリスト.map(点ハンドル=>点ハンドル.親の折れ線矢印集約);}
     private readonly _接続位置: 接続点位置;
     public readonly 親interface: I接続点親情報<座標点T>;
     

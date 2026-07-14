@@ -5,6 +5,7 @@ import { 描画キャンバスデータ, 配置物データ, 接続参照デー�
 
 import { 付箋集約 } from "../../配置物/付箋2/付箋集約";
 import { 折れ線矢印集約 } from "../../配置物";
+import { なめらか曲線矢印集約 } from "../../配置物/なめらか曲線矢印/なめらか曲線矢印集約";
 
 import { 接続点 } from "../../配置物/矢印接続可能なもの/接続点";
 import { キャンバスID } from "../../ID";
@@ -94,21 +95,23 @@ export class CanvasPersistenceManager {
 
         const 付箋マップ = new Map<string, 付箋集約<描画座標点>>();
         const 折れ線矢印マップ = new Map<string, 折れ線矢印集約<描画座標点>>();
+        const なめらか曲線矢印マップ = new Map<string, なめらか曲線矢印集約<描画座標点>>();
 
         // 第1フェーズ: 配置物を生成
         for (const itemData of data.配置物リスト) {
             const item = this.factory.createItemFromData(itemData);
             if (item) {
                     this.model.add配置物(item);
-                    
+
                     // マップ登録
                     if (itemData.type === "付箋") 付箋マップ.set(itemData.id.id, item as 付箋集約<描画座標点>);
                     else if (itemData.type === "折れ線矢印") 折れ線矢印マップ.set(itemData.id.id, item as 折れ線矢印集約<描画座標点>);
+                    else if (itemData.type === "なめらか曲線矢印") なめらか曲線矢印マップ.set(itemData.id.id, item as なめらか曲線矢印集約<描画座標点>);
             }
         }
 
         // 第2フェーズ: 接続を復元
-        this.restoreConnections(data.配置物リスト, 付箋マップ, 折れ線矢印マップ);
+        this.restoreConnections(data.配置物リスト, 付箋マップ, 折れ線矢印マップ, なめらか曲線矢印マップ);
 
         return true;
     }
@@ -116,7 +119,8 @@ export class CanvasPersistenceManager {
     private restoreConnections(
         配置物リスト: ReadonlyArray<配置物データ>,
         付箋マップ: Map<string, 付箋集約<描画座標点>>,
-        折れ線矢印マップ: Map<string, 折れ線矢印集約<描画座標点>>
+        折れ線矢印マップ: Map<string, 折れ線矢印集約<描画座標点>>,
+        なめらか曲線矢印マップ: Map<string, なめらか曲線矢印集約<描画座標点>>
     ): void {
         for (const data of 配置物リスト) {
             if (data.type === "折れ線矢印") {
@@ -130,6 +134,18 @@ export class CanvasPersistenceManager {
                 if (data.endRef) {
                     const 接続点 = this.getConnectionPointByRef(data.endRef, 付箋マップ);
                     if (接続点) 折れ線矢印.終点ハンドル.接続(接続点);
+                }
+            } else if (data.type === "なめらか曲線矢印") {
+                const なめらか曲線矢印 = なめらか曲線矢印マップ.get(data.id.id);
+                if (!なめらか曲線矢印) continue;
+
+                if (data.startRef) {
+                    const 接続点 = this.getConnectionPointByRef(data.startRef, 付箋マップ);
+                    if (接続点) なめらか曲線矢印.始点ハンドル.接続(接続点);
+                }
+                if (data.endRef) {
+                    const 接続点 = this.getConnectionPointByRef(data.endRef, 付箋マップ);
+                    if (接続点) なめらか曲線矢印.終点ハンドル.接続(接続点);
                 }
             }
         }

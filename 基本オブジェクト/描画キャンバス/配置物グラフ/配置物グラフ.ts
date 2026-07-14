@@ -1,25 +1,29 @@
 import { 配置物座標点 } from "SengenUI/index";
 import { IDMap } from "TypeScriptBenriKakuchou/DDDBase/IDBase";
-import { 付箋ID, 折れ線矢印ID } from "../../../../BoomYack/基本オブジェクト/ID";
+import { 付箋ID, 折れ線矢印ID, なめらか曲線矢印ID } from "../../../../BoomYack/基本オブジェクト/ID";
 import { I配置物集約 } from "../../../../BoomYack/基本オブジェクト/I配置物";
 
-import { 付箋情報, 折れ線矢印情報, 配置物情報 } from "./配置物情報";
+import { 付箋情報, 折れ線矢印情報, なめらか曲線矢印情報, 配置物情報 } from "./配置物情報";
 import { Func } from "TypeScriptBenriKakuchou/アーキテクチャBase";
 
 export class 配置物グラフ {
 
     public readonly 付箋map: IDMap<付箋ID, 付箋情報<配置物座標点>> = new IDMap();
     public readonly 折れ線矢印map: IDMap<折れ線矢印ID, 折れ線矢印情報<配置物座標点>> = new IDMap();
+    public readonly なめらか曲線矢印map: IDMap<なめらか曲線矢印ID, なめらか曲線矢印情報<配置物座標点>> = new IDMap();
 
     // コンストラクト時に配置物リストを受け取り、グラフ情報を完全に構築する
     public constructor(配置物リスト: I配置物集約[]) {
         for (const 配置物 of 配置物リスト){
             const 情報 = 配置物情報(配置物)
             if (情報.type === "付箋データ"){
-                this.付箋map.set(情報.配置物データ.id, 情報) 
+                this.付箋map.set(情報.配置物データ.id, 情報)
             }
             else if (情報.type === "折れ線矢印"){
                 this.折れ線矢印map.set(情報.配置物データ.id, 情報)
+            }
+            else if (情報.type === "なめらか曲線矢印"){
+                this.なめらか曲線矢印map.set(情報.配置物データ.id, 情報)
             }
         }
 
@@ -43,6 +47,22 @@ export class 配置物グラフ {
                 if (終点に接続した付箋情報){
                     折れ線矢印情報.終点接続付箋 = 終点に接続した付箋情報
                     終点に接続した付箋情報.終点が接続している矢印.push(折れ線矢印情報)
+                }
+            }
+        }
+        for (const なめらか曲線矢印情報 of this.なめらか曲線矢印map.values()){
+            const 始点に接続した付箋ID = なめらか曲線矢印情報.配置物.get始点接続付箋ID();
+            if (始点に接続した付箋ID){
+                const 始点に接続した付箋情報 = this.付箋map.get(始点に接続した付箋ID)
+                if (始点に接続した付箋情報){
+                    なめらか曲線矢印情報.始点接続付箋 = 始点に接続した付箋情報
+                }
+            }
+            const 終点に接続した付箋ID = なめらか曲線矢印情報.配置物.get終点接続付箋ID();
+            if (終点に接続した付箋ID){
+                const 終点に接続した付箋情報 = this.付箋map.get(終点に接続した付箋ID)
+                if (終点に接続した付箋情報){
+                    なめらか曲線矢印情報.終点接続付箋 = 終点に接続した付箋情報
                 }
             }
         }

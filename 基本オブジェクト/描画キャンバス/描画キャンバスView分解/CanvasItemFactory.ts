@@ -3,13 +3,15 @@ import { 付箋集約 } from "../../配置物/付箋2/付箋集約";
 import { 自動リサイズ付箋Viewオプション } from "../../配置物/付箋2/自動リサイズ付箋View";
 import { 矢印VM } from "../../配置物/折れ線矢印/矢印集約";
 import { 折れ線矢印VM, 折れ線矢印集約 } from "../../配置物";
+import { なめらか曲線矢印VM } from "../../配置物/なめらか曲線矢印/なめらか曲線矢印VM";
+import { なめらか曲線矢印集約 } from "../../配置物/なめらか曲線矢印/なめらか曲線矢印集約";
 
 
 import { 付箋ID } from "../../ID";
 import { CanvasGraphModel, ICanvasItemFactory } from "./CanvasGraphModel";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 import { コンテキストメニューコンテナ } from "../../キャンバス操作/円状コンテキストメニュー/コンテキストメニューコンテナ";
-import { 付箋データ, 矢印データ, 折れ線矢印データ, 配置物データ } from "../データクラス";
+import { 付箋データ, 矢印データ, 折れ線矢印データ, なめらか曲線矢印データ, 配置物データ } from "../データクラス";
 import { 付箋コンテンツデータ, 自由テキストコンテンツを作る, タイトル付きコンテンツを作る } from "../付箋コンテンツデータ";
 import { 付箋設定パネル, 付箋設定状態 } from "../../配置物/設定パネル";
 import { 配置物衝突判定サービス } from "./配置物衝突判定サービス";
@@ -17,7 +19,7 @@ import { AiOperationService } from "../../AI連携/AiOperationService";
 import { キャンバスグラフ操作サービス } from "./キャンバスグラフ操作サービス";
 import { I付箋View } from "../../I配置物";
 import { Iキャンバスコマンド } from "../../キャンバス操作/コマンドリポジトリ/Iキャンバスコマンド";
-import { 配置物テキスト変更コマンド, 配置物移動コマンド, 配置物追加コマンド, 配置物矢印変更コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
+import { 配置物テキスト変更コマンド, 配置物移動コマンド, 配置物追加コマンド, 配置物矢印変更コマンド, 配置物なめらか曲線矢印変更コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
 import { VoiceRecognitionService } from "../../キャンバス操作/音声認識サービス";
 import { ボード基準座標変換 } from "../../キャンバス操作/座標変換/ボード基準座標変換";
 
@@ -109,6 +111,11 @@ export class CanvasItemFactory implements ICanvasItemFactory {
                         this.onCommandPush?.(new 配置物追加コマンド(this.model, arrow));
                         return arrow;
                     },
+                    addなめらか曲線矢印: (vm) => {
+                        const arrow = this.model.addなめらか曲線矢印(vm);
+                        this.onCommandPush?.(new 配置物追加コマンド(this.model, arrow));
+                        return arrow;
+                    },
                     未接続の点ハンドルを接続点と接続をtryする: (接続点) => this.model.未接続の点ハンドルを接続点と接続をtryする(接続点)
                 },
                 i描画空間: this.model,
@@ -173,12 +180,44 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         );
         return this.create折れ線矢印(折れ線矢印vm);
     }
-    
+
+    public createなめらか曲線矢印(vm: なめらか曲線矢印VM<描画座標点>): なめらか曲線矢印集約<描画座標点> {
+        const arrow = new なめらか曲線矢印集約(vm, this.model, this.model, this.selectionManager);
+        let startData: なめらか曲線矢印データ | null = null;
+
+        arrow.onハンドルドラッグ開始 = () => {
+            startData = arrow.toシリアライズデータ();
+        };
+
+        arrow.onハンドルドラッグ終了 = () => {
+            if (startData) {
+                const endData = arrow.toシリアライズデータ();
+                const startJson = JSON.stringify(startData);
+                const endJson = JSON.stringify(endData);
+                if (startJson !== endJson) {
+                    this.onCommandPush?.(new 配置物なめらか曲線矢印変更コマンド(arrow, startData, endData, this.model));
+                }
+                startData = null;
+            }
+        };
+        return arrow;
+    }
+
+    public createなめらか曲線矢印FromData(data: なめらか曲線矢印データ): なめらか曲線矢印集約<描画座標点> {
+        const vm = new なめらか曲線矢印VM<描画座標点>(
+            data.id,
+            描画座標点.fromPx2DVector(data.start.toPx2DVector(), this.model.描画基準座標),
+            描画座標点.fromPx2DVector(data.end.toPx2DVector(), this.model.描画基準座標)
+        );
+        return this.createなめらか曲線矢印(vm);
+    }
+
     // データから適切なアイテムを生成
     public createItemFromData(data: 配置物データ) {
         switch (data.type) {
             case "付箋": return this.create付箋FromData(data);
             case "折れ線矢印": return this.create折れ線矢印FromData(data);
+            case "なめらか曲線矢印": return this.createなめらか曲線矢印FromData(data);
             default:
                 // data.type はUnion型なので通常ここは通らないが、型定義外の値が来た場合のフォールバック
                 // console.warn("未対応の配置物タイプ: " + (data as 配置物データ).type); 
