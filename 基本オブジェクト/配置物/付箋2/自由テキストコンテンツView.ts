@@ -1,4 +1,4 @@
-import { LV2HtmlComponentBase } from "SengenUI/index";
+import { LV2HtmlComponentBase, Px長さ } from "SengenUI/index";
 
 import { テキストエリアサイズパラメータ, 自動リサイズテキストエリア } from "../付箋/付箋View/自動リサイズモード/自動リサイズテキストエリア";
 import { I付箋コンテンツView, 付箋コンテンツView依存関係 } from "./I付箋コンテンツView";
@@ -7,6 +7,15 @@ import { 自由テキストコンテンツを作る, 付箋コンテンツデー
 import { 付箋設定状態 } from "../設定パネル";
 
 const 自由テキストのプレースホルダー = "付箋の内容を入力...";
+/**
+ * テキストエリア自身には人為的な最小高さを設けない(0を指定)。ブラウザが
+ * 自然に計算するscrollHeight(padding+行の高さ)だけに初期高さを委ねることで、
+ * 常に1行分の高さで表示され、入力量が増えれば自動リサイズで伸びる。
+ * 付箋全体(外枠)の最小高さ(依存関係.最小高さ)をそのまま転送すると、
+ * その値が1行分の高さを超えた場合に空白が生じて複数行分に見えてしまうため、
+ * 外枠の最小高さとテキストエリア自身の最小高さは独立させる。
+ */
+const 本文テキストエリアの最小高さ = new Px長さ(0);
 
 /**
  * 「自由テキスト」種別の付箋コンテンツ。単一のテキストエリアのみを持つ、
@@ -21,7 +30,7 @@ export class 自由テキストコンテンツView extends LV2HtmlComponentBase 
         this._componentRoot = new 自動リサイズテキストエリア({
             initialText: 依存関係.初期テキスト,
             placeholder: 自由テキストのプレースホルダー,
-            初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(依存関係.最小高さ),
+            初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(本文テキストエリアの最小高さ),
             onTextChange: 依存関係.onTextChange,
             onHeightChange: 依存関係.onHeightChange,
             onBlurTextCommit: 依存関係.onBlurTextCommit,
