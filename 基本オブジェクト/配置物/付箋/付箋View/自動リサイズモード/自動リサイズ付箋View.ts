@@ -4,6 +4,7 @@ import { div, DivC, LV2HtmlComponentBase, MouseStateManager, Px長さ } from "Se
 import { テキストエリアサイズパラメータ, 自動リサイズテキストエリア } from "./自動リサイズテキストエリア";
 import { I自動リサイズ付箋View } from "../../../../I配置物";
 import { I自動リサイズ付箋View操作 } from "./I自動リサイズ付箋View操作";
+import { グローバルイベントを購読する } from "../../../../グローバルイベント購読";
 
 import { 
     sticky_note_container, 
@@ -154,15 +155,15 @@ export class 自動リサイズ付箋View extends LV2HtmlComponentBase implement
         };
 
         header.addDivEventListener('pointerdown', onPointerDown);
-        document.addEventListener('pointermove', onPointerMove);
-        document.addEventListener('pointerup', onPointerUp);
+        const pointermove購読 = グローバルイベントを購読する(document, 'pointermove', onPointerMove);
+        const pointerup購読 = グローバルイベントを購読する(document, 'pointerup', onPointerUp);
 
         this._eventCleanupHandlers.push(() => {
-            document.removeEventListener('pointermove', onPointerMove);
-            document.removeEventListener('pointerup', onPointerUp);
+            pointermove購読.解除する();
+            pointerup購読.解除する();
         });
     }
-    
+
     private setupResizeHandling(handle: DivC, direction: 'left' | 'right'): void {
         let isResizing = false;
         let resizeStartX = 0;
@@ -208,12 +209,12 @@ export class 自動リサイズ付箋View extends LV2HtmlComponentBase implement
         };
 
         handle.addDivEventListener('pointerdown', onPointerDown);
-        document.addEventListener('pointermove', onPointerMove);
-        document.addEventListener('pointerup', onPointerUp);
+        const pointermove購読 = グローバルイベントを購読する(document, 'pointermove', onPointerMove);
+        const pointerup購読 = グローバルイベントを購読する(document, 'pointerup', onPointerUp);
 
         this._eventCleanupHandlers.push(() => {
-            document.removeEventListener('pointermove', onPointerMove);
-            document.removeEventListener('pointerup', onPointerUp);
+            pointermove購読.解除する();
+            pointerup購読.解除する();
         });
     }
     

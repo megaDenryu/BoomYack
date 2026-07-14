@@ -2,6 +2,7 @@ import { Toast } from "OneONetUIComponents/index";
 import { SaveMode } from "./セーブパネル型定義";
 
 import { キャンバスメタデータ } from "../../描画キャンバス/データクラス";
+import { グローバルイベントを購読する } from "../../グローバルイベント購読";
 
 /** ゴミ箱アイテム */
 export interface ITrashItem {
@@ -86,11 +87,11 @@ export class セーブパネル仮ゴミ箱 {
 
     /** ページ離脱時に仮ゴミ箱を完全削除するハンドラーを登録 */
     private registerBeforeUnloadHandler(): void {
-        window.addEventListener('beforeunload', () => {
+        グローバルイベントを購読する(window, 'beforeunload', () => {
             this.emptyTrashSync();
         });
-        
-        document.addEventListener('visibilitychange', () => {
+
+        グローバルイベントを購読する(document, 'visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
                 this.emptyTrashSync();
             }

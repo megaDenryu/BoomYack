@@ -2,6 +2,7 @@ import { div, DivC, LV2HtmlComponentBase } from "SengenUI/index";
 
 
 import { resize_handle, resize_handle_top, resize_handle_bottom, resize_handle_left, resize_handle_right, resize_handle_top_left, resize_handle_top_right, resize_handle_bottom_left, resize_handle_bottom_right } from "./style.css";
+import { グローバルイベントを購読する } from "BoomYack/基本オブジェクト/グローバルイベント購読";
 
 /**
  * リサイズタイプの定義
@@ -63,8 +64,8 @@ export class ResizeHandler extends LV2HtmlComponentBase {
         this._onResizeEnd = options.onResizeEnd ?? (() => {});
         this._componentRoot = this._ルートを構築する();
         
-        document.addEventListener('pointermove', this.handleMouseMove.bind(this));
-        document.addEventListener('pointerup', this.handleMouseUp.bind(this));
+        グローバルイベントを購読する(document, 'pointermove', this.handleMouseMove.bind(this));
+        グローバルイベントを購読する(document, 'pointerup', this.handleMouseUp.bind(this));
     }
 
     protected _ルートを構築する(): DivC {

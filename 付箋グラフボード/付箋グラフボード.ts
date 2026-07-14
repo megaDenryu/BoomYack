@@ -13,6 +13,7 @@ import { JSON読み込みサービス } from 'BoomYack/基本オブジェクト/
 import { 描画キャンバスデータバリデーター } from 'BoomYack/基本オブジェクト/ファイル入出力/描画キャンバスデータバリデーター';
 import { DropFileLoader } from 'TypeScriptBenriKakuchou/FileSystem/ローダー/DropFileLoader';
 import { I描画キャンバスAPIリポジトリ } from "BoomYack/基本オブジェクト/API/I描画キャンバスAPIリポジトリ";
+import { グローバルイベントを購読する } from 'BoomYack/基本オブジェクト/グローバルイベント購読';
 
 /**
  * Miroのような付箋グラフボードページ
@@ -57,7 +58,7 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
             new 描画キャンバスデータバリデーター()
         );
         // this.マウスキーボードイベントバインディング()
-        window.addEventListener("resize",this.ブラウザのウインドウが拡縮したときマウスを中心に拡縮したように見せるために座標中心を移動させる.bind(this))
+        グローバルイベントを購読する(window, "resize", this.ブラウザのウインドウが拡縮したときマウスを中心に拡縮したように見せるために座標中心を移動させる.bind(this))
         // スクロールしたときにresizeToを使うようにする
         this._mouseGlobal = new GlobalMouseManager(input => {this._描画キャンバスView.scaleUpdate(input);}, this._座標変換);
         
@@ -211,8 +212,8 @@ export class GlobalMouseManager {
     constructor(onScale: Action<拡縮入力>, 座標変換: ボード基準座標変換) {
         this.scale = 1;
         this._座標変換 = 座標変換;
-        document.addEventListener("pointermove", (e) => this.onGlobalPointerMove(e));
-        window.addEventListener('wheel', (e: WheelEvent) => this.onWheel(e), { passive: false });
+        グローバルイベントを購読する(document, "pointermove", (e) => this.onGlobalPointerMove(e));
+        グローバルイベントを購読する(window, 'wheel', (e: WheelEvent) => this.onWheel(e), { passive: false });
         this._onScale = onScale;
     }
 

@@ -31,6 +31,7 @@ import { SaveMode, ISavePanelEvents } from "./セーブパネル型定義";
 import { セーブパネル仮ゴミ箱 } from "./セーブパネル仮ゴミ箱";
 import { セーブパネルリスト } from "BoomYack/基本オブジェクト/キャンバス操作/セーブパネル/セーブパネルリスト";
 import { 描画キャンバスデータ } from "BoomYack/基本オブジェクト/描画キャンバス/データクラス";
+import { グローバルイベントを購読する } from "BoomYack/基本オブジェクト/グローバルイベント購読";
 import ゴミ箱Icon from "../../../SVGImg/ゴミ箱.svg?url";
 
 import { キャンバスJSON出力サービス } from "BoomYack/基本オブジェクト/ファイル入出力/キャンバスJSON出力サービス";
@@ -134,7 +135,7 @@ export class セーブパネル extends LV2HtmlComponentBase {
     }
 
     protected _ルートを構築する(): DivC {
-        window.addEventListener('keydown', (e) => {
+        グローバルイベントを購読する(window, 'keydown', (e) => {
                 if (e.key === "s" && e.ctrlKey == true) {
                     e.preventDefault();
                     if (this._currentCanvasName == null) {

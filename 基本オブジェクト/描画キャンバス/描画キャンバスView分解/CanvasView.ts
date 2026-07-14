@@ -30,6 +30,7 @@ import { VoiceRecognitionService } from "../../キャンバス操作/音声認�
 import { micIcon } from "OneONetUIComponents/Svg/Icons";
 import { 描画キャンバスリポジトリ } from "../../API/I描画キャンバスAPIリポジトリ";
 import { キャンバスコンテナ, 描画キャンバスView as 描画キャンバスViewcss, 配置物コンテナ as 配置物コンテナcss, 録音インジケータ } from "./style.css";
+import { グローバルイベントを購読する, グローバルイベント購読ハンドル } from "../../グローバルイベント購読";
 
 export interface 全ての接続点を表示非表示切り替え可能 {
     全ての接続点を表示非表示切り替え(表示する: boolean): void;
@@ -74,6 +75,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     private _再描画リクエストID: number | null = null;
     private _currentScale: number = 1;
     private readonly _座標変換: ボード基準座標変換;
+    private _keydown購読: グローバルイベント購読ハンドル;
 
     // UI Elements
     private menu!: Iコンテキストメニュー;
@@ -138,7 +140,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         
         this.model.subscribe((e) => this.handleGraphEvent(e));
         
-        document.addEventListener('keydown', this.handleKeyDown);
+        this._keydown購読 = グローバルイベントを購読する(document, 'keydown', this.handleKeyDown);
         
         // _mouseWifeの初期化は_ルートを構築する内のbindで行われるため、ここではプロパティへの代入待ち、あるいは再度ラップする。
         // Original: bindで_mouseWife生成。
@@ -424,8 +426,8 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     
     public delete(): void {
         super.delete();
-        this.contextMenuContainer.delete(); 
-        document.removeEventListener('keydown', this.handleKeyDown);
+        this.contextMenuContainer.delete();
+        this._keydown購読.解除する();
     }
 
     private 選択中配置物をコピー(): void {

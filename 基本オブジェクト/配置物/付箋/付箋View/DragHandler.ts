@@ -2,6 +2,7 @@ import { div, DivC, LV2HtmlComponentBase } from "SengenUI/index";
 
 
 import { drag_handle } from "./style.css";
+import { グローバルイベントを購読する } from "BoomYack/基本オブジェクト/グローバルイベント購読";
 
 /**
  * ドラッグ機能専用コンポーネント
@@ -33,8 +34,8 @@ export class DragHandler extends LV2HtmlComponentBase {
         this._onDragEnd = options.onDragEnd ?? (() => {});
         this._componentRoot = this._ルートを構築する();
         
-        document.addEventListener('pointermove', this.handleMouseMove.bind(this));
-        document.addEventListener('pointerup', this.handleMouseUp.bind(this));
+        グローバルイベントを購読する(document, 'pointermove', this.handleMouseMove.bind(this));
+        グローバルイベントを購読する(document, 'pointerup', this.handleMouseUp.bind(this));
     }
 
     protected _ルートを構築する(): DivC {
