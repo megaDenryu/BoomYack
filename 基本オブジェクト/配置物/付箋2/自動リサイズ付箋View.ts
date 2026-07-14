@@ -39,7 +39,6 @@ export enum 付箋選択状態 {
 export interface 自動リサイズ付箋Viewオプション<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
     position: 座標点T;
     size: Px2DVector;
-    minHeight: Px長さ;
     初期コンテンツ: 付箋コンテンツデータ;
     コンテキストメニューコンテナ: コンテキストメニューコンテナ;
     onDelete?: () => void;
@@ -101,7 +100,6 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
         }
         return 図形内座標点.fromPx2DVector(vec,this._position.図形内基準座標);
     }
-    private _minHeight: Px長さ;
     private _onDrag?: (e: Drag中値, ドラッグしたコンポーネント: 自動リサイズ付箋View<座標点T>) => void;
     private _onResize?: () => void;
     private _onTextChange?: (text: string) => void;
@@ -119,13 +117,15 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
         super();
         this.配置物ID = 配置物ID;
         this._position = option.position;
-        this._minHeight = option.minHeight;
         this._size = option.size;
         this._コンテキストメニューコンテナ = option.コンテキストメニューコンテナ;
         this._onDrag = option.onDrag;
         this._onResize = option.onResize;
         this._onTextChange = option.onTextChange;
         this._componentRoot = this._ルートを構築する(option, 矢印接続可能なもの依存関係, コンテキストメニュー依存関係);
+        // コンテンツの同期初期高さ通知は矢印接続可能なもの構築前に発火しうるため
+        // (update接続点座標のコメント参照)、構築完了後に1回呼び直して追いつかせる
+        this.update接続点座標();
         const imgBg = "rgba(255, 255, 255, 0.5)";
 
         this._コンテキストメニューコンテナ.コンテキストメニュー追加(
@@ -223,12 +223,10 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
                                     flex: "1",
                                     display: "flex",
                                     flexDirection: "column",
-                                    minHeight: this._minHeight.minus(new Px長さ(30)).toStr(),
                                     zIndex: 配置物zIndex.付箋内部構造.コンテナ
                                 })
                                 .childs([
                                     付箋コンテンツViewを生成する(option.初期コンテンツ, {
-                                        最小高さ: this._minHeight,
                                         onTextChange: (text: string) => {
                                             this._onTextChange?.(text);
                                         },
@@ -315,27 +313,30 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
     /**
      * 付箋ボードのTransformを設定する
      * paddingを使用してホバー領域を拡張する
-     * 
+     *
      * 構造:
-     * - 付箋ボード全体のサイズ = コンテンツサイズ + padding*2
-     * - paddingは要素内部なのでオフセット計算不要
+     * - 幅はリサイズハンドル操作の対象なのでJSが明示的に指定する
+     * - 高さはCSSのcontent-flow(auto)に委ね、常にコンテンツ(付箋コンテンツ
+     *   コンテナ)の実高さと一致させる。JSがheightを直接指定すると、
+     *   コンテンツ側の高さ変化(onHeightChange)が伝わるまでの間だけ外枠と
+     *   中身の高さがずれ、背景の黄色が半分しか塗られない状態が生まれる
+     *   (設計2026-07-14_付箋コンテンツ設計.md 検証時に判明)。_size.yは接続点
+     *   計算・衝突判定用の数値として保持するのみで、CSSのheightには使わない
      * - positionは付箋ボードの左上角（padding含む）を指す
      */
     private set付箋ボードTransform(rect: {size?: Px2DVector, position?: 座標点T}):this{
         if (rect.position) {this._position = rect.position;}
         if (rect.size) {this._size = rect.size;}
-        
-        // paddingを含めた全体サイズ
+
+        // paddingを含めた全体幅（高さはコンテンツに追従させるためautoのまま指定しない）
         const 全体幅 = this._size.x.plus(this._hoverPadding.multiply(2));
-        const 全体高さ = this._size.y.plus(this._hoverPadding.multiply(2));
         // マージン分だけ左上にオフセットした位置（border原点がpositionと一致するように）
         const offsetPosition = this._position.minus(
             new Px2DVector(this._hoverPadding, this._hoverPadding)
         );
-        
+
         this.付箋ホバー領域.setStyleCSS({
             width: 全体幅.toStr(),
-            height: 全体高さ.toStr(),
             padding: this._hoverPadding.toStr(),
             boxSizing: "border-box",
         });
@@ -458,8 +459,15 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
 
     /**
      * 接続点座標を再計算して更新する
+     *
+     * 注意: コンテンツ(自動リサイズテキストエリア等)は生成された瞬間から
+     * 正しい高さで描画するためonHeightChangeを構築時に同期発火する。この
+     * 発火は_ルートを構築する()内でまだ矢印接続可能なものが組み立てられて
+     * いない段階で起こりうるため、未構築の間は何もしない(コンストラクタ
+     * 完了後にupdate接続点座標()を1回明示的に呼び直して追いつかせる)。
      */
     public update接続点座標(): void {
+        if (!this._矢印接続可能なもの) { return; }
         this._矢印接続可能なもの.update接続点座標(this.calculate矢印接続ポイント相対Transform(this.calculate矢印接続ポイント(this._padding)));
     }
 

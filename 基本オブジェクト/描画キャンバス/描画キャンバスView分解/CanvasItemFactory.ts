@@ -45,7 +45,6 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         return this.付箋を構築する(
             pos,
             new Px2DVector(new Px長さ(200), new Px長さ(50)),
-            new Px長さ(50),
             自由テキストコンテンツを作る(text ?? ""),
             new 付箋ID(id)
         );
@@ -55,7 +54,6 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         return this.付箋を構築する(
             pos,
             new Px2DVector(new Px長さ(220), new Px長さ(70)),
-            new Px長さ(70),
             タイトル付きコンテンツを作る("", ""),
             new 付箋ID(id)
         );
@@ -63,7 +61,7 @@ export class CanvasItemFactory implements ICanvasItemFactory {
 
     public create付箋FromData(data: 付箋データ): 付箋集約<描画座標点> {
         const pos = 描画座標点.fromPx2DVector(data.position.toPx2DVector(), this.model.描画基準座標);
-        const 付箋 = this.付箋を構築する(pos, data.size.toPx2DVector(), new Px長さ(50), data.コンテンツ, data.id);
+        const 付箋 = this.付箋を構築する(pos, data.size.toPx2DVector(), data.コンテンツ, data.id);
         付箋.設定を適用(data.設定状態);
         return 付箋;
     }
@@ -76,7 +74,6 @@ export class CanvasItemFactory implements ICanvasItemFactory {
     private 付箋を構築する(
         pos: 描画座標点,
         size: Px2DVector,
-        minHeight: Px長さ,
         初期コンテンツ: 付箋コンテンツデータ,
         id: 付箋ID
     ): 付箋集約<描画座標点> {
@@ -84,7 +81,6 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         const オプション: 自動リサイズ付箋Viewオプション<描画座標点> = {
             position: pos,
             size,
-            minHeight,
             初期コンテンツ,
             コンテキストメニューコンテナ: this.contextMenuContainer,
             onTextCommit: (oldText: string, newText: string) => {
