@@ -4,7 +4,7 @@ import { 矢印ホバー用四角形 } from "./style.css";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 import { I矢印生成先 } from "../../配置物リポジトリ";
 import { I接続点親情報, I矢印接続可能なもの中央PositionState, 接続点, 接続点State } from "./接続点";
-import { I接続点, I折れ線矢印集約 } from "BoomYack/基本オブジェクト/I配置物";
+import { I接続点, I始終点矢印集約 } from "BoomYack/基本オブジェクト/I配置物";
 
 export interface 絶対矢印上下左右Position<座標点T extends 配置物座標点> {
     上: 座標点T;
@@ -46,7 +46,7 @@ export class 矢印接続可能なもの<座標点T extends 配置物座標点> 
     public get 接続点_左(): 接続点<座標点T> {return this._接続点_左;}
     private _ホバー用四角形: DivC;
     private _i配置物選択機能集約:I配置物選択機能集約
-    public 接続している矢印リスト(): ReadonlyArray<I折れ線矢印集約<座標点T>> {
+    public 接続している矢印リスト(): ReadonlyArray<I始終点矢印集約<座標点T>> {
         return [
             ...this._接続点_上.接続している矢印リスト,
             ...this._接続点_右.接続している矢印リスト,

@@ -5,7 +5,7 @@ import { Drag中値, LV2HtmlComponentBase, Px2DVector, 描画座標点, 配置�
 import { I点state } from "./配置物/折れ線矢印/折れ線矢印state";
 import { I点ハンドルView } from "./配置物/折れ線矢印/折れ線矢印View";
 import { I接続点親情報, 接続点 } from "./配置物/矢印接続可能なもの/接続点";
-import { 接続参照データ, 接続点位置, 配置物データ, 付箋データ, 折れ線矢印データ } from "./描画キャンバス/データクラス";
+import { 接続参照データ, 接続点位置, 配置物データ, 付箋データ, 折れ線矢印データ, なめらか曲線矢印データ } from "./描画キャンバス/データクラス";
 import { 付箋ID } from "./ID";
 
 export type 配置物type = "折れ線矢印" | "まっすぐ矢印" | "なめらか曲線矢印" | "付箋" | "自動リサイズ付箋" | "グループミニキャンバス";
@@ -104,10 +104,29 @@ export interface Iまっすぐ矢印VM {
 export interface Iまっすぐ矢印View extends LV2HtmlComponentBase {
 }
 
-export interface Iなめらか曲線矢印集約 extends I配置物集約 {
+/**
+ * 始点と終点を持つ矢印系配置物の共通契約。
+ * 折れ線矢印(中点付き)となめらか曲線矢印(中点なし)の両方が実装する。
+ * 接続点・付箋リサイズ追従の仕組み(接続点.ts / 矢印接続可能なもの.ts / カスケード削除)は
+ * この共通契約だけを要求するよう一般化してあり、矢印の種類が増えても書き換え不要。
+ */
+export interface I始終点矢印集約<座標点T extends 配置物座標点> extends I配置物集約 {
+    type: "折れ線矢印" | "なめらか曲線矢印";
+    始点と終点の付箋の接続点を最短のものに切り替える(): void;
+    /** 始点に接続している付箋のID。未接続のnull */
+    get始点接続付箋ID(): 付箋ID | null;
+    /** 終点に接続している付箋のID。未接続のnull */
+    get終点接続付箋ID(): 付箋ID | null;
+    onハンドルドラッグ開始?: () => void;
+    onハンドルドラッグ終了?: () => void;
+}
+
+export interface Iなめらか曲線矢印集約<座標点T extends 配置物座標点> extends I始終点矢印集約<座標点T> {
     type: "なめらか曲線矢印";
     readonly view: Iなめらか曲線矢印View;
-    readonly vm: Iなめらか曲線矢印VM;
+    readonly 始点ハンドル: I点ハンドル<座標点T>;
+    readonly 終点ハンドル: I点ハンドル<座標点T>;
+    updateStateFromData(data: なめらか曲線矢印データ, モデルの描画基準座標: 描画基準座標): void;
 }
 
 export interface Iなめらか曲線矢印VM {
@@ -115,6 +134,9 @@ export interface Iなめらか曲線矢印VM {
 
 export interface Iなめらか曲線矢印View extends LV2HtmlComponentBase {
 }
+
+/** なめらか曲線矢印データに特化したシリアライズインターフェース */
+export interface Iなめらか曲線矢印シリアライズ可能 extends Iシリアライズ可能配置物<なめらか曲線矢印データ> {}
 
 
 
@@ -138,7 +160,7 @@ export interface I点ハンドル<座標点T extends 配置物座標点> extends
     get prev線分ハンドル(): I線分ハンドル<座標点T>| null;
     get 描画座標点(): 描画座標点;
     index: number;
-    親の折れ線矢印集約:I折れ線矢印集約<座標点T>;
+    親の折れ線矢印集約:I始終点矢印集約<座標点T>;
 }
 
 export interface I接続点と接続可能 {
@@ -162,21 +184,22 @@ export interface I折れ線矢印VM {
 export interface I折れ線矢印View extends LV2HtmlComponentBase {
 }
 
-export interface I折れ線矢印集約<座標点T extends 配置物座標点> extends I配置物集約, I点と線のリポジトリ<座標点T> {
+export interface I折れ線矢印集約<座標点T extends 配置物座標点> extends I始終点矢印集約<座標点T>, I点と線のリポジトリ<座標点T> {
     type: "折れ線矢印";
-    始点と終点の付箋の接続点を最短のものに切り替える():void;
-    /** 始点に接続している付箋のID。未接続のnull */
-    get始点接続付箋ID(): 付箋ID | null;
-    /** 終点に接続している付箋のID。未接続のnull */
-    get終点接続付箋ID(): 付箋ID | null;
-    onハンドルドラッグ開始?: () => void;
-    onハンドルドラッグ終了?: () => void;
     updateStateFromData(data: 折れ線矢印データ, モデルの描画基準座標: 描画基準座標): void;
 }
 
 /** I配置物集約をtype判別子でI折れ線矢印集約へ絞り込む型ガード */
 export function is折れ線矢印集約<座標点T extends 配置物座標点>(item: I配置物集約): item is I折れ線矢印集約<座標点T> {
     return item.type === "折れ線矢印";
+}
+
+/**
+ * I配置物集約をtype判別子でI始終点矢印集約(折れ線矢印/なめらか曲線矢印の共通契約)へ絞り込む型ガード。
+ * カスケード削除・グラフ走査など「矢印の種類を問わず始点/終点接続だけ見たい」処理で使う。
+ */
+export function is始終点矢印集約<座標点T extends 配置物座標点>(item: I配置物集約): item is I始終点矢印集約<座標点T> {
+    return item.type === "折れ線矢印" || item.type === "なめらか曲線矢印";
 }
 
 
