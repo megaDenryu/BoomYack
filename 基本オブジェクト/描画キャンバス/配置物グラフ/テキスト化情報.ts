@@ -3,6 +3,7 @@ import { 配置物座標点 } from "SengenUI/index";
 import { 配置物連結グラフ } from "./配置物連結グラフ";
 import { 付箋情報 } from "./配置物情報";
 import { Func } from "TypeScriptBenriKakuchou/アーキテクチャBase";
+import { レコードとして扱えるか } from "../../オブジェクト型ガード";
 
 // テキスト埋め込み用情報
 export interface GraphNode<T>{id:string;nodeData:T;linkNode:{nextIDs:string[];prevIDs:string[];}}
@@ -98,11 +99,11 @@ export function  配置物連結グラフtoテキスト用グラフノード(グ
 
 // バリデーション関数
 export function isテキスト用グラフ_付箋text(obj: unknown): obj is Graph<付箋text> {
-    if (typeof obj !== 'object' || obj === null) {
+    if (!レコードとして扱えるか(obj)) {
         console.error('[BoomYack検証] Graphオブジェクトが無効:', typeof obj);
         return false;
     }
-    const g = obj as any; // テキスト用グラフ<T> の構造チェック
+    const g = obj; // テキスト用グラフ<T> の構造チェック
 
     // nodes プロパティチェック
     if (!Array.isArray(g.nodes)) {
@@ -128,11 +129,11 @@ export function isテキスト用グラフ_付箋text(obj: unknown): obj is Grap
 function isテキスト用付箋ノード(obj: unknown, index?: number): boolean {
     const prefix = index !== undefined ? `[BoomYack検証] ノード[${index}]` : '[BoomYack検証] ノード';
     
-    if (typeof obj !== 'object' || obj === null) {
+    if (!レコードとして扱えるか(obj)) {
         console.error(`${prefix} がオブジェクトではない:`, typeof obj);
         return false;
     }
-    const n = obj as any; // GraphNode<付箋text> の構造チェック
+    const n = obj; // GraphNode<付箋text> の構造チェック
 
     // id
     if (typeof n.id !== 'string') {
@@ -146,25 +147,26 @@ function isテキスト用付箋ノード(obj: unknown, index?: number): boolean
     }
 
     // linkNode
-    if (typeof n.linkNode !== 'object' || n.linkNode === null) {
-        console.error(`${prefix} linkNodeがオブジェクトではない:`, n.linkNode);
+    const linkNode = n.linkNode;
+    if (!レコードとして扱えるか(linkNode)) {
+        console.error(`${prefix} linkNodeがオブジェクトではない:`, linkNode);
         return false;
     }
-    if (!Array.isArray(n.linkNode.nextIDs)) {
-        console.error(`${prefix} nextIDsが配列ではない:`, typeof n.linkNode.nextIDs);
+    if (!Array.isArray(linkNode.nextIDs)) {
+        console.error(`${prefix} nextIDsが配列ではない:`, typeof linkNode.nextIDs);
         return false;
     }
-    if (!n.linkNode.nextIDs.every((id: any) => typeof id === 'string')) {
-        console.error(`${prefix} nextIDs内に非文字列がある:`, n.linkNode.nextIDs);
+    if (!linkNode.nextIDs.every((id: any) => typeof id === 'string')) {
+        console.error(`${prefix} nextIDs内に非文字列がある:`, linkNode.nextIDs);
         return false;
     }
 
-    if (!Array.isArray(n.linkNode.prevIDs)) {
-        console.error(`${prefix} prevIDsが配列ではない:`, typeof n.linkNode.prevIDs);
+    if (!Array.isArray(linkNode.prevIDs)) {
+        console.error(`${prefix} prevIDsが配列ではない:`, typeof linkNode.prevIDs);
         return false;
     }
-    if (!n.linkNode.prevIDs.every((id: any) => typeof id === 'string')) {
-        console.error(`${prefix} prevIDs内に非文字列がある:`, n.linkNode.prevIDs);
+    if (!linkNode.prevIDs.every((id: any) => typeof id === 'string')) {
+        console.error(`${prefix} prevIDs内に非文字列がある:`, linkNode.prevIDs);
         return false;
     }
 
@@ -174,11 +176,11 @@ function isテキスト用付箋ノード(obj: unknown, index?: number): boolean
 function is付箋text(obj: unknown, context?: string): obj is 付箋text {
     const prefix = context ?? '[BoomYack検証] 付箋text';
     
-    if (typeof obj !== 'object' || obj === null) {
+    if (!レコードとして扱えるか(obj)) {
         console.error(`${prefix} がオブジェクトではない:`, typeof obj);
         return false;
     }
-    const d = obj as any;
+    const d = obj;
     if (typeof d.text !== 'string') {
         console.error(`${prefix} textプロパティが文字列ではない:`, typeof d.text, '実際のプロパティ:', Object.keys(d));
         return false;

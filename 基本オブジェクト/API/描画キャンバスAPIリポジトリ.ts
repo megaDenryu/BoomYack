@@ -2,6 +2,7 @@ import { RequestAPI } from "TypeScriptBenriKakuchou/Web/RequestApi";
 import { キャンバスメタデータ, 描画キャンバスデータ, 描画キャンバスデータからメタデータ抽出, 描画キャンバスJSON, I描画キャンバスJSON } from "../描画キャンバス/データクラス";
 import { CanvasDeleteResponse, CanvasListResponse, CanvasLoadResponse, キャンバス保存レスポンス } from "../描画キャンバス/CanvasResponse";
 import { I描画キャンバスAPIリポジトリ, I描画キャンバスローカルリポジトリ } from "./I描画キャンバスAPIリポジトリ";
+import { レコードとして扱えるか } from "../オブジェクト型ガード";
 
 
 
@@ -100,20 +101,19 @@ export class 描画キャンバスローカルリポジトリ implements I描画
      * @returns 有効なら true、無効なら false
      */
     public static データ検証(data: unknown): data is I描画キャンバスJSON {
-        if (!data || typeof data !== 'object') return false;
-        
-        const d = data as Record<string, unknown>;
-        
+        if (!レコードとして扱えるか(data)) return false;
+        const d = data;
+
         // 必須フィールドの存在チェック
         if (typeof d.id !== 'string' || d.id.trim() === '') return false;
         if (typeof d.name !== 'string') return false;
         if (typeof d.version !== 'string') return false;
         if (typeof d.createdAt !== 'string') return false;
         if (typeof d.updatedAt !== 'string') return false;
-        
+
         // 描画原点のチェック
-        if (!d.描画原点 || typeof d.描画原点 !== 'object') return false;
-        const origin = d.描画原点 as Record<string, unknown>;
+        if (!レコードとして扱えるか(d.描画原点)) return false;
+        const origin = d.描画原点;
         if (typeof origin.x !== 'number' || typeof origin.y !== 'number') return false;
         
         // 配置物リストのチェック

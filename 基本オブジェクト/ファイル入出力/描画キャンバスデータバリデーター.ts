@@ -1,5 +1,6 @@
 import { FileOperationResult, JSONファイル } from "TypeScriptBenriKakuchou/FileSystem/ファイル/拡張子付きファイル/JSONファイル";
 import { I描画キャンバスJSON, 描画キャンバスデータ } from "../描画キャンバス/データクラス";
+import { レコードとして扱えるか } from "../オブジェクト型ガード";
 
 export class 描画キャンバスデータバリデーター {
     public constructor() {
@@ -26,10 +27,10 @@ export class 描画キャンバスデータバリデーター {
      * ドメイン固有のバリデーションロジック
      */
     private isCanvasJSON(obj: unknown): obj is I描画キャンバスJSON {
-        if (!obj || typeof obj !== 'object') return false;
-        
-        const data = obj as Record<string, unknown>;
-        
+        if (!レコードとして扱えるか(obj)) return false;
+
+        const data = obj;
+
         // 必須フィールドの存在と型チェック
         return (
             typeof data.version === 'string' &&
