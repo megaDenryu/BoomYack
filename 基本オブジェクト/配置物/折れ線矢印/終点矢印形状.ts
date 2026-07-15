@@ -1,16 +1,15 @@
-import { polygon, svg, PolygonC } from "SengenUI/index";
-import { 点ハンドルViewBase } from "./点ハンドルViewBase";
-import { Iハンドル操作実行時コマンド } from "./Iハンドル操作実行時コマンド";
+import { polygon, svg, PolygonC, SvgC } from "SengenUI/index";
+import { Iハンドル形状 } from "./Iハンドル形状";
 
 /**
- * 終点用の矢印形状ハンドル
+ * 終点用の矢印形状。点ハンドルViewへ注入して使う。
  */
-export class 終点矢印ハンドルView extends 点ハンドルViewBase {
+export class 終点矢印形状 implements Iハンドル形状 {
     private _arrow: PolygonC;
+    public readonly svg: SvgC;
 
-    public constructor(ハンドル操作実行時コマンドlist: Iハンドル操作実行時コマンド[]) {
-        super(ハンドル操作実行時コマンドlist);
-        this.addSvgContent(
+    public constructor() {
+        this.svg = (
             svg({ width: 20, height: 20, viewBox: "0 0 20 20" }).child(
                 polygon({
                     points: [[18, 10], [2, 18], [2, 2]],
@@ -18,12 +17,11 @@ export class 終点矢印ハンドルView extends 点ハンドルViewBase {
                     stroke: "#D84315",
                     strokeWidth: 1.5,
                     strokeLinejoin: "round"
-                }).tap((poly) => { this._arrow = poly; }
-            )
-        ));
+                }).tap((poly) => { this._arrow = poly; }))
+        );
     }
 
-    protected onDragStyleChange(isDragging: boolean): void {
+    public ドラッグ時のスタイル変更(isDragging: boolean): void {
         if (isDragging) {
             this._arrow.setFill("#FF7043");
             this._arrow.setStroke("#E64A19", 2);
@@ -33,7 +31,7 @@ export class 終点矢印ハンドルView extends 点ハンドルViewBase {
         }
     }
 
-    protected onHoverStyleChange(isHovered: boolean): void {
+    public ホバー時のスタイル変更(isHovered: boolean): void {
         if (isHovered) {
             this._arrow.setFill("#FF8A65");
         } else {

@@ -1,10 +1,11 @@
 import { LV2HtmlComponentBase, Degree角度, 配置物座標点 } from "SengenUI/index";
-import { 円ハンドルView } from "./円ハンドルView";
+import { 点ハンドルView } from "./点ハンドルView";
+import { 円ハンドル形状 } from "./円ハンドル形状";
 import { I点ハンドルView } from "./I点ハンドルView";
 import { Iハンドル操作実行時コマンド } from "./Iハンドル操作実行時コマンド";
 
 export class 始点ハンドルView extends LV2HtmlComponentBase implements I点ハンドルView {
-    protected _componentRoot: 円ハンドルView;
+    protected _componentRoot: 点ハンドルView;
     private _ハンドル操作実行時コマンドlist: Iハンドル操作実行時コマンド[];
 
     constructor(ハンドル操作実行時コマンドlist: Iハンドル操作実行時コマンド[]) {
@@ -12,9 +13,9 @@ export class 始点ハンドルView extends LV2HtmlComponentBase implements I点
         this._ハンドル操作実行時コマンドlist = ハンドル操作実行時コマンドlist;
         this._componentRoot = this._ルートを構築する();
     }
-    
-    protected _ルートを構築する(): 円ハンドルView {
-        return new 円ハンドルView(this._ハンドル操作実行時コマンドlist);
+
+    protected _ルートを構築する(): 点ハンドルView {
+        return new 点ハンドルView(this._ハンドル操作実行時コマンドlist, new 円ハンドル形状());
     }
 
     public 位置を設定(pos: 配置物座標点): this {

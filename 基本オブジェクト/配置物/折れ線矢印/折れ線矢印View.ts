@@ -3,8 +3,10 @@
 export { 折れ線矢印View } from "./折れ線矢印View本体";
 export { 矢印View } from "./矢印View";
 export type { I点ハンドルView } from "./I点ハンドルView";
-export { 点ハンドルViewBase } from "./点ハンドルViewBase";
 export { 点ハンドルView } from "./点ハンドルView";
+export type { Iハンドル形状 } from "./Iハンドル形状";
+export { 円ハンドル形状 } from "./円ハンドル形状";
+export { 終点矢印形状 } from "./終点矢印形状";
 export { 始点中心線分情報 } from "./始点中心線分情報";
 export { 線分ハンドルView } from "./線分ハンドルView";
 export { 始点ハンドルView } from "./始点ハンドルView";

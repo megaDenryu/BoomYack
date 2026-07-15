@@ -1,6 +1,7 @@
 import { LV2HtmlComponentBase } from "SengenUI/index";
 
-import { テキストエリアサイズパラメータ, 自動リサイズテキストエリア } from "./自動リサイズテキストエリア";
+import { 自動リサイズテキストエリア } from "./自動リサイズテキストエリア";
+import { テキストエリアサイズパラメータ } from "./テキストエリアサイズパラメータ";
 import { I付箋コンテンツView, 付箋コンテンツView依存関係 } from "./I付箋コンテンツView";
 import { テキストフォーマット適用 } from "./テキストフォーマッタサービス";
 import { 自由テキストコンテンツを作る, 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
@@ -27,7 +28,7 @@ export class 自由テキストコンテンツView extends LV2HtmlComponentBase 
             onBlurTextCommit: 依存関係.onBlurTextCommit,
             onFocus: 依存関係.onFocus,
         });
-        this._formatterCleanup = テキストフォーマット適用(this._componentRoot.element);
+        this._formatterCleanup = テキストフォーマット適用(this._componentRoot.textArea);
     }
 
     public get text(): string {

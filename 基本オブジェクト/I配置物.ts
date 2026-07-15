@@ -1,281 +1,67 @@
-import { Canvas座標Base, Drag中値, LV2HtmlComponentBase, Px2DVector, 配置物座標点, 描画基準座標, 描画座標点 } from "SengenUI/index";
+// 参照: この barrel は旧ファイル互換のためだけに残す。新規importは個別ファイルから行う。
 
+export { 配置物zIndex } from "./配置物zIndex";
 
+export type {
+    配置物type,
+    Iドラッグ移動可能,
+    Iシリアライズ可能配置物,
+    I選択可能配置物,
+    I衝突判定可能,
+    接触判定可能な点,
+    I接触点登録先,
+    I配置物集約,
+} from "./I配置物集約";
 
-import { I点state } from "./配置物/折れ線矢印/折れ線矢印state";
-import { I点ハンドルView } from "./配置物/折れ線矢印/折れ線矢印View";
-import { I接続点親情報, 接続点 } from "./配置物/矢印接続可能なもの/接続点";
-import { 接続参照データ, 接続点位置, 配置物データ, 付箋データ, 折れ線矢印データ, なめらか曲線矢印データ } from "./描画キャンバス/データクラス";
-import { 付箋ID } from "./ID";
+export type {
+    I付箋シリアライズ可能,
+    I付箋集約,
+    I付箋VM,
+    I付箋View,
+    I自動リサイズ付箋集約,
+    I自動リサイズ付箋VM,
+    I自動リサイズ付箋View,
+} from "./I付箋";
 
-export type 配置物type = "折れ線矢印" | "まっすぐ矢印" | "なめらか曲線矢印" | "付箋" | "自動リサイズ付箋" | "グループミニキャンバス";
+export type {
+    Iグループミニキャンバス集約,
+    IグループミニキャンバスVM,
+    IグループミニキャンバスView,
+} from "./Iグループミニキャンバス";
 
-export interface Iシリアライズ可能配置物<T extends 配置物データ = 配置物データ> {
-    toシリアライズデータ(): T;
-}
+export type {
+    I始終点矢印集約,
+    I点と線のリポジトリ,
+    I点ハンドル,
+    I接続点と接続可能,
+    I線分ハンドル,
+} from "./I矢印共通";
+export { is始終点矢印集約 } from "./I矢印共通";
 
-/** 付箋データに特化したシリアライズインターフェース */
-export interface I付箋シリアライズ可能 extends Iシリアライズ可能配置物<付箋データ> {}
+export type {
+    Iまっすぐ矢印集約,
+    Iまっすぐ矢印VM,
+    Iまっすぐ矢印View,
+    I矢印集約,
+} from "./Iまっすぐ矢印";
 
-/** 折れ線矢印データに特化したシリアライズインターフェース */
-export interface I折れ線矢印シリアライズ可能 extends Iシリアライズ可能配置物<折れ線矢印データ> {}
+export type {
+    I折れ線矢印シリアライズ可能,
+    I折れ線矢印VM,
+    I折れ線矢印View,
+    I折れ線矢印集約,
+} from "./I折れ線矢印";
+export { is折れ線矢印集約 } from "./I折れ線矢印";
 
-export interface I選択可能配置物 {
-    選択された時の処理(): void;
-    選択解除された時の処理(): void;
-    ホバーされたときの処理(): void;
-    ホバー解除されたときの処理(): void;
-    接続点を表示非表示切り替え?(表示する: boolean): void;
-}
+export type {
+    Iなめらか曲線矢印集約,
+    Iなめらか曲線矢印VM,
+    Iなめらか曲線矢印View,
+    Iなめらか曲線矢印シリアライズ可能,
+} from "./Iなめらか曲線矢印";
 
-export interface I衝突判定可能 {
-    get衝突判定用矩形(): { 位置: 描画座標点; サイズ: Px2DVector };
-}
-
-/** 接触判定システムへの登録先。instanceof分岐を各配置物側に閉じ込めるためのポリモーフィズム口 */
-export interface I接触点登録先 {
-    add配置物(node: 接触判定可能な点): void;
-    add接続点リスト(接続点リスト: Iterable<接続点<any>>): void;
-}
-
-export interface I配置物集約 extends I選択可能配置物, Iシリアライズ可能配置物, I衝突判定可能 {
-    type: 配置物type;
-    readonly view: LV2HtmlComponentBase
-    /** IDの生文字列。異種IDMapを横断検索するためのエスケープハッチ（IDMapのhasString()と組み合わせる） */
-    readonly idString: string;
-    再描画(): void;
-    選択状態のzIndexにする(): void;
-    通常状態のzIndexにする(): void;
-    /** 接触判定システムへ自身の判定対象を登録する。型分岐をここに閉じ込める */
-    接触判定対象を登録する(target: I接触点登録先): void;
-    /** ドラッグ移動対象を収集する。付箋はviewを、矢印は点ハンドルリストを返す。除外するviewを指定可能 */
-    ドラッグ移動対象を収集する(除外view?: LV2HtmlComponentBase): Iドラッグ移動可能[];
-}
-
-export interface 接触判定可能な点 {
-    判定(pos: Px2DVector): boolean;
-    描画座標点: 描画座標点;
-}
-
-export interface Iグループミニキャンバス集約 {
-    readonly view: IグループミニキャンバスView;
-    readonly vm: IグループミニキャンバスVM;
-}
-
-export interface IグループミニキャンバスVM {
-}
-
-export interface IグループミニキャンバスView {
-}
-
-export interface I付箋集約 extends I配置物集約 {
-    type: "付箋";
-    readonly view: I付箋View;
-    readonly vm: I付箋VM;
-}
-
-export interface I付箋VM {
-}
-
-export interface I付箋View extends Iドラッグ移動可能,LV2HtmlComponentBase{
-}
-
-export interface I自動リサイズ付箋集約 extends I配置物集約 {
-    type: "自動リサイズ付箋";
-    readonly view: I自動リサイズ付箋View;
-    readonly vm: I自動リサイズ付箋VM;
-}
-
-export interface I自動リサイズ付箋VM {
-}
-
-export interface I自動リサイズ付箋View extends LV2HtmlComponentBase {
-}
-
-export interface Iまっすぐ矢印集約 extends I配置物集約 {
-    type: "まっすぐ矢印";
-    readonly view: Iまっすぐ矢印View;
-    readonly vm: Iまっすぐ矢印VM;
-}
-
-export interface Iまっすぐ矢印VM {
-}
-
-export interface Iまっすぐ矢印View extends LV2HtmlComponentBase {
-}
-
-/**
- * 始点と終点を持つ矢印系配置物の共通契約。
- * 折れ線矢印(中点付き)となめらか曲線矢印(中点なし)の両方が実装する。
- * 接続点・付箋リサイズ追従の仕組み(接続点.ts / 矢印接続可能なもの.ts / カスケード削除)は
- * この共通契約だけを要求するよう一般化してあり、矢印の種類が増えても書き換え不要。
- */
-export interface I始終点矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends I配置物集約 {
-    type: "折れ線矢印" | "なめらか曲線矢印";
-    始点と終点の付箋の接続点を最短のものに切り替える(): void;
-    /** 始点に接続している付箋のID。未接続のnull */
-    get始点接続付箋ID(): 付箋ID | null;
-    /** 終点に接続している付箋のID。未接続のnull */
-    get終点接続付箋ID(): 付箋ID | null;
-    onハンドルドラッグ開始?: () => void;
-    onハンドルドラッグ終了?: () => void;
-}
-
-export interface Iなめらか曲線矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends I始終点矢印集約<座標点T> {
-    type: "なめらか曲線矢印";
-    readonly view: Iなめらか曲線矢印View;
-    readonly 始点ハンドル: I点ハンドル<座標点T>;
-    readonly 終点ハンドル: I点ハンドル<座標点T>;
-    updateStateFromData(data: なめらか曲線矢印データ, モデルの描画基準座標: 描画基準座標): void;
-}
-
-export interface Iなめらか曲線矢印VM {
-}
-
-export interface Iなめらか曲線矢印View extends LV2HtmlComponentBase {
-}
-
-/** なめらか曲線矢印データに特化したシリアライズインターフェース */
-export interface Iなめらか曲線矢印シリアライズ可能 extends Iシリアライズ可能配置物<なめらか曲線矢印データ> {}
-
-
-
-export interface I点と線のリポジトリ<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
-    get点ハンドルByIndex(index: number): I点ハンドル<座標点T> | null;
-    get線分ハンドルByIndex(index: number): I線分ハンドル<座標点T> | null;
-    insert中点(insertIndex: number, pos: 座標点T): this;
-    delete中点(index: number): this;
-}
-
-export interface I点ハンドル<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends Iドラッグ移動可能{
-    ドラッグ移動処理(e: Drag中値): this;
-    render(): this;
-    移動終了(e: Drag中値): void;
-    move(diff: Px2DVector): this;
-    移動開始(e: Drag中値): void;
-    setPosition(pos: 配置物座標点): this
-    state: I点state<座標点T>;
-    view: I点ハンドルView;
-    get next線分ハンドル(): I線分ハンドル<座標点T>| null;
-    get prev線分ハンドル(): I線分ハンドル<座標点T>| null;
-    get 描画座標点(): 描画座標点;
-    index: number;
-    親の折れ線矢印集約:I始終点矢印集約<座標点T>;
-}
-
-export interface I接続点と接続可能 {
-
-}
-
-export interface I矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends I配置物集約, I点と線のリポジトリ<座標点T> {
-    type: "まっすぐ矢印";
-}
-
-export interface I線分ハンドル<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends Iドラッグ移動可能{
-    ドラッグ移動処理(e: Drag中値): this;
-    render(): this;
-    set親の集約(親: I点と線のリポジトリ<座標点T>): void;
-    set線分の位置(位置: number): void;
-}
-
-export interface I折れ線矢印VM {
-}
-
-export interface I折れ線矢印View extends LV2HtmlComponentBase {
-}
-
-export interface I折れ線矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends I始終点矢印集約<座標点T>, I点と線のリポジトリ<座標点T> {
-    type: "折れ線矢印";
-    updateStateFromData(data: 折れ線矢印データ, モデルの描画基準座標: 描画基準座標): void;
-}
-
-/** I配置物集約をtype判別子でI折れ線矢印集約へ絞り込む型ガード */
-export function is折れ線矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点>(item: I配置物集約): item is I折れ線矢印集約<座標点T> {
-    return item.type === "折れ線矢印";
-}
-
-/**
- * I配置物集約をtype判別子でI始終点矢印集約(折れ線矢印/なめらか曲線矢印の共通契約)へ絞り込む型ガード。
- * カスケード削除・グラフ走査など「矢印の種類を問わず始点/終点接続だけ見たい」処理で使う。
- */
-export function is始終点矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点>(item: I配置物集約): item is I始終点矢印集約<座標点T> {
-    return item.type === "折れ線矢印" || item.type === "なめらか曲線矢印";
-}
-
-
-
-export interface I接触点を教えてくれる人<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
-    接触点を取得(pos: 描画座標点):接触判定可能な点|null;
-    接続点を取得(pos: 描画座標点): I接続点<座標点T>|null;
-    未接続の点ハンドルを接続点と接続をtryする(接続点:接続点<座標点T>):void;
-
-    add配置物(node:接触判定可能な点):void;
-    add接続点(接続点: 接続点<座標点T>):void;
-
-    
-}
-
-export interface リスト配置可能<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
-    add配置物リスト(nodes: Iterable<接触判定可能な点>):void;
-    add接続点リスト(接続点リスト: Iterable<接続点<座標点T>>):void;
-}
-
-export interface I接続点<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
-    接続(点ハンドル: I点ハンドル<座標点T>): void;
-    接続解除(点ハンドル: I点ハンドル<座標点T>): void;
-    親interface: I接続点親情報<座標点T>;
-    /** この接続点の親配置物ID */
-    get 親配置物ID(): 付箋ID;
-    /** この接続点の位置（上/下/左/右） */
-    get 接続位置(): 接続点位置;
-    /** 接続参照データを生成 */
-    get接続参照データ(): 接続参照データ;
-}
-
-
-export class 配置物zIndex {
-    /**
-     * 付箋内部の階層構造定義
-     * スタッキングコンテキストを作らないため、親要素にはzIndexを設定しない
-     */
-    public static readonly 付箋内部構造 = {
-        ホバー用四角形: "0",
-        コンテナ: "1",      // テキストエリアを含むメインコンテナ
-        ヘッダー: "2",      // 付箋のヘッダー部分
-        リサイズハンドル: "3",  // 左右のリサイズハンドル
-    };
-
-    /**
-     * 折れ線矢印内部の階層構造定義
-     */
-    public static readonly 矢印内部構造 = {
-        線分: "1",
-        点ハンドル: "2",
-    };
-
-    public static readonly 付箋 = {
-        ホバー用四角形: "1",
-        付箋: "2"
-    }
-
-
-    public static readonly お絵描きキャンバス = "0";
-    public static readonly キャンバス = {
-        描画キャンバス: "1",
-        図形内キャンバス: "2",
-        配置物コンテナ: "3",
-        コンテキストメニューコンテナ: "4",
-    }
-
-    public  static readonly 選択状態 = {
-        未選択:"0",
-        選択中:"100",
-    }
-
-}
-
-export interface Iドラッグ移動可能 {
-    ドラッグ移動処理(e: Drag中値): this;
-}
-
-
+export type {
+    I接触点を教えてくれる人,
+    リスト配置可能,
+    I接続点,
+} from "./I接触判定";

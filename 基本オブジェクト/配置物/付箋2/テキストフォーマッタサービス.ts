@@ -1,11 +1,13 @@
+import { TextAreaC } from "SengenUI/index";
+
 /**
  * テキストフォーマッタサービス
- * 
+ *
  * BoomYack付箋のテキスト入力を補完・整形するサービス。
  * - 括弧ペアリング（自動閉じ括弧挿入）
  * - Tab/Shift+Tabインデント
  * - Enter時の自動インデント継続
- * 
+ *
  * 提案-011: テキスト入力補完・フォーマッタ
  */
 
@@ -28,29 +30,29 @@ const 閉じ括弧セット: ReadonlySet<string> = new Set(
 
 /**
  * テキストエリアにフォーマット機能を適用する
- * @param element 対象のHTMLTextAreaElement
+ * @param textArea 対象のSengenUI TextAreaC(生DOM要素は扱わない)
  * @returns クリーンアップ関数（イベントリスナーの解除）
  */
-export function テキストフォーマット適用(element: HTMLTextAreaElement): () => void {
+export function テキストフォーマット適用(textArea: TextAreaC): () => void {
     const handler = (e: KeyboardEvent): void => {
         if (e.key === "Tab") {
-            _handleTab(element, e);
+            _handleTab(textArea, e);
         } else if (e.key === "Enter") {
-            _handleEnter(element, e);
+            _handleEnter(textArea, e);
         } else if (括弧ペアマップ.has(e.key)) {
-            _handle括弧開き(element, e);
+            _handle括弧開き(textArea, e);
         } else if (閉じ括弧セット.has(e.key)) {
-            _handle閉じ括弧スキップ(element, e);
+            _handle閉じ括弧スキップ(textArea, e);
         } else if (e.key === "Backspace") {
-            _handleBackspace括弧削除(element, e);
+            _handleBackspace括弧削除(textArea, e);
         }
     };
 
-    element.addEventListener("keydown", handler);
+    textArea.addTypedEventListener("keydown", handler);
 
     // クリーンアップ関数を返す
     return () => {
-        element.removeEventListener("keydown", handler);
+        textArea.removeTypedEventListener("keydown", handler);
     };
 }
 
@@ -59,15 +61,17 @@ export function テキストフォーマット適用(element: HTMLTextAreaElemen
 // Tab インデント
 // ============================================
 
-function _handleTab(el: HTMLTextAreaElement, e: KeyboardEvent): void {
+function _handleTab(ta: TextAreaC, e: KeyboardEvent): void {
     e.preventDefault();
-    const { selectionStart, selectionEnd, value } = el;
+    const selectionStart = ta.getSelectionStart();
+    const selectionEnd = ta.getSelectionEnd();
+    const value = ta.getValue();
 
     if (selectionStart === selectionEnd) {
         // 単一カーソル位置: タブ文字（スペース4つ）を挿入
         const indent = "    ";
-        el.value = value.slice(0, selectionStart) + indent + value.slice(selectionEnd);
-        el.selectionStart = el.selectionEnd = selectionStart + indent.length;
+        const newValue = value.slice(0, selectionStart) + indent + value.slice(selectionEnd);
+        ta.値と選択範囲を書き換えて通知する(newValue, selectionStart + indent.length);
     } else {
         // 範囲選択中: 選択行の先頭にインデント追加/削除
         const before = value.slice(0, selectionStart);
@@ -77,20 +81,13 @@ function _handleTab(el: HTMLTextAreaElement, e: KeyboardEvent): void {
         if (e.shiftKey) {
             // Shift+Tab: インデント削除
             const deindented = selected.replace(/^( {1,4}|\t)/gm, "");
-            el.value = before + deindented + after;
-            el.selectionStart = selectionStart;
-            el.selectionEnd = selectionStart + deindented.length;
+            ta.値と選択範囲を書き換えて通知する(before + deindented + after, selectionStart, selectionStart + deindented.length);
         } else {
             // Tab: インデント追加
             const indented = selected.replace(/^/gm, "    ");
-            el.value = before + indented + after;
-            el.selectionStart = selectionStart;
-            el.selectionEnd = selectionStart + indented.length;
+            ta.値と選択範囲を書き換えて通知する(before + indented + after, selectionStart, selectionStart + indented.length);
         }
     }
-
-    // inputイベントを発火してViewに反映
-    el.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 
@@ -98,10 +95,11 @@ function _handleTab(el: HTMLTextAreaElement, e: KeyboardEvent): void {
 // Enter 自動インデント
 // ============================================
 
-function _handleEnter(el: HTMLTextAreaElement, e: KeyboardEvent): void {
+function _handleEnter(ta: TextAreaC, e: KeyboardEvent): void {
     if (e.isComposing) return; // IME変換中は無視
 
-    const { selectionStart, value } = el;
+    const selectionStart = ta.getSelectionStart();
+    const value = ta.getValue();
 
     // 現在行のインデントを取得
     const lineStart = value.lastIndexOf("\n", selectionStart - 1) + 1;
@@ -113,12 +111,10 @@ function _handleEnter(el: HTMLTextAreaElement, e: KeyboardEvent): void {
 
     e.preventDefault();
     const before = value.slice(0, selectionStart);
-    const after = value.slice(el.selectionEnd);
+    const after = value.slice(ta.getSelectionEnd());
 
-    el.value = before + "\n" + indent + after;
-    el.selectionStart = el.selectionEnd = selectionStart + 1 + indent.length;
-
-    el.dispatchEvent(new Event("input", { bubbles: true }));
+    const newValue = before + "\n" + indent + after;
+    ta.値と選択範囲を書き換えて通知する(newValue, selectionStart + 1 + indent.length);
 }
 
 
@@ -126,16 +122,18 @@ function _handleEnter(el: HTMLTextAreaElement, e: KeyboardEvent): void {
 // 括弧ペアリング
 // ============================================
 
-function _handle括弧開き(el: HTMLTextAreaElement, e: KeyboardEvent): void {
+function _handle括弧開き(ta: TextAreaC, e: KeyboardEvent): void {
     const 閉じ括弧 = 括弧ペアマップ.get(e.key);
     if (!閉じ括弧) return;
 
-    const { selectionStart, selectionEnd, value } = el;
+    const selectionStart = ta.getSelectionStart();
+    const selectionEnd = ta.getSelectionEnd();
+    const value = ta.getValue();
 
     // 同一文字ペア（"" や ''）で既に閉じ括弧の直前にいるならスキップ
     if (e.key === 閉じ括弧 && value[selectionStart] === 閉じ括弧) {
         e.preventDefault();
-        el.selectionStart = el.selectionEnd = selectionStart + 1;
+        ta.setSelectionRange(selectionStart + 1, selectionStart + 1);
         return;
     }
 
@@ -143,31 +141,31 @@ function _handle括弧開き(el: HTMLTextAreaElement, e: KeyboardEvent): void {
 
     if (selectionStart === selectionEnd) {
         // カーソル位置に括弧ペアを挿入、カーソルを括弧の間に配置
-        el.value = value.slice(0, selectionStart) + e.key + 閉じ括弧 + value.slice(selectionEnd);
-        el.selectionStart = el.selectionEnd = selectionStart + 1;
+        const newValue = value.slice(0, selectionStart) + e.key + 閉じ括弧 + value.slice(selectionEnd);
+        ta.値と選択範囲を書き換えて通知する(newValue, selectionStart + 1);
     } else {
         // 選択範囲を括弧で囲む
         const selected = value.slice(selectionStart, selectionEnd);
-        el.value = value.slice(0, selectionStart) + e.key + selected + 閉じ括弧 + value.slice(selectionEnd);
-        el.selectionStart = selectionStart + 1;
-        el.selectionEnd = selectionEnd + 1;
+        const newValue = value.slice(0, selectionStart) + e.key + selected + 閉じ括弧 + value.slice(selectionEnd);
+        ta.値と選択範囲を書き換えて通知する(newValue, selectionStart + 1, selectionEnd + 1);
     }
-
-    el.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
-function _handle閉じ括弧スキップ(el: HTMLTextAreaElement, e: KeyboardEvent): void {
-    const { selectionStart, value } = el;
+function _handle閉じ括弧スキップ(ta: TextAreaC, e: KeyboardEvent): void {
+    const selectionStart = ta.getSelectionStart();
+    const value = ta.getValue();
 
     // カーソルの直後が同じ閉じ括弧ならスキップ
     if (value[selectionStart] === e.key) {
         e.preventDefault();
-        el.selectionStart = el.selectionEnd = selectionStart + 1;
+        ta.setSelectionRange(selectionStart + 1, selectionStart + 1);
     }
 }
 
-function _handleBackspace括弧削除(el: HTMLTextAreaElement, e: KeyboardEvent): void {
-    const { selectionStart, selectionEnd, value } = el;
+function _handleBackspace括弧削除(ta: TextAreaC, e: KeyboardEvent): void {
+    const selectionStart = ta.getSelectionStart();
+    const selectionEnd = ta.getSelectionEnd();
+    const value = ta.getValue();
 
     if (selectionStart !== selectionEnd) return; // 範囲選択中は通常動作
     if (selectionStart === 0) return;
@@ -179,8 +177,7 @@ function _handleBackspace括弧削除(el: HTMLTextAreaElement, e: KeyboardEvent)
     const 対応する閉じ括弧 = 括弧ペアマップ.get(前の文字);
     if (対応する閉じ括弧 && 後の文字 === 対応する閉じ括弧) {
         e.preventDefault();
-        el.value = value.slice(0, selectionStart - 1) + value.slice(selectionStart + 1);
-        el.selectionStart = el.selectionEnd = selectionStart - 1;
-        el.dispatchEvent(new Event("input", { bubbles: true }));
+        const newValue = value.slice(0, selectionStart - 1) + value.slice(selectionStart + 1);
+        ta.値と選択範囲を書き換えて通知する(newValue, selectionStart - 1);
     }
 }

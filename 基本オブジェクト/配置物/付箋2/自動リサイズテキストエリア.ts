@@ -1,8 +1,6 @@
 import { LV2HtmlComponentBase, Px長さ, TextAreaC } from "SengenUI/index";
-
-
 import { sticky_note_textarea } from "./自動リサイズ付箋style.css";
-
+import { テキストエリアサイズパラメータ, テキストエリアサイズパラメータ管理 } from "./テキストエリアサイズパラメータ";
 
 /**
  * 自動リサイズ対応テキストエリアコンポーネント
@@ -12,7 +10,7 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
     protected _componentRoot: TextAreaC;
     private _text: string;
     private _テキストエリアサイズパラメータ管理: テキストエリアサイズパラメータ管理;
-    
+
     // コールバック
     private _onTextChange: (text: string) => void;
     private _onHeightChange: (newHeight: number) => void;
@@ -106,50 +104,22 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
             e.stopPropagation();
         });
     }
-    
+
     /**
-     * テキスト量に応じて高さを自動調整
+     * テキスト量に応じて高さを自動調整する。
+     * 空文字時のscrollHeight混入バグ(placeholder描画の影響)はTextAreaC.autoFitToContent()側で
+     * 対処済み(inline heightを外してCSS min-heightへ委ねる)なのでここでは呼ぶだけでよい。
      */
     private adjustHeight(): void {
         if (!this._componentRoot) {
             return; // まだ初期化されていない場合は何もしない
         }
-        
-        const textarea = this._componentRoot.dom.element as HTMLTextAreaElement;
-        if (!textarea) {
-            return; // DOM要素が取得できない場合は何もしない
-        }
-        
-        const minHeight = this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ.minHeight;
-
-        // 空文字時はplaceholder描画がscrollHeightに混入し、実際より大きい値
-        // (例: 1行分のはずが2行分)を返すことがある(Chromiumの既知の挙動)。
-        // 空文字はどんな種別でも最小高さで足りるため、scrollHeight計測自体を
-        // 行わずminHeightを直接採用して回避する。
-        if (this._text.length === 0) {
-            textarea.style.height = minHeight.toCssValue();
-            if (this._onHeightChange) {
-                this._onHeightChange(minHeight.value);
-            }
-            return;
-        }
-
-        // 一時的に高さをリセットしてscrollHeightを正確に取得
-        textarea.style.height = 'auto';
-
-        // 必要な高さを計算
-        const scrollHeight = new Px長さ(textarea.scrollHeight);
-        const newHeight = minHeight.isGreaterThan(scrollHeight) ? minHeight : scrollHeight;
-
-        // 新しい高さを適用
-        textarea.style.height = newHeight.toCssValue();
-
-        // 親コンポーネントに高さ変更を通知
+        this._componentRoot.autoFitToContent();
         if (this._onHeightChange) {
-            this._onHeightChange(newHeight.value);
+            this._onHeightChange(this._componentRoot.高さPxを取得する());
         }
     }
-    
+
     // 外部からテキストを設定
     public setValue(text: string): void {
         this._text = text;
@@ -157,38 +127,39 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
         // 高さを再調整
         setTimeout(() => this.adjustHeight(), 0);
     }
-    
+
     // 現在のテキストを取得
     public getValue(): string {
         return this._componentRoot.getValue();
     }
 
-    public get element(): HTMLTextAreaElement {
-        return this._componentRoot.dom.element as HTMLTextAreaElement;
+    /** SengenUIコンポーネント自体を公開する(生DOM要素は渡さない) */
+    public get textArea(): TextAreaC {
+        return this._componentRoot;
     }
-    
+
     // フォーカスを当てる
     public focus(): void {
         this._componentRoot.focus();
     }
-    
+
     // フォーカスを外す
     public blur(): void {
         // TextAreaCのblurは自動的に処理される
     }
-    
+
     // 現在のテキスト状態を取得
     public getText(): string {
         return this._text;
     }
-    
+
     // 最小高さを設定
     public setMinHeight(minHeight: number): this {
         this._テキストエリアサイズパラメータ管理.scale1の時のサイズパラメータ = this._テキストエリアサイズパラメータ管理.scale1の時のサイズパラメータ.setMinHeight(new Px長さ(minHeight));
         this.adjustHeight();
         return this;
     }
-    
+
     // 行の高さを設定
     public setLineHeight(lineHeight: number): this {
         this._テキストエリアサイズパラメータ管理.scale1の時のサイズパラメータ = this._テキストエリアサイズパラメータ管理.scale1の時のサイズパラメータ.setLineHeight(new Px長さ(lineHeight));
@@ -215,79 +186,5 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
     /** 文字色を設定 */
     public set文字色(色: string): void {
         this._componentRoot.setStyleCSS({ color: 色 });
-    }
-
-
-
-
-}
-
-export class テキストエリアサイズパラメータ {
-    public readonly padding: Px長さ;
-    public readonly lineHeight: Px長さ;
-    public readonly minHeight: Px長さ;
-    public readonly textSize: Px長さ;
-
-    constructor(
-        padding: Px長さ = new Px長さ(16),
-        lineHeight: Px長さ = new Px長さ(20),
-        minHeight: Px長さ = new Px長さ(52),
-        textSize: Px長さ = new Px長さ(14)
-    ) {
-        this.padding = padding;
-        this.lineHeight = lineHeight;
-        this.minHeight = minHeight;
-        this.textSize = textSize;
-    }
-
-    public multiplyScale(scale: number): テキストエリアサイズパラメータ {
-        return new テキストエリアサイズパラメータ(
-            this.padding.multiply(scale),
-            this.lineHeight.multiply(scale),
-            this.minHeight.multiply(scale),
-            this.textSize.multiply(scale)
-        );
-    }
-
-    public setMinHeight(minHeight: Px長さ): テキストエリアサイズパラメータ {
-        return new テキストエリアサイズパラメータ(
-            this.padding,
-            this.lineHeight,
-            minHeight,
-            this.textSize
-        );
-    }
-
-    public setLineHeight(lineHeight: Px長さ): テキストエリアサイズパラメータ {
-        return new テキストエリアサイズパラメータ(
-            this.padding,
-            lineHeight,
-            this.minHeight,
-            this.textSize
-        );
-    }
-
-    public setTextSize(textSize: Px長さ): テキストエリアサイズパラメータ {
-        return new テキストエリアサイズパラメータ(
-            this.padding,
-            this.lineHeight,
-            this.minHeight,
-            textSize
-        );
-    }
-}
-
-export class テキストエリアサイズパラメータ管理 {
-    public scale: number = 1.0;
-    public scale1の時のサイズパラメータ: テキストエリアサイズパラメータ;
-
-    constructor(
-        scale1の時のサイズパラメータ: テキストエリアサイズパラメータ = new テキストエリアサイズパラメータ()
-    ) {
-        this.scale1の時のサイズパラメータ = scale1の時のサイズパラメータ;
-    }
-
-    public get 現在のサイズパラメータ(): テキストエリアサイズパラメータ {
-        return this.scale1の時のサイズパラメータ.multiplyScale(this.scale);
     }
 }
