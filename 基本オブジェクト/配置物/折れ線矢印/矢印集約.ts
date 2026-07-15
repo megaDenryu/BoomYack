@@ -77,12 +77,12 @@ export class 始点ハンドル<座標点T extends Canvas座標Base<座標点T> 
         this._view = new 始点ハンドルView().配線する({
                 onドラッグ開始: (e): void => {
                     this.移動開始(e);
-                    this.親の折れ線矢印集約.onハンドルドラッグ開始?.();
+                    this.親の折れ線矢印集約.ハンドルドラッグ開始を通知する();
                 },
                 onドラッグ中: (e): void => {this.ドラッグ移動処理(e);},
                 onドラッグ終了: (e): void => {
                     this.移動終了(e);
-                    this.親の折れ線矢印集約.onハンドルドラッグ終了?.();
+                    this.親の折れ線矢印集約.ハンドルドラッグ終了を通知する();
                 },
                 on右クリック: () => {},
             });
@@ -201,14 +201,14 @@ export class 終点ハンドル<座標点T extends Canvas座標Base<座標点T> 
         this._view = new 終点ハンドルView().配線する({
             onドラッグ開始: (e): void => {
                 this.移動開始(e);
-                this.親の折れ線矢印集約.onハンドルドラッグ開始?.();
+                this.親の折れ線矢印集約.ハンドルドラッグ開始を通知する();
             },
             onドラッグ中: (e): void => {
                 this.ドラッグ移動処理(e);
             },
             onドラッグ終了: (e): void => {
                 this.移動終了(e);
-                this.親の折れ線矢印集約.onハンドルドラッグ終了?.();
+                this.親の折れ線矢印集約.ハンドルドラッグ終了を通知する();
             },
             on右クリック: () => {},
         });
@@ -315,12 +315,12 @@ export class 線分ハンドル<座標点T extends Canvas座標Base<座標点T> 
         this._view = new 線分ハンドルView().配線する({
             onドラッグ開始: (e): void => {
                 this.移動開始(e);
-                (this._親の集約 as unknown as I折れ線矢印集約<座標点T>)?.onハンドルドラッグ開始?.();
+                (this._親の集約 as unknown as I折れ線矢印集約<座標点T>)?.ハンドルドラッグ開始を通知する();
             },
             onドラッグ中: (e): void => {this.ドラッグ移動処理(e);},
             onドラッグ終了: (e): void => {
                 this.移動終了(e);
-                (this._親の集約 as unknown as I折れ線矢印集約<座標点T>)?.onハンドルドラッグ終了?.();
+                (this._親の集約 as unknown as I折れ線矢印集約<座標点T>)?.ハンドルドラッグ終了を通知する();
             },
             on右クリック: (e: MouseEvent): void => {
                 this.線分ハンドルを右クリックしたときの処理(e);

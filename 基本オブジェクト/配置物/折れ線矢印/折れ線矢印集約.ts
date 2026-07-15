@@ -1,6 +1,6 @@
-import { Canvas座標Base, Drag開始値, Drag中値, I描画空間, LV2HtmlComponentBase, Px2DVector, 画面座標点, 配置物座標点, 描画基準座標, 描画座標点 } from "SengenUI/index";
+import { Canvas座標Base, Drag開始値, Drag中値, I描画空間, LV2HtmlComponentBase, Px2DVector, 画面座標点, 配置物座標点, 描画基準座標, 描画座標点, 配線ポート } from "SengenUI/index";
 
-import {  I折れ線矢印集約, I点ハンドル, I線分ハンドル, I点と線のリポジトリ, I接触点を教えてくれる人, I折れ線矢印シリアライズ可能, I接触点登録先, Iドラッグ移動可能 } from "../../I配置物";
+import {  I折れ線矢印集約, I点ハンドル, I線分ハンドル, I点と線のリポジトリ, I接触点を教えてくれる人, I折れ線矢印シリアライズ可能, I接触点登録先, Iドラッグ移動可能, I矢印集約配線 } from "../../I配置物";
 import { 中点ハンドルView, 折れ線矢印View } from "./折れ線矢印View";
 import { 中点State, 始点State, 終点State } from "./折れ線矢印state";
 import { 折れ線矢印VM } from "./折れ線矢印VM";
@@ -35,8 +35,7 @@ export class 折れ線矢印集約<座標点T extends Canvas座標Base<座標点
     private _id: 折れ線矢印ID;
     private _設定状態: 矢印設定状態;
 
-    public onハンドルドラッグ開始?: () => void;
-    public onハンドルドラッグ終了?: () => void;
+    private readonly _配線 = new 配線ポート<I矢印集約配線>("折れ線矢印集約");
 
     public constructor(
         vm: 折れ線矢印VM<座標点T>,
@@ -76,6 +75,10 @@ export class 折れ線矢印集約<座標点T extends Canvas座標Base<座標点
             線分ハンドル.render();
         });
     }
+
+    public 配線する(配線: I矢印集約配線): this { this._配線.配線する(配線); return this; }
+    public ハンドルドラッグ開始を通知する(): void { this._配線.先.onハンドルドラッグ開始(); }
+    public ハンドルドラッグ終了を通知する(): void { this._配線.先.onハンドルドラッグ終了(); }
 
     判定(pos: Px2DVector): boolean {
         throw new Error("画面座標点の実装が必要です");
@@ -406,13 +409,13 @@ export class 中点ハンドル<座標点T extends Canvas座標Base<座標点T> 
         this.親の折れ線矢印集約 = i折れ線矢印集約;
         this._view = new 中点ハンドルView().配線する({
                 onドラッグ開始: (): void => {
-                    this.親の折れ線矢印集約.onハンドルドラッグ開始?.();
+                    this.親の折れ線矢印集約.ハンドルドラッグ開始を通知する();
                 },
                 onドラッグ中: (e): void => {
                     this.ドラッグ移動処理(e);
                 },
                 onドラッグ終了: (): void => {
-                    this.親の折れ線矢印集約.onハンドルドラッグ終了?.();
+                    this.親の折れ線矢印集約.ハンドルドラッグ終了を通知する();
                 },
                 on右クリック: (e: MouseEvent): void => {
                     e.preventDefault();// ブラウザのコンテキストメニューを抑制

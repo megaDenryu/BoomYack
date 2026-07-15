@@ -31,6 +31,7 @@ export type {
 
 export type {
     I始終点矢印集約,
+    I矢印集約配線,
     I点と線のリポジトリ,
     I点ハンドル,
     I接続点と接続可能,

@@ -1,4 +1,4 @@
-import { Canvas座標Base, Drag中値, Px2DVector, 配置物座標点, 描画座標点 } from "SengenUI/index";
+import { Canvas座標Base, Drag中値, I配線可能, Px2DVector, 配置物座標点, 描画座標点 } from "SengenUI/index";
 import { I点state } from "./配置物/折れ線矢印/折れ線矢印state";
 import { I点ハンドルView } from "./配置物/折れ線矢印/折れ線矢印View";
 import { I配置物集約, Iドラッグ移動可能 } from "./I配置物集約";
@@ -10,15 +10,21 @@ import { 付箋ID } from "./ID";
  * 接続点・付箋リサイズ追従の仕組み(接続点.ts / 矢印接続可能なもの.ts / カスケード削除)は
  * この共通契約だけを要求するよう一般化してあり、矢印の種類が増えても書き換え不要。
  */
-export interface I始終点矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends I配置物集約 {
+export interface I矢印集約配線 {
+    onハンドルドラッグ開始(): void;
+    onハンドルドラッグ終了(): void;
+}
+
+export interface I始終点矢印集約<座標点T extends Canvas座標Base<座標点T> & 配置物座標点>
+    extends I配置物集約, I配線可能<I矢印集約配線> {
     type: "折れ線矢印" | "なめらか曲線矢印";
     始点と終点の付箋の接続点を最短のものに切り替える(): void;
     /** 始点に接続している付箋のID。未接続のnull */
     get始点接続付箋ID(): 付箋ID | null;
     /** 終点に接続している付箋のID。未接続のnull */
     get終点接続付箋ID(): 付箋ID | null;
-    onハンドルドラッグ開始?: () => void;
-    onハンドルドラッグ終了?: () => void;
+    ハンドルドラッグ開始を通知する(): void;
+    ハンドルドラッグ終了を通知する(): void;
 }
 
 /**

@@ -1,5 +1,5 @@
-import { Canvas座標Base, I描画空間, LV2HtmlComponentBase, Px2DVector, 画面座標点, 配置物座標点, 描画基準座標, 描画座標点 } from "SengenUI/index";
-import { Iなめらか曲線矢印集約, Iなめらか曲線矢印シリアライズ可能, I接触点を教えてくれる人, I接触点登録先, Iドラッグ移動可能 } from "../../I配置物";
+import { Canvas座標Base, I描画空間, LV2HtmlComponentBase, Px2DVector, 画面座標点, 配置物座標点, 描画基準座標, 描画座標点, 配線ポート } from "SengenUI/index";
+import { Iなめらか曲線矢印集約, Iなめらか曲線矢印シリアライズ可能, I接触点を教えてくれる人, I接触点登録先, Iドラッグ移動可能, I矢印集約配線 } from "../../I配置物";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 import { なめらか曲線矢印データ } from "../../描画キャンバス/データクラス";
 import { なめらか曲線矢印ID, 付箋ID } from "../../ID";
@@ -21,8 +21,7 @@ export class なめらか曲線矢印集約<T extends Canvas座標Base<T> & 配�
     public readonly 始点ハンドル: 始点ハンドル<T>;
     public readonly 終点ハンドル: 終点ハンドル<T>;
     private readonly _middle: なめらか曲線矢印中間点管理<T>;
-    public onハンドルドラッグ開始?: () => void;
-    public onハンドルドラッグ終了?: () => void;
+    private readonly _配線 = new 配線ポート<I矢印集約配線>("なめらか曲線矢印集約");
 
     public constructor(vm: なめらか曲線矢印VM<T>, contacts: I接触点を教えてくれる人<T>,
         space: I描画空間, selection: I配置物選択機能集約) {
@@ -40,6 +39,9 @@ export class なめらか曲線矢印集約<T extends Canvas座標Base<T> & 配�
         this.再描画();
     }
     private readonly _id: なめらか曲線矢印ID;
+    public 配線する(配線: I矢印集約配線): this { this._配線.配線する(配線); return this; }
+    public ハンドルドラッグ開始を通知する(): void { this._配線.先.onハンドルドラッグ開始(); }
+    public ハンドルドラッグ終了を通知する(): void { this._配線.先.onハンドルドラッグ終了(); }
     public get 中間点ハンドルリスト(): readonly なめらか曲線矢印中間点ハンドル<T>[] { return this._middle.handles; }
     public get id(): なめらか曲線矢印ID { return this._id; }
     public get idString(): string { return this._id.id; }
