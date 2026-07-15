@@ -111,7 +111,11 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         this._座標変換 = 座標変換;
 
         this.選択物まとめて移動サービス = new まとめて移動サービス();
-        this.selectionManager = new 配置物選択機能集約(this, this.選択物まとめて移動サービス);
+        this.selectionManager = new 配置物選択機能集約(
+            this,
+            this.選択物まとめて移動サービス,
+            () => this._付箋召喚UI?.ホバー表示を解除する()
+        );
         this.model = new CanvasGraphModel();
         this.contextMenuContainer = new コンテキストメニューコンテナ();
         this.グラフ操作サービス = new キャンバスグラフ操作サービス(this.model, () => this.model.metadata.name, this._座標変換);
@@ -146,9 +150,11 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         this.persistence = new CanvasPersistenceManager(this.model, this.factory, repository);
         
         this._componentRoot = this._ルートを構築する();
-        this._付箋召喚UI = new 付箋召喚UI({
-            position: 描画座標点.fromNumbers(0, 0, this.model.描画基準座標),
+        this._付箋召喚UI = new 付箋召喚UI(
+            描画座標点.fromNumbers(0, 0, this.model.描画基準座標)
+        ).配線する({
             on召喚開始: text => this.付箋召喚を開始する(text),
+            onHover開始: () => this.selectionManager.ホバー解除(),
         });
         this._配置物コンテナ.child(this._付箋召喚UI);
         

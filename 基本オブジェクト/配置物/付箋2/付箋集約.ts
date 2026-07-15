@@ -46,7 +46,6 @@ export class 付箋集約<座標点T extends Canvas座標Base<座標点T> & 配�
                 this._i配置物選択機能集約.set選択中配置物(this);
             })
             .onHover(() => { this._i配置物選択機能集約.setホバー中配置物(this); })
-            .onHoverEnd(() => { this._i配置物選択機能集約.ホバー解除(this); })
 
         this._i描画基準座標を持つ = 矢印接続可能なもの依存関係.i描画空間;
         this.設定を適用(this._設定状態);

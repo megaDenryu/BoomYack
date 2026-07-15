@@ -214,8 +214,7 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
             });
         };
 
-        this._ドラッグ操作領域 = new 付箋ドラッグ操作領域({
-            ariaLabel: "付箋をドラッグ",
+        this._ドラッグ操作領域 = new 付箋ドラッグ操作領域("付箋をドラッグ").配線する({
             onPointerDown: e => this.選択する?.(e),
             onContextMenu: コンテキストメニューを表示する,
             onドラッグ開始: () => option.onDragStart?.(),
@@ -421,12 +420,7 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
     }
 
     public onHover(callback: TypedEventListener<'mouseover'>): this {
-        this._ドラッグ操作領域.onHover(callback);
-        return this;
-    }
-
-    public onHoverEnd(callback: TypedEventListener<'mouseleave'>): this {
-        this._ドラッグ操作領域.onHoverEnd(callback);
+        this._componentRoot.onMouseOver(callback);
         return this;
     }
 

@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css";
-import { 付箋ドラッグ操作余白Px, 付箋ドラッグ枠線 } from "./付箋操作仕様";
+import { 付箋ドラッグ操作余白Px } from "./付箋操作仕様";
 
 export const 付箋ドラッグ操作枠 = style({
     position: "absolute",
@@ -7,11 +7,6 @@ export const 付箋ドラッグ操作枠 = style({
     pointerEvents: "none",
     outlineOffset: "0",
     transition: "outline 0.2s ease-in-out",
-    selectors: {
-        "&:hover": {
-            outline: 付箋ドラッグ枠線.ホバー,
-        },
-    },
 });
 
 const ドラッグハンドル = style({
