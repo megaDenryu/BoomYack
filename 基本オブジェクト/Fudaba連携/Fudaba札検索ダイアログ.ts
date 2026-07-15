@@ -1,4 +1,5 @@
-import { button, div, input, DivC, LV2HtmlComponentBase, PointerWife, Px2DVector, ビューポート座標値 } from "SengenUI/index";
+import { button, div, input, DivC, LV2HtmlComponentBase, PointerWife, ビューポート座標値 } from "SengenUI/index";
+import { パネルドラッグを配線する } from "../キャンバス操作/パネルドラッグ";
 
 import { FudabaAPIクライアント } from "./FudabaAPIクライアント";
 import { Fudaba札DTO } from "./Fudaba札DTO";
@@ -54,14 +55,8 @@ export class Fudaba札検索ダイアログ extends LV2HtmlComponentBase {
                         div({ class: 検索ダイアログタイトル, text: "Fudaba札を貼り付け" }),
                         button({ class: 検索ダイアログ閉じるボタン, text: "×" }).addTypedEventListener("click", () => { this._on閉じる(); })
                     ]).tap((self) => {
-                        this._mouseWife = new PointerWife(self).ドラッグ連動登録({
-                            onドラッグ開始: () => { self.setStyleCSS({ cursor: "grabbing" }); },
-                            onドラッグ中: (e) => {
-                                const delta = e.data.直前のマウス位置から現在位置までの差分;
-                                this._position = this._position.plus(Px2DVector.fromXYpair(delta));
-                                this._componentRoot.setViewportPosition(this._position);
-                            },
-                            onドラッグ終了: () => { self.setStyleCSS({ cursor: "grab" }); }
+                        this._mouseWife = パネルドラッグを配線する(self, () => this._position, position => {
+                            this._position = position; this._componentRoot.setViewportPosition(position);
                         });
                     }),
                     input({ class: 検索入力欄, placeholder: "タイトルまたはIDで絞り込み..." })

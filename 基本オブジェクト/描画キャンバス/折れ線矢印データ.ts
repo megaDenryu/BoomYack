@@ -1,17 +1,8 @@
 import { 折れ線矢印ID } from "../ID";
-import { I座標JSON, 座標データ } from "./座標データ";
-import { I接続参照JSON, 接続参照データ } from "./接続参照データ";
-
-/** 折れ線矢印データJSON */
-export interface I折れ線矢印JSON {
-    type: "折れ線矢印";
-    id: string;
-    start: I座標JSON;
-    中点リスト: Array<I座標JSON>;
-    end: I座標JSON;
-    startRef?: I接続参照JSON | null;
-    endRef?: I接続参照JSON | null;
-}
+import { 座標データ } from "./座標データ";
+import { 接続参照データ } from "./接続参照データ";
+import { I折れ線矢印JSON } from "./折れ線矢印JSON";
+export type { I折れ線矢印JSON } from "./折れ線矢印JSON";
 
 /**
  * 折れ線矢印データ - 関数型DDD的な不変データクラス

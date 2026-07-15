@@ -1,9 +1,10 @@
 import { NumberSliderInput } from "OneONetUIComponents/index";
-import { button, div, input, label, DivC, LV2HtmlComponentBase, PointerWife, Px2DVector, ビューポート座標値 } from "SengenUI/index";
+import { button, div, input, label, DivC, LV2HtmlComponentBase, PointerWife, ビューポート座標値 } from "SengenUI/index";
 
 
 import { 設定パネルコンテナ, 設定パネルヘッダー, 設定パネルタイトル, 閉じるボタン, 設定項目, 設定項目ラベル, カラー入力, 数値入力 } from "./style.css";
 import { 付箋設定状態 } from "./設定状態データクラス";
+import { パネルドラッグを配線する } from "../../キャンバス操作/パネルドラッグ";
 
 
 export interface 付箋設定パネルオプション {
@@ -39,16 +40,10 @@ export class 付箋設定パネル extends LV2HtmlComponentBase {
                         div({ class: 設定パネルタイトル, text: "付箋設定" }),
                         button({ class: 閉じるボタン, text: "×" }).addTypedEventListener("click", () => { this._on閉じる(); })
                     ]).tap(self => {
-                        this._mouseWife = new PointerWife(self).ドラッグ連動登録({
-                            onドラッグ開始: (e) => { self.setStyleCSS({ cursor: "grabbing" }); },
-                            onドラッグ中: (e) => {
-                                const delta = e.data.直前のマウス位置から現在位置までの差分;
-                                this._position = this._position.plus(Px2DVector.fromXYpair(delta));
-                                this._componentRoot.setViewportPosition(this._position);
-                            },
-                            onドラッグ終了: (e) => { self.setStyleCSS({ cursor: "grab" }); }
+                        this._mouseWife = パネルドラッグを配線する(self, () => this._position, position => {
+                            this._position = position; this._componentRoot.setViewportPosition(position);
                         });
-                    }).setStyleCSS({ cursor: "grab" }),
+                    }),
                     this.create背景色設定(),
                     this.create文字サイズ設定(),
                     this.create文字色設定()
