@@ -1,124 +1,66 @@
-import { div, DivC, LV2HtmlComponentBase, svg, TypedEventListener, ビューポート座標値, 配置物座標点 } from "SengenUI/index";
+import {
+    div, DivC, I配線可能, LV2部品集約Base, svg, ビューポート座標値,
+    配置物座標点, 配線ポート,
+} from "SengenUI/index";
 import { Iなめらか曲線矢印View, 配置物zIndex } from "../../I配置物";
+import { 中点ハンドルView } from "../折れ線矢印/中点ハンドルView";
 import { 始点ハンドルView } from "../折れ線矢印/始点ハンドルView";
 import { 終点ハンドルView } from "../折れ線矢印/終点ハンドルView";
-import { 中点ハンドルView } from "../折れ線矢印/中点ハンドルView";
-import { 曲線パス } from "./曲線パス";
+import { 曲線操作パス, 曲線表示パス } from "./曲線パス";
 
-/**
- * なめらか曲線矢印の描画View。折れ線矢印View(線分ハンドルの集合)と異なり、
- * 始点/終点の2つのハンドルとSVG pathの3次ベジェ曲線1本だけで構成される。
- * pathのd属性はビューポート座標値の生ピクセル値で書く(点ハンドルと同じ
- * setViewportPositionByTransformの仕組みに乗せ、position:fixed化された
- * 祖先のtransformを通じて配置物コンテナ基準の座標系に揃える)。
- */
-export class なめらか曲線矢印View extends LV2HtmlComponentBase implements Iなめらか曲線矢印View {
+interface なめらか曲線矢印View部品 {
+    readonly 始点: 始点ハンドルView;
+    readonly 終点: 終点ハンドルView;
+    readonly 表示パス: 曲線表示パス;
+    readonly 操作パス: 曲線操作パス;
+}
+export interface Iなめらか曲線矢印View配線 {
+    on選択(e: MouseEvent): void;
+    onHover(): void;
+    on曲線右クリック(e: MouseEvent): void;
+}
+
+export class なめらか曲線矢印View extends LV2部品集約Base<なめらか曲線矢印View部品>
+    implements Iなめらか曲線矢印View, I配線可能<Iなめらか曲線矢印View配線> {
     protected _componentRoot: DivC;
-    public readonly 始点ハンドルView: 始点ハンドルView;
-    public readonly 終点ハンドルView: 終点ハンドルView;
-    private readonly _曲線パス = new 曲線パス();
+    private readonly _配線 = new 配線ポート<Iなめらか曲線矢印View配線>("なめらか曲線矢印View");
+    private readonly _部品: なめらか曲線矢印View部品;
+    private _中間点: 中点ハンドルView | null = null;
 
-    constructor(
-        始点ハンドルView: 始点ハンドルView,
-        終点ハンドルView: 終点ハンドルView
-    ) {
+    public constructor(始点: 始点ハンドルView, 終点: 終点ハンドルView) {
         super();
-        this.始点ハンドルView = 始点ハンドルView;
-        this.終点ハンドルView = 終点ハンドルView;
-        this._componentRoot = this._ルートを構築する();
+        this._部品 = { 始点, 終点, 表示パス: new 曲線表示パス(), 操作パス: new 曲線操作パス() };
+        this._componentRoot = this._ルートを構築する(this._部品);
     }
 
-    protected _ルートを構築する(): DivC {
-        return (
-            div()
-                .setStyleCSS({
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                    pointerEvents: "none",
-                })
-                .childs([
-                    div()
-                        .setStyleCSS({
-                            position: "absolute",
-                            width: "0px",
-                            height: "0px",
-                            pointerEvents: "none",
-                            zIndex: 配置物zIndex.矢印内部構造.線分,
-                        })
-                        .tap((self) => {
-                            self.setViewportPositionByTransform(ビューポート座標値.fromNumbers(0, 0));
-                        })
-                        .child(
-                            svg({ width: 1, height: 1 })
-                                .setStyleCSS({
-                                    position: "absolute",
-                                    top: "0px",
-                                    left: "0px",
-                                    overflow: "visible",
-                                    pointerEvents: "none",
-                                })
-                                .child(this._曲線パス)
-                        ),
-                    this.始点ハンドルView,
-                    this.終点ハンドルView,
-                ])
-        );
+    protected _ルートを構築する(部品: なめらか曲線矢印View部品): DivC {
+        return div().setStyleCSS({ position: "absolute", width: "100%", height: "100%", pointerEvents: "none" })
+            .addDivEventListener("click", e => this._配線.先.on選択(e))
+            .addDivEventListener("mouseover", () => this._配線.先.onHover())
+            .childs([
+                div().setStyleCSS({ position: "absolute", width: "0px", height: "0px",
+                    pointerEvents: "none", zIndex: 配置物zIndex.矢印内部構造.線分 })
+                    .tap(self => self.setViewportPositionByTransform(ビューポート座標値.fromNumbers(0, 0)))
+                    .child(svg({ width: 1, height: 1 }).setStyleCSS({ position: "absolute", top: "0px",
+                        left: "0px", overflow: "visible", pointerEvents: "none" })
+                        .childs([部品.表示パス, 部品.操作パス
+                            .addSvgEventListener("contextmenu", e => this._配線.先.on曲線右クリック(e))])),
+                部品.始点, 部品.終点,
+            ]);
     }
 
-    /** 始点/終点(配置物座標点)からベジェ曲線を再計算してpathへ反映する。中間点ハンドルがあればその形状を優先する */
-    public pathを更新する(始点: 配置物座標点, 終点: 配置物座標点, 中間点: 配置物座標点 | null): this {
-        this._曲線パス.曲線を設定する(始点, 終点, 中間点);
+    public 配線する(配線: Iなめらか曲線矢印View配線): this { this._配線.配線する(配線); return this; }
+    public pathを更新する(start: 配置物座標点, end: 配置物座標点, middle: 配置物座標点 | null): this {
+        this._部品.表示パス.曲線を設定する(start, end, middle);
+        this._部品.操作パス.曲線を設定する(start, end, middle);
         return this;
     }
-
-    /** 曲線上での右クリックを購読する(中間点ハンドル生成のトリガー) */
-    public on曲線右クリック(callback: TypedEventListener<'contextmenu'>): this {
-        this._曲線パス.addSvgEventListener('contextmenu', callback);
-        return this;
-    }
-
-    /** 中間点ハンドルのViewをDOMへ追加する */
-    public add中間点ハンドル(中間点ハンドルView: 中点ハンドルView): this {
-        this._componentRoot.child(中間点ハンドルView);
-        return this;
-    }
-
-    public select(): this {
-        this._曲線パス.選択色にする();
-        this._componentRoot.setStyleCSS({ zIndex: "10000" });
-        return this;
-    }
-
-    public deselect(): this {
-        this._曲線パス.通常色にする();
-        this._componentRoot.setStyleCSS({ zIndex: "auto" });
-        return this;
-    }
-
-    public hover(): this {
-        return this;
-    }
-
-    public unhover(): this {
-        return this;
-    }
-
-    public onClick(callback: TypedEventListener<'click'>) {
-        this._componentRoot.addDivEventListener("click", (e) => { callback(e); });
-        return this;
-    }
-
-    public onHover(callback: TypedEventListener<'mouseover'>) {
-        this._componentRoot.addDivEventListener("mouseover", (e) => { callback(e); });
-        return this;
-    }
-
-    public 選択状態のzIndexにする(): void {
-        this._componentRoot.setStyleCSS({ zIndex: 配置物zIndex.選択状態.選択中 });
-    }
-
-    public 通常状態のzIndexにする(): void {
-        this._componentRoot.setStyleCSS({ zIndex: 配置物zIndex.選択状態.未選択 });
-    }
+    public add中間点ハンドル(view: 中点ハンドルView): this { this._中間点 = view; this._componentRoot.child(view); return this; }
+    public select(): this { this._部品.表示パス.選択状態を設定する(true); this._中間点を表示する(true); return this; }
+    public deselect(): this { this._部品.表示パス.選択状態を設定する(false); this._中間点を表示する(false); return this; }
+    public hover(): this { this._部品.表示パス.ホバー状態を設定する(true); this._中間点を表示する(true); return this; }
+    public unhover(): this { this._部品.表示パス.ホバー状態を設定する(false); this._中間点を表示する(false); return this; }
+    private _中間点を表示する(show: boolean): void { this._中間点?.setStyleCSS({ display: show ? "block" : "none" }); }
+    public 選択状態のzIndexにする(): void { this._componentRoot.setStyleCSS({ zIndex: 配置物zIndex.選択状態.選択中 }); }
+    public 通常状態のzIndexにする(): void { this._componentRoot.setStyleCSS({ zIndex: 配置物zIndex.選択状態.未選択 }); }
 }
