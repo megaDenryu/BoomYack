@@ -5,10 +5,13 @@
  * 「未分類として扱っている」ことが分かる灰色で表す。
  */
 const 種別配色: Readonly<Record<string, string>> = {
-    タスク: "#5b4a96",
+    実装: "#5b4a96",
     バグ: "#c9403a",
+    新仕様: "#2563a6",
+    仕様検討: "#9a5b16",
+    タスク分解: "#7a4e9d",
+    記録: "#8078a4",
     決定: "#2f7d5a",
-    メモ: "#8078a4",
 };
 
 const 状態配色: Readonly<Record<string, string>> = {
