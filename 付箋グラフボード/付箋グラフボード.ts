@@ -7,7 +7,7 @@ import { Action } from 'TypeScriptBenriKakuchou/アーキテクチャBase';
 import { セーブパネル, ISavePanelEvents, SaveMode } from 'BoomYack/基本オブジェクト/キャンバス操作/セーブパネル';
 import { 描画キャンバスローカルリポジトリ } from 'BoomYack/基本オブジェクト/API/描画キャンバスAPIリポジトリ';
 import { キャンバスメタデータ, 描画キャンバスデータ } from 'BoomYack/基本オブジェクト/描画キャンバス/データクラス';
-import { 付箋枠 } from 'BoomYack/基本オブジェクト/配置物/付箋2/付箋枠';
+import { 自動リサイズ付箋View } from 'BoomYack/基本オブジェクト/配置物/付箋2/自動リサイズ付箋View';
 import { JSON読み込みサービス } from 'BoomYack/基本オブジェクト/ファイル入出力/JSON読み込みサービス';
 import { 描画キャンバスデータバリデーター } from 'BoomYack/基本オブジェクト/ファイル入出力/描画キャンバスデータバリデーター';
 import { DropFileLoader } from 'TypeScriptBenriKakuchou/FileSystem/ローダー/DropFileLoader';
@@ -24,7 +24,7 @@ import { グローバルイベントを購読する } from 'BoomYack/基本オ�
  */
 export class StickyGraphBoard extends LV2HtmlComponentBase {
     protected _componentRoot: DivC;
-    private _一番上の付箋: 付箋枠<描画座標点>;
+    private _一番上の付箋: 自動リサイズ付箋View<描画座標点>;
     private _mouseGlobal: GlobalMouseManager;
     private _windowSizeScaleObserver: WindowSizeScaleObserver;
     private _描画キャンバスView: CanvasView;

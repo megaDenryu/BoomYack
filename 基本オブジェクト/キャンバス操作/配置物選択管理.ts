@@ -5,7 +5,7 @@ import { Canvas座標Base, Drag中値, 配置物座標点 } from "SengenUI/index
 import { I配置物集約 } from "../I配置物";
 import { I配置物選択機能集約用のキャンバス機能 } from "../描画キャンバス/描画キャンバスView分解/CanvasView";
 import { まとめて移動サービス } from "../描画キャンバス/描画キャンバスView分解/まとめて移動サービス";
-import { 付箋枠 } from "../配置物/付箋2/付箋枠";
+import { 自動リサイズ付箋View } from "../配置物/付箋2/自動リサイズ付箋View";
 
 export interface I配置物選択機能集約 {
     readonly 選択中配置物: I配置物集約[];
@@ -16,7 +16,7 @@ export interface I配置物選択機能集約 {
     選択解除(): void;
     ホバー解除(): void;
     全ての接続点を表示非表示切り替え(表示する: boolean): void;
-    まとめて移動<座標点T extends Canvas座標Base<座標点T> & 配置物座標点>(e: Drag中値, ドラッグしたコンポーネント: 付箋枠<座標点T>): void;
+    まとめて移動<座標点T extends Canvas座標Base<座標点T> & 配置物座標点>(e: Drag中値, ドラッグしたコンポーネント: 自動リサイズ付箋View<座標点T>): void;
 }
 
 export class 配置物選択機能集約 implements I配置物選択機能集約 {
@@ -103,7 +103,7 @@ export class 配置物選択機能集約 implements I配置物選択機能集約
         if (this.ホバー中配置物) {this.setホバー中配置物(this.ホバー中配置物);}
     }
 
-    public まとめて移動<座標点T extends Canvas座標Base<座標点T> & 配置物座標点>(e: Drag中値, ドラッグしたコンポーネント: 付箋枠<座標点T>): void {
+    public まとめて移動<座標点T extends Canvas座標Base<座標点T> & 配置物座標点>(e: Drag中値, ドラッグしたコンポーネント: 自動リサイズ付箋View<座標点T>): void {
         this._選択物まとめて移動サービス.配置物をまとめて移動処理(e,this.選択中配置物, ドラッグしたコンポーネント);
     }
 
