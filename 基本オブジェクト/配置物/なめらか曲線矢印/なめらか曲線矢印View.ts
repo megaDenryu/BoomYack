@@ -18,6 +18,9 @@ export interface Iなめらか曲線矢印View配線 {
     on選択(e: MouseEvent): void;
     onHover(): void;
     on曲線右クリック(e: MouseEvent): void;
+    on曲線ドラッグ開始(position: Px2DVector): void;
+    on曲線ドラッグ中(delta: Px2DVector): void;
+    on曲線ドラッグ終了(): void;
 }
 
 export class なめらか曲線矢印View extends LV2部品集約Base<なめらか曲線矢印View部品>
@@ -31,7 +34,12 @@ export class なめらか曲線矢印View extends LV2部品集約Base<なめら�
 
     public constructor(始点: 始点ハンドルView, 終点: 終点ハンドルView) {
         super();
-        this._部品 = { 始点, 終点, 表示パス: new 曲線表示パス(), 操作パス: new 曲線操作パス() };
+        const 操作パス = new 曲線操作パス().ドラッグ配線する({
+            開始: position => this._配線.先.on曲線ドラッグ開始(position),
+            移動: delta => this._配線.先.on曲線ドラッグ中(delta),
+            終了: () => this._配線.先.on曲線ドラッグ終了(),
+        });
+        this._部品 = { 始点, 終点, 表示パス: new 曲線表示パス(), 操作パス };
         this._componentRoot = this._ルートを構築する(this._部品);
     }
 

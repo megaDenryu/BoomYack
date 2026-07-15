@@ -44,6 +44,8 @@ export class 曲線表示パス extends ベジェ曲線パス {
 }
 
 export class 曲線操作パス extends ベジェ曲線パス {
+    private _直前位置: Px2DVector | null = null;
+
     public constructor() {
         super({ fill: "none", stroke: "transparent", strokeWidth: 20, strokeLinecap: "round" });
         this.setStyleCSS({ pointerEvents: "stroke", cursor: "pointer" });
@@ -55,5 +57,32 @@ export class 曲線操作パス extends ベジェ曲線パス {
         if (matrix === null) throw new Error("曲線操作パスの画面変換行列を取得できません");
         const point = new DOMPoint(e.clientX, e.clientY).matrixTransform(matrix.inverse());
         return Px2DVector.fromNumbers(point.x, point.y);
+    }
+
+    public ドラッグ配線する(callbacks: {
+        開始(position: Px2DVector): void;
+        移動(delta: Px2DVector): void;
+        終了(): void;
+    }): this {
+        this.addSvgEventListener("pointerdown", e => {
+            if (e.button !== 0 || this._直前位置 !== null) return;
+            e.preventDefault(); e.stopPropagation();
+            this._直前位置 = Px2DVector.fromNumbers(e.clientX, e.clientY);
+            callbacks.開始(this.イベントのローカル座標(e));
+        });
+        document.addEventListener("pointermove", e => {
+            if (this._直前位置 === null) return;
+            e.preventDefault(); e.stopPropagation();
+            const current = Px2DVector.fromNumbers(e.clientX, e.clientY);
+            callbacks.移動(current.minus(this._直前位置));
+            this._直前位置 = current;
+        });
+        document.addEventListener("pointerup", e => {
+            if (this._直前位置 === null) return;
+            e.preventDefault(); e.stopPropagation();
+            this._直前位置 = null;
+            callbacks.終了();
+        });
+        return this;
     }
 }

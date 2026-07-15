@@ -56,11 +56,15 @@ export abstract class 曲線端点ハンドルBase<
     public move(diff: Px2DVector): this { return this.setPosition(this._state.pos.plus(diff)); }
     public setPosition(pos: T): this { this._state.setPosition(pos); this.render(); this.親の折れ線矢印集約.再描画(); return this; }
     public 移動終了(_e: Drag中値): void {
+        this.区間移動終了();
+    }
+    public 区間移動終了(): void {
         const point = this._contacts.接続点を取得(this.描画座標点);
         if (point === null) return;
         this.接続(point); this._selection.全ての接続点を表示非表示切り替え(false);
     }
-    public 移動開始(_e: Drag開始値): void { this._接続解除(); this._selection.全ての接続点を表示非表示切り替え(true); }
+    public 移動開始(_e: Drag開始値): void { this.区間移動開始(); }
+    public 区間移動開始(): void { this._接続解除(); this._selection.全ての接続点を表示非表示切り替え(true); }
     public 接続(point: I接続点<T>): this {
         this._接続解除(); this._view.見た目を接続状態にする(); this._接続点 = point; point.接続(this); return this;
     }

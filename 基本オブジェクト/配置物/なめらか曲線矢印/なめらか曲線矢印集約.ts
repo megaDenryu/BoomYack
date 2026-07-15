@@ -13,6 +13,7 @@ import { なめらか曲線矢印中間点ハンドル } from "./なめらか曲
 import { なめらか曲線矢印中間点管理 } from "./なめらか曲線矢印中間点管理";
 import { 曲線の衝突判定用矩形, 最短の接続点へ切り替える } from "./なめらか曲線矢印計算";
 import { 曲線矢印データを反映する, 曲線矢印をシリアライズする } from "./なめらか曲線矢印データ操作";
+import { 曲線区間移動 } from "./曲線区間移動";
 
 export class なめらか曲線矢印集約<T extends Canvas座標Base<T> & 配置物座標点>
     implements Iなめらか曲線矢印集約<T>, Iなめらか曲線矢印シリアライズ可能 {
@@ -21,6 +22,7 @@ export class なめらか曲線矢印集約<T extends Canvas座標Base<T> & 配�
     public readonly 始点ハンドル: 始点ハンドル<T>;
     public readonly 終点ハンドル: 終点ハンドル<T>;
     private readonly _middle: なめらか曲線矢印中間点管理<T>;
+    private readonly _区間移動: 曲線区間移動<T>;
     private readonly _配線 = new 配線ポート<I矢印集約配線>("なめらか曲線矢印集約");
 
     public constructor(vm: なめらか曲線矢印VM<T>, contacts: I接触点を教えてくれる人<T>,
@@ -33,9 +35,15 @@ export class なめらか曲線矢印集約<T extends Canvas座標Base<T> & 配�
                 on選択: e => { if (e.ctrlKey) selection.追加選択(this); else selection.set選択中配置物(this); },
                 onHover: () => selection.setホバー中配置物(this),
                 on曲線右クリック: e => { e.preventDefault(); this.曲線上に中間点ハンドルを生成する(e); },
+                on曲線ドラッグ開始: position => this._区間移動.開始する(position),
+                on曲線ドラッグ中: delta => this._区間移動.移動する(delta),
+                on曲線ドラッグ終了: () => this._区間移動.終了する(),
             });
         this._middle = new なめらか曲線矢印中間点管理(this, space, this.view);
         this._middle.初期化する(vm.middlePoints);
+        this._区間移動 = new 曲線区間移動(this.始点ハンドル, this.終点ハンドル,
+            () => this._middle.handles, space, () => this.再描画(),
+            () => this.ハンドルドラッグ開始を通知する(), () => this.ハンドルドラッグ終了を通知する());
         this.再描画();
     }
     private readonly _id: なめらか曲線矢印ID;
