@@ -1,11 +1,6 @@
-import { CanvasGraphModel } from "../描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
 import { 配置物選択機能集約 } from "./配置物選択管理";
-import { 自動リサイズ付箋View } from "../配置物/付箋2/自動リサイズ付箋View";
+import { 確定音声テキスト, 選択中付箋へ追記する } from "./音声認識処理";
 
-/**
- * マイク音声認識を管理し、選択中の付箋にテキストを直書きするサービス。
- * ブラウザの Web Speech API (webkitSpeechRecognition) を利用。
- */
 export class VoiceRecognitionService {
     private selectionManager: 配置物選択機能集約;
     private recognition: any | null = null;
@@ -31,16 +26,8 @@ export class VoiceRecognitionService {
         this.recognition.lang = 'ja-JP';
 
         this.recognition.onresult = (event: any) => {
-            let finalTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript;
-                }
-            }
-
-            if (finalTranscript) {
-                this.writeToSelectedStickyNotes(finalTranscript);
-            }
+            const finalTranscript = 確定音声テキスト(event);
+            if (finalTranscript) 選択中付箋へ追記する(this.selectionManager, finalTranscript);
         };
 
         this.recognition.onerror = (event: any) => {
@@ -106,18 +93,4 @@ export class VoiceRecognitionService {
         }
     }
 
-    private writeToSelectedStickyNotes(text: string) {
-        const selectedItems = this.selectionManager.選択中配置物;
-        for (const item of selectedItems) {
-            if (item.type === "自動リサイズ付箋" || item.type === "付箋") {
-                const view = item.view as unknown as 自動リサイズ付箋View<any>;
-                if (view && typeof view.text === 'string' && typeof view.setText === 'function') {
-                    // 現在のテキストの末尾に追記
-                    const currentText = view.text;
-                    const newText = currentText ? currentText + "\n" + text : text;
-                    view.setText(newText);
-                }
-            }
-        }
-    }
 }
