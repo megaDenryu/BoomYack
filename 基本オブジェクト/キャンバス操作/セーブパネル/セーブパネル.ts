@@ -1,30 +1,12 @@
 import { Toast } from "OneONetUIComponents/index";
-import { button, div, input, span, ButtonC, DivC, HtmlComponentBase, InputC, LV2HtmlComponentBase, SpanC } from "SengenUI/index";
+import { ButtonC, DivC, InputC, LV2HtmlComponentBase, SpanC } from "SengenUI/index";
 import {
-    savePanelContainer,
-    panelHeader,
-    panelTitle,
-    closeButton,
-    panelContent,
-    inputGroup,
-    inputLabel,
-    textInput,
-    modeSelector,
     modeButton,
     modeButtonActive,
-    actionButtonGroup,
-    primaryButton,
-    secondaryButton,
-    tabContainer,
-    tab,
-    tabActive,
     overlayBackdrop,
     overlayBackdropVisible,
     panelFadeIn,
     panelFadeOut,
-    trashToggleButton,
-    trashBadge,
-    savePanelWrapper
 } from "./style.css";
 
 import { SaveMode, ISavePanelEvents } from "./セーブパネル型定義";
@@ -35,6 +17,9 @@ import { グローバルイベントを購読する } from "BoomYack/基本オ�
 import ゴミ箱Icon from "../../../SVGImg/ゴミ箱.svg?url";
 
 import { キャンバスJSON出力サービス } from "BoomYack/基本オブジェクト/ファイル入出力/キャンバスJSON出力サービス";
+import { セーブパネル外枠 } from "./セーブパネル外枠UI";
+import { I保存欄イベント, I保存欄参照, 新規保存欄, 現在名欄 } from "./セーブパネル保存欄UI";
+import { ゴミ箱欄, モード欄, リスト欄, 読込欄 } from "./セーブパネル操作欄UI";
 
 // 型定義を再エクスポート
 export type { SaveMode, ISavePanelEvents } from "./セーブパネル型定義";
@@ -147,169 +132,26 @@ export class セーブパネル extends LV2HtmlComponentBase {
                     
                 }
             });
-        return (
-            div({ class: savePanelWrapper })
-                .setStyleCSS({ display: 'none' })
-                .childs([
-                    div({ class: overlayBackdrop })
-                        .tap(self => this._backdrop = self)
-                        .addDivEventListener('click', () => this.閉じる()),
-                    div({ class: savePanelContainer })
-                        .tap(self => this._panel = self)
-                        .childs([
-                            this.Header(),
-                            this.Content()
-                        ])
-                ])
-        );
-    }
-
-    private Header(): DivC {
-        return (
-            div({ class: panelHeader })
-                .childs([
-                    span({ text: "セーブ/ロード", class: panelTitle }),
-                    button({ text: "×", class: closeButton })
-                        .addTypedEventListener('click', () => this.閉じる())
-                ])
-        );
-    }
-
-    private Content(): DivC {
-        return (
-            div({ class: panelContent })
-                .setStyleCSS({ position: 'relative' })
-                .childs([
-                    this.モード選択(),
-                    this.現在のキャンバス名と上書き保存(),
-                    this.新規保存入力(),
-                    this.セーブリスト(),
-                    this.読み込みボタン(),
-                    this.仮ゴミ箱ボタン()
-                ])
-        );
-    }
-
-    private モード選択(): DivC {
-        return (
-            div({ class: inputGroup })
-                .childs([
-                    span({ text: "保存先", class: inputLabel }),
-                    div({ class: modeSelector })
-                        .child(
-                            button({ text: "ローカル", class: [modeButton, modeButtonActive] })
-                                .tap(self => this._localModeBtn = self)
-                                .addTypedEventListener('click', () => this.switchMode("local"))
-                        ).childIf({
-                            If: this._events.onIsServerModeAvailable(),
-                            True: () => button({ text: "サーバー", class: modeButton })
-                                .tap(self => this._serverModeBtn = self)
-                                .addTypedEventListener('click', () => this.switchMode("server"))
-                        })
-                ])
-        );
-    }
-
-    private 現在のキャンバス名と上書き保存(): DivC {
-        return (
-            div({ class: inputGroup })
-                .childs([
-                    span({ text: "現在のキャンバス名", class: inputLabel }),
-                    div().setStyleCSS({ display: 'flex', gap: '8px', alignItems: 'center' })
-                        .childs([
-                            div().setStyleCSS({ flex: '1', position: 'relative' })
-                                .childs([
-                                    span({ text: this._currentCanvasName ?? "（未保存）" })
-                                        .tap(self => this._currentCanvasNameSpan = self)
-                                        .setStyleCSS({
-                                            display: 'block',
-                                            padding: '8px',
-                                            backgroundColor: '#f5f5f5',
-                                            borderRadius: '4px',
-                                            color: '#333',
-                                            fontSize: '14px',
-                                            cursor: this._currentCanvasName ? 'pointer' : 'default',
-                                            userSelect: 'none'
-                                        })
-                                        .addTypedEventListener('dblclick', () => this.startRenaming()),
-                                    input({ type: 'text', class: textInput })
-                                        .tap(self => this._currentCanvasNameInput = self)
-                                        .setStyleCSS({
-                                            display: 'none',
-                                            width: '100%',
-                                            padding: '8px',
-                                            fontSize: '14px'
-                                        })
-                                        .addTypedEventListener('keydown', (e) => this.handleRenameKeydown(e))
-                                        .addTypedEventListener('blur', () => this.confirmRenaming())
-                                ]),
-                            button({ text: "上書き保存", class: primaryButton })
-                                .tap(self => this._overwriteSaveButton = self)
-                                .setStyleCSS({ display: this._currentCanvasName ? 'block' : 'none' })
-                                .addTypedEventListener('click', () => this.handleOverwriteSave())
-                        ])
-                ])
-        );
-    }
-
-    private 新規保存入力(): DivC {
-        return (
-            div({ class: inputGroup })
-                .childs([
-                    span({ text: "新規保存", class: inputLabel }),
-                    div().setStyleCSS({ display: 'flex', gap: '8px' })
-                        .childs([
-                            input({ type: 'text', placeholder: 'キャンバスの名前を入力...', class: textInput })
-                                .tap(self => this._newSaveNameInput = self)
-                                .setStyleCSS({ flex: '1' }),
-                            button({ text: "新規保存", class: primaryButton })
-                                .tap(self => this._newSaveButton = self)
-                                .addTypedEventListener('click', () => this.handleNewSave())
-                        ])
-                ])
-        );
-    }
-
-    private セーブリスト(): HtmlComponentBase {
-        return (
-            div({ class: inputGroup })
-                .childs([
-                    span({ text: "保存データ一覧", class: inputLabel }),
-                    this._list
-                ])
-        );
-    }
-
-    private 読み込みボタン(): HtmlComponentBase {
-        return (
-            div({ class: actionButtonGroup })
-                .childs([
-                    button({ text: "読込", class: secondaryButton })
-                        .tap(self => this._loadButton = self)
-                        .addTypedEventListener('click', () => this.handleLoad())
-                ])
-        );
-    }
-
-    private 仮ゴミ箱ボタン(): HtmlComponentBase {
-        return (
-            button({ text: "", class: trashToggleButton })
-                .setStyleCSS({
-                    display: 'none',
-                    backgroundImage: `url(${ゴミ箱Icon})`,
-                    backgroundSize: 'contain',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'center',
-                    width: '48px',
-                    height: '48px'
-                })
-                .tap(self => this._trashToggleBtn = self)
-                .addTypedEventListener('click', () => this.toggleTrashView())
-                .child(
-                    span({ text: "0", class: trashBadge })
-                        .tap(self => this._trashBadgeSpan = self)
-                )
-        );
+        const refs: I保存欄参照 = {
+            currentNameSpan: value => this._currentCanvasNameSpan = value,
+            currentNameInput: value => this._currentCanvasNameInput = value,
+            overwriteButton: value => this._overwriteSaveButton = value,
+            newNameInput: value => this._newSaveNameInput = value,
+            newSaveButton: value => this._newSaveButton = value,
+        };
+        const events: I保存欄イベント = {
+            startRenaming: () => this.startRenaming(), renameKeydown: event => this.handleRenameKeydown(event),
+            confirmRenaming: () => this.confirmRenaming(), overwriteSave: () => this.handleOverwriteSave(),
+            newSave: () => this.handleNewSave(),
+        };
+        return セーブパネル外枠([
+            モード欄(this._events.onIsServerModeAvailable(), mode => this.switchMode(mode),
+                value => this._localModeBtn = value, value => this._serverModeBtn = value),
+            現在名欄(this._currentCanvasName, refs, events), 新規保存欄(refs, events), リスト欄(this._list),
+            読込欄(() => this.handleLoad(), value => this._loadButton = value),
+            ゴミ箱欄(() => this.toggleTrashView(), value => this._trashToggleBtn = value,
+                value => this._trashBadgeSpan = value),
+        ], () => this.閉じる(), value => this._backdrop = value, value => this._panel = value);
     }
 
     // ====== パネル表示制御 ======

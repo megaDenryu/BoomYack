@@ -1,197 +1,77 @@
-import { button, div, span, DivC, LV2HtmlComponentBase } from "SengenUI/index";
-
-
-
-
-import { セーブパネル仮ゴミ箱 } from "./セーブパネル仮ゴミ箱";
-import {
-    saveListContainer,
-    saveListItem,
-    saveListItemSelected,
-    saveItemName,
-    saveItemDate,
-    deleteItemButton,
-    emptyMessage,
-    trashedItem,
-    restoreButton,
-    jsonFileOutputButton
-} from "./style.css";
+import { div, DivC, LV2HtmlComponentBase } from "SengenUI/index";
 import { キャンバスメタデータ } from "../../描画キャンバス/データクラス";
-import ゴミ箱Icon from "../../../SVGImg/ゴミ箱.svg?url";
+import { SaveMode } from "./セーブパネル型定義";
+import { セーブパネル仮ゴミ箱 } from "./セーブパネル仮ゴミ箱";
+import { ゴミ箱項目, 空メッセージ, 保存項目 } from "./セーブパネルリスト項目";
+import { saveListContainer } from "./style.css";
 
-/** リスト選択イベント */
 export interface ISaveListEvents {
-    onSelect: (id: string, name: string) => void;
-    onMoveToTrash: (item: キャンバスメタデータ) => void;
-    onRestoreFromTrash: (id: string) => void;
-    onJsonOutput: (item: キャンバスメタデータ) => void;
+  onSelect: (id: string, name: string) => void;
+  onMoveToTrash: (item: キャンバスメタデータ) => void;
+  onRestoreFromTrash: (id: string) => void;
+  onJsonOutput: (item: キャンバスメタデータ) => void;
 }
 
-/**
- * セーブデータリストの表示を管理するコンポーネント
- */
 export class セーブパネルリスト extends LV2HtmlComponentBase {
-    protected _componentRoot: DivC;
-    private _saveList: キャンバスメタデータ[] = [];
-    private _selectedItemId: string | null = null;
-    private _showingTrash: boolean = false;
-    private _trash: セーブパネル仮ゴミ箱;
-    private _events: ISaveListEvents;
-    private _currentMode: "local" | "server" = "local";
+  protected _componentRoot: DivC;
+  private _saveList: キャンバスメタデータ[] = [];
+  private _selectedItemId: string | null = null;
+  private _showingTrash = false;
+  private _currentMode: SaveMode = "local";
 
-    constructor(trash: セーブパネル仮ゴミ箱, events: ISaveListEvents) {
-        super();
-        this._trash = trash;
-        this._events = events;
-        this._componentRoot = this._ルートを構築する();
-    }
+  constructor(private _trash: セーブパネル仮ゴミ箱, private _events: ISaveListEvents) {
+    super();
+    this._componentRoot = div({ class: saveListContainer });
+    this.render();
+  }
 
-    protected _ルートを構築する(): DivC {
-        return (
-          div({ class: saveListContainer })
-              .child(
-                  div({ class: emptyMessage })
-                      .child(span({ text: "保存データがありません" })))
-        );
-    }
+  public setList(list: キャンバスメタデータ[], mode: SaveMode): void {
+    this._saveList = list;
+    this._currentMode = mode;
+    this.render();
+  }
+  public get selectedItemId(): string | null { return this._selectedItemId; }
+  public clearSelection(): void { this._selectedItemId = null; this.render(); }
+  public toggleTrashView(): boolean {
+    this._showingTrash = !this._showingTrash;
+    this.render();
+    return this._showingTrash;
+  }
+  public resetTrashView(): void { this._showingTrash = false; }
+  public render(): void {
+    this._componentRoot.clearChildren();
+    if (this._showingTrash) this.renderTrashList();
+    else this.renderSaveList();
+  }
 
-    /** リストデータを設定 */
-    public setList(list: キャンバスメタデータ[], mode: "local" | "server"): void {
-        this._saveList = list;
-        this._currentMode = mode;
-        this.render();
-    }
+  private renderSaveList(): void {
+    const items = this._saveList.filter(item => !this._trash.has(item.id.id));
+    if (items.length === 0) { this._componentRoot.child(空メッセージ("保存データがありません")); return; }
+    for (const item of items) this._componentRoot.child(保存項目(
+      item, this._selectedItemId === item.id.id,
+      () => this.selectItem(item),
+      () => this._events.onJsonOutput(item),
+      () => this._events.onMoveToTrash(item),
+    ));
+  }
 
-    /** 選択中のアイテムID */
-    public get selectedItemId(): string | null {
-        return this._selectedItemId;
-    }
+  private renderTrashList(): void {
+    const items = this._trash.getItemsByMode(this._currentMode);
+    if (items.length === 0) { this._componentRoot.child(空メッセージ("ゴミ箱は空です")); return; }
+    for (const { item } of items) this._componentRoot.child(
+      ゴミ箱項目(item, () => this._events.onRestoreFromTrash(item.id.id)),
+    );
+  }
 
-    /** 選択をクリア */
-    public clearSelection(): void {
-        this._selectedItemId = null;
-        this.render();
-    }
-
-    /** ゴミ箱表示モードを切り替え */
-    public toggleTrashView(): boolean {
-        this._showingTrash = !this._showingTrash;
-        this.render();
-        return this._showingTrash;
-    }
-
-    /** ゴミ箱表示モードをリセット */
-    public resetTrashView(): void {
-        this._showingTrash = false;
-    }
-
-    /** 再描画 */
-    public render(): void {
-        this._componentRoot.clearChildren();
-        
-        if (this._showingTrash) {
-            this.renderTrashList();
-        } else {
-            this.renderSaveList();
-        }
-    }
-
-    private renderSaveList(): void {
-        const visibleItems = this._saveList.filter(item => !this._trash.has(item.id.id));
-        
-        if (visibleItems.length === 0) {
-            this._componentRoot.child(
-                div({ class: emptyMessage })
-                    .child(span({ text: "保存データがありません" }))
-            );
-            return;
-        }
-        
-        for (const item of visibleItems) {
-            const isSelected = this._selectedItemId === item.id.id;
-            const itemClasses = isSelected ? [saveListItem, saveListItemSelected] : [saveListItem];
-            
-            this._componentRoot.child(
-                div({ class: itemClasses })
-                    .addDivEventListener('click', () => this.selectItem(item))
-                    .childs([
-                        div().childs([
-                            span({ text: item.name, class: saveItemName }),
-                            span({ 
-                                text: new Date(item.updatedAt).toLocaleString(), 
-                                class: saveItemDate 
-                            }).setStyleCSS({ display: 'block' })
-                        ]),
-                        button({ text: "json", class: jsonFileOutputButton})
-                            .addTypedEventListener("click", (e) => {
-                                e.stopPropagation();
-                                this._events.onJsonOutput(item)
-                            }),
-                        button({ text: "", class: deleteItemButton })
-                            .setStyleCSS({
-                                backgroundImage: `url(${ゴミ箱Icon})`,
-                                backgroundSize: 'contain',
-                                backgroundRepeat: 'no-repeat',
-                                backgroundPosition: 'center',
-                                width: '32px',
-                                height: '32px'
-                            })
-                            .addTypedEventListener('click', (e) => {
-                                e.stopPropagation();
-                                this._events.onMoveToTrash(item);
-                            })
-                    ])
-            );
-        }
-    }
-
-    private renderTrashList(): void {
-        const trashItems = this._trash.getItemsByMode(this._currentMode);
-        
-        if (trashItems.length === 0) {
-            this._componentRoot.child(
-                div({ class: emptyMessage })
-                    .child(span({ text: "ゴミ箱は空です" }))
-            );
-            return;
-        }
-        
-        for (const { item } of trashItems) {
-            this._componentRoot.child(
-                div({ class: [saveListItem, trashedItem] })
-                    .childs([
-                        div().childs([
-                            span({ text: item.name, class: saveItemName }),
-                            span({ 
-                                text: new Date(item.updatedAt).toLocaleString(), 
-                                class: saveItemDate 
-                            }).setStyleCSS({ display: 'block' })
-                        ]),
-                        button({ text: "↩", class: restoreButton })
-                            .addTypedEventListener('click', (e) => {
-                                e.stopPropagation();
-                                this._events.onRestoreFromTrash(item.id.id);
-                            })
-                    ])
-            );
-        }
-    }
-
-    private selectItem(item: キャンバスメタデータ): void {
-        this._selectedItemId = item.id.id;
-        this.render();
-        this._events.onSelect(item.id.id, item.name);
-    }
-
-    /** 名前から既存アイテムを検索 */
-    public findItemByName(name: string): キャンバスメタデータ | null {
-        if (!name) return null;
-        return this._saveList.find(item => item.name === name) ?? null;
-    }
-
-    public getCanvasNameById(id: string): string | null {
-        const item = this._saveList.find(item => item.id.id === id);
-        return item ? item.name : null;
-    }
+  private selectItem(item: キャンバスメタデータ): void {
+    this._selectedItemId = item.id.id;
+    this.render();
+    this._events.onSelect(item.id.id, item.name);
+  }
+  public findItemByName(name: string): キャンバスメタデータ | null {
+    return name ? this._saveList.find(item => item.name === name) ?? null : null;
+  }
+  public getCanvasNameById(id: string): string | null {
+    return this._saveList.find(item => item.id.id === id)?.name ?? null;
+  }
 }
-
