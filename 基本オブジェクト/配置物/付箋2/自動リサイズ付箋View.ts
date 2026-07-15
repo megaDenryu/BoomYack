@@ -398,9 +398,6 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
         }
     }
 
-    public 付箋をめくる動作を登録(callback: TypedEventListener<'click'>): void {
-        this._componentRoot.onceClick(callback);
-    }
     public 再描画(): void {
         this.set付箋ボードTransform({});
     }

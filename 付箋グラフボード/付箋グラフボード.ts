@@ -7,7 +7,6 @@ import { Action } from 'TypeScriptBenriKakuchou/アーキテクチャBase';
 import { セーブパネル, ISavePanelEvents, SaveMode } from 'BoomYack/基本オブジェクト/キャンバス操作/セーブパネル';
 import { 描画キャンバスローカルリポジトリ } from 'BoomYack/基本オブジェクト/API/描画キャンバスAPIリポジトリ';
 import { キャンバスメタデータ, 描画キャンバスデータ } from 'BoomYack/基本オブジェクト/描画キャンバス/データクラス';
-import { 自動リサイズ付箋View } from 'BoomYack/基本オブジェクト/配置物/付箋2/自動リサイズ付箋View';
 import { JSON読み込みサービス } from 'BoomYack/基本オブジェクト/ファイル入出力/JSON読み込みサービス';
 import { 描画キャンバスデータバリデーター } from 'BoomYack/基本オブジェクト/ファイル入出力/描画キャンバスデータバリデーター';
 import { DropFileLoader } from 'TypeScriptBenriKakuchou/FileSystem/ローダー/DropFileLoader';
@@ -18,13 +17,10 @@ import { グローバルイベントを購読する } from 'BoomYack/基本オ�
  * Miroのような付箋グラフボードページ
  * 複数の付箋を配置して、矢印で接続できるキャンバスを提供
  * 
- *  機能：
- *  矢印接続可能付箋の追加方法：左上に矢印接続可能付箋置き場がある。それをドラッグするとその付箋はそのまま好きな場所における。
- * そしてドラッグした瞬間に付箋置き場には新しい付箋が生成される。
+ * 左上の付箋召喚UIはCanvasViewが所有し、ドラッグ開始時に実付箋を生成する。
  */
 export class StickyGraphBoard extends LV2HtmlComponentBase {
     protected _componentRoot: DivC;
-    private _一番上の付箋: 自動リサイズ付箋View<描画座標点>;
     private _mouseGlobal: GlobalMouseManager;
     private _windowSizeScaleObserver: WindowSizeScaleObserver;
     private _描画キャンバスView: CanvasView;
@@ -50,8 +46,6 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
         // まで先送りされるため、この時点で未構築でも問題ない。
         this._座標変換 = new ボード基準座標変換(() => this._componentRoot.dom.element);
         this._componentRoot = this._ルートを構築する();
-        this._一番上の付箋 = this._描画キャンバスView.add付箋(Px2DVector.fromNumbers(0,0)).view;
-        this._一番上の付箋.付箋をめくる動作を登録( this.付箋をめくる動作.bind(this) );
         this._json読み込みサービス = new JSON読み込みサービス(
             new DropFileLoader(),
             new 描画キャンバスデータバリデーター()
@@ -183,13 +177,6 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
 
     public delete(): void {
         super.delete();
-    }
-
-    private 付箋をめくる動作():void{
-        this._一番上の付箋 = this._描画キャンバスView.add付箋(Px2DVector.fromNumbers(0,0)).view;
-        this._一番上の付箋.付箋をめくる動作を登録( () => {
-            this.付箋をめくる動作();
-        });
     }
 
     private ブラウザのウインドウが拡縮したときマウスを中心に拡縮したように見せるために座標中心を移動させる(){

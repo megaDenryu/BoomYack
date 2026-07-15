@@ -52,6 +52,9 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
             value: this._text,
             placeholder: placeholder ?? "付箋のテキストを入力...",
             class: 追加クラス ? [sticky_note_textarea, 追加クラス] : sticky_note_textarea,
+            // HTMLTextAreaElementの既定値は2行。未指定だと1文字入力しただけで
+            // scrollHeightが2行分になり、1行付箋が52pxから72pxへ伸びる。
+            rows: 1,
             spellcheck: false
         })
         .setStyleCSS({
@@ -115,8 +118,7 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
      * placeholderが混入する問題の別形)。そのため空文字時はminHeightを明示的な
      * heightとして直接設定し、自然高さ計算そのものを起こさせない。
      * 併せてonHeightChangeへ渡す値も同じ既知の値を使い、実測(高さPxを取得する)に
-     * 頼らない。この付箋がまだdocumentへ未接続の段階(例: 付箋グラフボードの
-     * コンストラクタ内で同期的に生成される「一番上の付箋」)でadjustHeightが呼ばれると、
+     * 頼らない。この付箋がまだdocumentへ未接続の段階でadjustHeightが呼ばれると、
      * offsetHeightはレイアウト未計算のため信頼できない値を返すため。
      */
     private adjustHeight(): void {

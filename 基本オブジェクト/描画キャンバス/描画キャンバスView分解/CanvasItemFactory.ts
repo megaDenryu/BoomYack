@@ -23,10 +23,12 @@ import { Iキャンバスコマンド } from "../../キャンバス操作/コマ
 import { 配置物テキスト変更コマンド, 配置物移動コマンド, 配置物追加コマンド, 配置物矢印変更コマンド, 配置物なめらか曲線矢印変更コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
 import { VoiceRecognitionService } from "../../キャンバス操作/音声認識サービス";
 import { ボード基準座標変換 } from "../../キャンバス操作/座標変換/ボード基準座標変換";
-
-// 自由テキスト付箋の初期最小高さ。テキストエリアのpadding(16px×2)+lineHeight(20px)の
-// 1行分と一致させる(この値未満だとscrollHeightが常にminHeightを上回り無意味な値になる)。
-const 自由テキスト付箋の初期最小高さ = new Px長さ(52);
+import {
+    コンテンツ種別の最小高さを取得する,
+    タイトル付き付箋初期寸法,
+    札参照付箋初期寸法,
+    自由テキスト付箋初期寸法,
+} from "../../配置物/付箋2/付箋初期寸法";
 
 export class CanvasItemFactory implements ICanvasItemFactory {
     private 衝突判定サービス: 配置物衝突判定サービス;
@@ -50,8 +52,8 @@ export class CanvasItemFactory implements ICanvasItemFactory {
     public create付箋(pos: 描画座標点, text?: string, id?: string): 付箋集約<描画座標点> {
         return this.付箋を構築する(
             pos,
-            new Px2DVector(new Px長さ(200), 自由テキスト付箋の初期最小高さ),
-            自由テキスト付箋の初期最小高さ,
+            自由テキスト付箋初期寸法.サイズ,
+            自由テキスト付箋初期寸法.最小高さ,
             自由テキストコンテンツを作る(text ?? ""),
             new 付箋ID(id)
         );
@@ -60,8 +62,8 @@ export class CanvasItemFactory implements ICanvasItemFactory {
     public createタイトル付き付箋(pos: 描画座標点, id?: string): 付箋集約<描画座標点> {
         return this.付箋を構築する(
             pos,
-            new Px2DVector(new Px長さ(220), new Px長さ(70)),
-            new Px長さ(70),
+            タイトル付き付箋初期寸法.サイズ,
+            タイトル付き付箋初期寸法.最小高さ,
             タイトル付きコンテンツを作る("", ""),
             new 付箋ID(id)
         );
@@ -70,8 +72,8 @@ export class CanvasItemFactory implements ICanvasItemFactory {
     public create札参照付箋(pos: 描画座標点, 札ID: string, id?: string): 付箋集約<描画座標点> {
         return this.付箋を構築する(
             pos,
-            new Px2DVector(new Px長さ(220), new Px長さ(90)),
-            new Px長さ(90),
+            札参照付箋初期寸法.サイズ,
+            札参照付箋初期寸法.最小高さ,
             札参照コンテンツを作る(札ID),
             new 付箋ID(id)
         );
@@ -79,7 +81,8 @@ export class CanvasItemFactory implements ICanvasItemFactory {
 
     public create付箋FromData(data: 付箋データ): 付箋集約<描画座標点> {
         const pos = 描画座標点.fromPx2DVector(data.position.toPx2DVector(), this.model.描画基準座標);
-        const 付箋 = this.付箋を構築する(pos, data.size.toPx2DVector(), new Px長さ(50), data.コンテンツ, data.id);
+        const 最小高さ = コンテンツ種別の最小高さを取得する(data.コンテンツ);
+        const 付箋 = this.付箋を構築する(pos, data.size.toPx2DVector(), 最小高さ, data.コンテンツ, data.id);
         付箋.設定を適用(data.設定状態);
         return 付箋;
     }

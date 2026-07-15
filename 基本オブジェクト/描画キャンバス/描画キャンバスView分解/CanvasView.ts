@@ -34,6 +34,9 @@ import { キャンバスコンテナ, 描画キャンバスView as 描画キャ�
 import { グローバルイベントを購読する, グローバルイベント購読ハンドル } from "../../グローバルイベント購読";
 import { FudabaAPIクライアント } from "../../Fudaba連携/FudabaAPIクライアント";
 import { Fudaba札検索ダイアログ } from "../../Fudaba連携/Fudaba札検索ダイアログ";
+import { 付箋召喚UI } from "../../配置物/付箋2/付箋召喚UI";
+import type { 付箋召喚ドラッグ対象 } from "../../配置物/付箋2/付箋召喚UI";
+import type { 付箋集約 } from "../../配置物/付箋2/付箋集約";
 
 export interface 全ての接続点を表示非表示切り替え可能 {
     全ての接続点を表示非表示切り替え(表示する: boolean): void;
@@ -86,6 +89,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     private contextMenuContainer: コンテキストメニューコンテナ;
     private _配置物コンテナ!: DivC;
     private _fudaba検索ダイアログ: Fudaba札検索ダイアログ | null = null;
+    private _付箋召喚UI: 付箋召喚UI;
     
     // State
     private readonly _options: CanvasViewOptions;
@@ -142,6 +146,11 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         this.persistence = new CanvasPersistenceManager(this.model, this.factory, repository);
         
         this._componentRoot = this._ルートを構築する();
+        this._付箋召喚UI = new 付箋召喚UI({
+            position: 描画座標点.fromNumbers(0, 0, this.model.描画基準座標),
+            on召喚開始: text => this.付箋召喚を開始する(text),
+        });
+        this._配置物コンテナ.child(this._付箋召喚UI);
         
         this.model.subscribe((e) => this.handleGraphEvent(e));
         
@@ -185,9 +194,25 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         this._再描画予約済み = true;
         this._再描画リクエストID = requestAnimationFrame(() => {
             this.model.配置物再描画();
+            this._付箋召喚UI.再描画();
             this._再描画予約済み = false;
             this._再描画リクエストID = null;
         });
+    }
+
+    private 付箋召喚を開始する(text: string): 付箋召喚ドラッグ対象 {
+        const position = 描画座標点.fromNumbers(0, 0, this.model.描画基準座標);
+        const 付箋 = this.自由テキスト付箋を生成する(position, text);
+        this.selectionManager.set選択中配置物(付箋);
+        return {
+            ドラッグ中: e => 付箋.view.ドラッグ移動処理(e),
+        };
+    }
+
+    private 自由テキスト付箋を生成する(position: 描画座標点, text = ""): 付箋集約<描画座標点> {
+        const item = this.model.描画座標点でadd付箋(position, text);
+        this.commandRepository.push(new 配置物追加コマンド(this.model, item));
+        return item;
     }
 
     protected _ルートを構築する(): DivC {
@@ -356,8 +381,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
          const data = new MouseEventData(e);
          const 補正済み画面座標点 = this._座標変換.画面座標点を補正する(data.position.x, data.position.y);
          const pos = 補正済み画面座標点.to描画座標点(this.model.描画基準座標);
-         const item = this.model.描画座標点でadd付箋(pos);
-         this.commandRepository.push(new 配置物追加コマンド(this.model, item));
+         this.自由テキスト付箋を生成する(pos);
     }
 
     private onAddTitledStickyNote(e: MouseEvent): void {
@@ -458,10 +482,6 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
          });
     }
     
-    public add付箋(pos: Px2DVector) {
-        return this.model.add付箋(pos);
-    }
-
     public setCanvasIdAndName(id: string, name: string) {
         this._options.canvasId = id; 
         
