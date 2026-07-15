@@ -1,4 +1,4 @@
-import { Px2DVector, Px長さ, 描画座標点 } from "SengenUI/index";
+import { 描画座標点 } from "SengenUI/index";
 import { AiApiRepository, 分解戦略 } from "./AiApiRepository";
 import { CanvasGraphModel } from "../描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
 import { 付箋集約 } from "../配置物/付箋2/付箋集約";
@@ -6,7 +6,7 @@ import { 付箋選択状態 } from "../配置物/付箋2/自動リサイズ付�
 import { Toast } from "../../../OneONetUIComponents/Toast/Toast";
 import { Iキャンバスコマンド } from "../キャンバス操作/コマンドリポジトリ/Iキャンバスコマンド";
 import { 配置物追加コマンド } from "../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
-import { I配置物集約 } from "../I配置物";
+import { AI分解付箋を作る, AI続き付箋を作る } from "./Ai生成物構築";
 
 /**
  * キャンバス上のAI機能（テキスト生成・分解）のビジネスロジックを担うサービス
@@ -34,14 +34,9 @@ export class AiOperationService {
         try {
             const res = await this._repository.generateText({ プロンプト: prompt });
             if (res.success && res.生成テキスト) {
-                // 右側に新しい付箋を生成
-                const newPos = 起点付箋.描画座標点.plus(new Px2DVector(new Px長さ(300), new Px長さ(0)));
-                const 新付箋 = this._model.描画座標点でadd付箋(newPos, res.生成テキスト);
-
-                // 矢印で繋ぐ（内部でCanvasGraphModelに追加される）
-                const 矢印 = 起点付箋.別の付箋へ矢印を作る(新付箋);
+                const addedItems = AI続き付箋を作る(this._model, 起点付箋, res.生成テキスト);
                 if (this._onCommandPush) {
-                    this._onCommandPush(new 配置物追加コマンド(this._model, [新付箋, 矢印]));
+                    this._onCommandPush(new 配置物追加コマンド(this._model, addedItems));
                 }
                 Toast.success("AI生成が完了しました");
             } else {
@@ -75,18 +70,8 @@ export class AiOperationService {
                     // 今回はひとまず子ノードの展開だけ行う
                 }
 
-                const addedItems: I配置物集約[] = [];
-                let currentYOffset = new Px長さ(150);
-                for (const child of res.子ノードリスト) {
-                    const newPos = 対象付箋.描画座標点.plus(new Px2DVector(new Px長さ(300), currentYOffset));
-                    const 新付箋 = this._model.描画座標点でadd付箋(newPos, child.テキスト);
-                    
-                    // 矢印で繋ぐ（内部でCanvasGraphModelに追加される）
-                    const 矢印 = 対象付箋.別の付箋へ矢印を作る(新付箋);
-
-                    addedItems.push(新付箋, 矢印);
-                    currentYOffset = currentYOffset.plus(new Px長さ(200));
-                }
+                const texts = res.子ノードリスト.map(child => child.テキスト);
+                const addedItems = AI分解付箋を作る(this._model, 対象付箋, texts);
                 if (this._onCommandPush && addedItems.length > 0) {
                     this._onCommandPush(new 配置物追加コマンド(this._model, addedItems));
                 }
