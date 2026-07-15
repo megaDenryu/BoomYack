@@ -1,4 +1,5 @@
-import { I付箋コンテンツView, 付箋コンテンツView共通依存関係 } from "./I付箋コンテンツView";
+import { I付箋コンテンツView } from "./I付箋コンテンツView";
+import { Px長さ } from "SengenUI/index";
 import { 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
 import { 自由テキストコンテンツView } from "./自由テキストコンテンツView";
 import { タイトル付きコンテンツView } from "./タイトル付きコンテンツView";
@@ -20,24 +21,24 @@ export interface 外部連携依存関係 {
  */
 export function 付箋コンテンツViewを生成する(
     初期コンテンツ: 付箋コンテンツデータ,
-    共通依存関係: 付箋コンテンツView共通依存関係,
+    最小高さ: Px長さ,
     外部連携依存関係: 外部連携依存関係
 ): I付箋コンテンツView {
     switch (初期コンテンツ.種別) {
         case "自由テキスト":
             return new 自由テキストコンテンツView({
-                ...共通依存関係,
+                最小高さ,
                 初期テキスト: 初期コンテンツ.text
             });
         case "タイトル付き":
             return new タイトル付きコンテンツView({
-                ...共通依存関係,
+                最小高さ,
                 初期タイトル: 初期コンテンツ.タイトル,
                 初期本文: 初期コンテンツ.本文
             });
         case "札参照":
             return new 札参照コンテンツView({
-                ...共通依存関係,
+                最小高さ,
                 初期札ID: 初期コンテンツ.札ID,
                 fudabaAPIクライアント: 外部連携依存関係.fudabaAPIクライアント
             });

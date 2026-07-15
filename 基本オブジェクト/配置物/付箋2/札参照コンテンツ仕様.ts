@@ -1,8 +1,8 @@
 import { FudabaAPIクライアント } from "../../Fudaba連携/FudabaAPIクライアント";
 import { Fudaba札DTO } from "../../Fudaba連携/Fudaba札DTO";
-import { 付箋コンテンツView共通依存関係 } from "./I付箋コンテンツView";
+import { 付箋コンテンツView構築データ } from "./I付箋コンテンツView";
 
-export interface 札参照コンテンツView依存関係 extends 付箋コンテンツView共通依存関係 {
+export interface 札参照コンテンツView依存関係 extends 付箋コンテンツView構築データ {
     初期札ID: string;
     fudabaAPIクライアント: FudabaAPIクライアント;
 }

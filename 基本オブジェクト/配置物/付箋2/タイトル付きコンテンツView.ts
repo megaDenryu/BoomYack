@@ -1,8 +1,8 @@
-import { div, DivC, LV2HtmlComponentBase } from "SengenUI/index";
+import { div, DivC, LV2HtmlComponentBase, 配線ポート } from "SengenUI/index";
 
 import { 自動リサイズテキストエリア } from "./自動リサイズテキストエリア";
 import { テキストエリアサイズパラメータ } from "./テキストエリアサイズパラメータ";
-import { I付箋コンテンツView } from "./I付箋コンテンツView";
+import { I付箋コンテンツView, I付箋コンテンツView配線 } from "./I付箋コンテンツView";
 import { タイトル付きコンテンツを作る, 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
 import { テキストフォーマット適用 } from "./テキストフォーマッタサービス";
 import { タイトル入力欄, タイトル付き付箋コンテナ } from "./style.css";
@@ -17,6 +17,7 @@ export class タイトル付きコンテンツView extends LV2HtmlComponentBase 
     private _タイトル高さ = 0;
     private _本文高さ = 0;
     private _formatterCleanup?: () => void;
+    private readonly _配線 = new 配線ポート<I付箋コンテンツView配線>("タイトル付きコンテンツView");
 
     public constructor(依存関係: タイトル付きコンテンツView依存関係) {
         super();
@@ -25,7 +26,7 @@ export class タイトル付きコンテンツView extends LV2HtmlComponentBase 
     }
 
     private _ルートを構築する(依存関係: タイトル付きコンテンツView依存関係): DivC {
-        const 高さ変更を通知する = (): void => 依存関係.onHeightChange(this._タイトル高さ + this._本文高さ);
+        const 高さ変更を通知する = (): void => this._配線.先.onHeightChange(this._タイトル高さ + this._本文高さ);
         return (
             div({ class: タイトル付き付箋コンテナ }).childs([
                 new 自動リサイズテキストエリア({
@@ -34,18 +35,18 @@ export class タイトル付きコンテンツView extends LV2HtmlComponentBase 
                     追加クラス: タイトル入力欄,
                     初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(タイトル欄の最小高さ),
                 }).配線する({
-                    onTextChange: () => { 依存関係.onTextChange(this.text); },
+                    onTextChange: () => { this._配線.先.onTextChange(this.text); },
                     onHeightChange: (newHeight) => {
                         this._タイトル高さ = newHeight;
                         高さ変更を通知する();
                     },
                     onBlurTextCommit: (旧タイトル, 新タイトル) => {
-                        依存関係.onBlurTextCommit(
+                        this._配線.先.onBlurTextCommit(
                             `${旧タイトル}\n${this._本文エリア.getText()}`,
                             `${新タイトル}\n${this._本文エリア.getText()}`
                         );
                     },
-                    onFocus: 依存関係.onFocus,
+                    onFocus: () => this._配線.先.onFocus(),
                     onBlur: () => {},
                 }).tap((self) => { this._タイトルエリア = self; }),
                 new 自動リサイズテキストエリア({
@@ -53,18 +54,18 @@ export class タイトル付きコンテンツView extends LV2HtmlComponentBase 
                     placeholder: 本文のプレースホルダー,
                     初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(依存関係.最小高さ),
                 }).配線する({
-                    onTextChange: () => { 依存関係.onTextChange(this.text); },
+                    onTextChange: () => { this._配線.先.onTextChange(this.text); },
                     onHeightChange: (newHeight) => {
                         this._本文高さ = newHeight;
                         高さ変更を通知する();
                     },
                     onBlurTextCommit: (旧本文, 新本文) => {
-                        依存関係.onBlurTextCommit(
+                        this._配線.先.onBlurTextCommit(
                             `${this._タイトルエリア.getText()}\n${旧本文}`,
                             `${this._タイトルエリア.getText()}\n${新本文}`
                         );
                     },
-                    onFocus: 依存関係.onFocus,
+                    onFocus: () => this._配線.先.onFocus(),
                     onBlur: () => {},
                 }).tap((self) => { this._本文エリア = self; }),
             ])
@@ -87,14 +88,13 @@ export class タイトル付きコンテンツView extends LV2HtmlComponentBase 
         return タイトル付きコンテンツを作る(this._タイトルエリア.getText(), this._本文エリア.getText());
     }
 
+    public 配線する(配線: I付箋コンテンツView配線): this { this._配線.配線する(配線); return this; }
+
     public 設定を適用(設定: 付箋設定状態): void {
         this._タイトルエリア.setTextSize(設定.文字サイズ);
         this._本文エリア.setTextSize(設定.文字サイズ).set文字色(設定.文字色);
     }
 
     public AI操作に対応しているか(): boolean { return true; }
-    public delete(): void {
-        super.delete();
-        this._formatterCleanup?.();
-    }
+    public delete(): void { super.delete(); this._formatterCleanup?.(); }
 }

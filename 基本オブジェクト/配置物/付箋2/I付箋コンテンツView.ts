@@ -1,4 +1,4 @@
-import { LV2HtmlComponentBase, Px長さ } from "SengenUI/index";
+import { I配線可能, LV2HtmlComponentBase, Px長さ } from "SengenUI/index";
 
 import { 付箋設定状態 } from "../設定パネル";
 import { 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
@@ -7,19 +7,19 @@ import { 付箋コンテンツデータ } from "../../描画キャンバス/付�
  * どのコンテンツ種別でも共通して必要になる依存関係。初期値(初期テキスト等)は
  * 種別ごとに形が異なるため含めず、種別ごとの依存関係interfaceがこれを拡張する。
  */
-export interface 付箋コンテンツView共通依存関係 {
+export interface 付箋コンテンツView構築データ {
     最小高さ: Px長さ;
-    onTextChange: (text: string) => void;
-    onHeightChange: (newHeight: number) => void;
-    onBlurTextCommit: (oldText: string, newText: string) => void;
-    onFocus: () => void;
 }
 
-/**
- * 付箋コンテンツ(自由テキスト)を構築するために枠(自動リサイズ付箋View)から渡す依存関係。
- */
-export interface 付箋コンテンツView依存関係 extends 付箋コンテンツView共通依存関係 {
+export interface 付箋コンテンツView依存関係 extends 付箋コンテンツView構築データ {
     初期テキスト: string;
+}
+
+export interface I付箋コンテンツView配線 {
+    onTextChange(text: string): void;
+    onHeightChange(newHeight: number): void;
+    onBlurTextCommit(oldText: string, newText: string): void;
+    onFocus(): void;
 }
 
 /**
@@ -31,7 +31,8 @@ export interface 付箋コンテンツView依存関係 extends 付箋コンテ�
  * コンテンツは自然高さの変化を依存関係.onHeightChangeで枠へ通知する。
  * 枠はその通知を受けて外形を確定し、接続点・矢印の再配置を行う(一方向ループ)。
  */
-export interface I付箋コンテンツView extends LV2HtmlComponentBase {
+export interface I付箋コンテンツView extends LV2HtmlComponentBase,
+    I配線可能<I付箋コンテンツView配線> {
     /** AI生成/分解・グラフのテキストコピー等が要求する平文表現 */
     get text(): string;
     setText(text: string): void;

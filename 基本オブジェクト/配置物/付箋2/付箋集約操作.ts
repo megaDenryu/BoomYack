@@ -4,20 +4,25 @@ import { 付箋データ, 座標データ, サイズデータ } from "../../描�
 import { 折れ線矢印集約 } from "../折れ線矢印";
 import { 付箋設定状態 } from "../設定パネル";
 import type { 付箋集約 } from "./付箋集約";
-import { 自動リサイズ付箋View, 自動リサイズ付箋Viewオプション } from "./自動リサイズ付箋View";
+import { I自動リサイズ付箋View配線, 自動リサイズ付箋View, 自動リサイズ付箋Viewオプション } from "./自動リサイズ付箋View";
 
-export function 付箋Viewオプションを強化する<T extends Canvas座標Base<T> & 配置物座標点>(
+export function 付箋View配線を作る<T extends Canvas座標Base<T> & 配置物座標点>(
     options: 自動リサイズ付箋Viewオプション<T>,
     selection: I配置物選択機能集約,
     self: () => 付箋集約<T>,
-): 自動リサイズ付箋Viewオプション<T> {
-    return { ...options,
-        onDragStart: options.onDragStart,
+): I自動リサイズ付箋View配線<T> {
+    return {
+        on選択: e => { if (e.ctrlKey) selection.追加選択(self()); else selection.set選択中配置物(self()); },
+        onHover: () => selection.setホバー中配置物(self()),
+        onDragStart: () => options.onDragStart?.(),
         onDragEnd: () => {
             options.onDragEnd?.();
             for (const arrow of self().矢印接続可能なもの.接続している矢印リスト()) arrow.始点と終点の付箋の接続点を最短のものに切り替える();
         },
         onDrag: (e, view) => selection.まとめて移動(e, view),
+        onResize: () => options.onResize?.(),
+        onTextChange: text => options.onTextChange?.(text),
+        onTextCommit: (oldText, newText) => options.onTextCommit?.(oldText, newText),
     };
 }
 

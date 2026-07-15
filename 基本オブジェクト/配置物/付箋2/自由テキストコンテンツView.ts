@@ -1,8 +1,8 @@
-import { LV2HtmlComponentBase } from "SengenUI/index";
+import { LV2HtmlComponentBase, 配線ポート } from "SengenUI/index";
 
 import { 自動リサイズテキストエリア } from "./自動リサイズテキストエリア";
 import { テキストエリアサイズパラメータ } from "./テキストエリアサイズパラメータ";
-import { I付箋コンテンツView, 付箋コンテンツView依存関係 } from "./I付箋コンテンツView";
+import { I付箋コンテンツView, I付箋コンテンツView配線, 付箋コンテンツView依存関係 } from "./I付箋コンテンツView";
 import { テキストフォーマット適用 } from "./テキストフォーマッタサービス";
 import { 自由テキストコンテンツを作る, 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
 import { 付箋設定状態 } from "../設定パネル";
@@ -15,6 +15,7 @@ const 自由テキストのプレースホルダー = "付箋の内容を入力.
  */
 export class 自由テキストコンテンツView extends LV2HtmlComponentBase implements I付箋コンテンツView {
     protected _componentRoot: 自動リサイズテキストエリア;
+    private readonly _配線 = new 配線ポート<I付箋コンテンツView配線>("自由テキストコンテンツView");
     private _formatterCleanup?: () => void;
 
     public constructor(依存関係: 付箋コンテンツView依存関係) {
@@ -24,13 +25,18 @@ export class 自由テキストコンテンツView extends LV2HtmlComponentBase 
             placeholder: 自由テキストのプレースホルダー,
             初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(依存関係.最小高さ),
         }).配線する({
-            onTextChange: 依存関係.onTextChange,
-            onHeightChange: 依存関係.onHeightChange,
-            onBlurTextCommit: 依存関係.onBlurTextCommit,
-            onFocus: 依存関係.onFocus,
+            onTextChange: text => this._配線.先.onTextChange(text),
+            onHeightChange: height => this._配線.先.onHeightChange(height),
+            onBlurTextCommit: (oldText, newText) => this._配線.先.onBlurTextCommit(oldText, newText),
+            onFocus: () => this._配線.先.onFocus(),
             onBlur: () => {},
         });
         this._formatterCleanup = テキストフォーマット適用(this._componentRoot.textArea);
+    }
+
+    public 配線する(配線: I付箋コンテンツView配線): this {
+        this._配線.配線する(配線);
+        return this;
     }
 
     public get text(): string {

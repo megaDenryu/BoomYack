@@ -20,6 +20,11 @@ export interface 自動リサイズ付箋Viewオプション<T extends Canvas座
     onTextCommit?: (oldText: string, newText: string) => void;
 }
 
+export type 自動リサイズ付箋View構築データ<T extends Canvas座標Base<T> & 配置物座標点> =
+    Pick<自動リサイズ付箋Viewオプション<T>,
+        "position" | "size" | "minHeight" | "初期コンテンツ" |
+        "コンテキストメニューコンテナ" | "fudabaAPIクライアント">;
+
 export interface 自動リサイズ付箋用コンテキストメニュー依存関係 {
     座標変換: ボード基準座標変換;
     on削除(): void;

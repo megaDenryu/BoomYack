@@ -1,6 +1,6 @@
-import { div, DivC, LV2HtmlComponentBase } from "SengenUI/index";
+import { div, DivC, LV2HtmlComponentBase, 配線ポート } from "SengenUI/index";
 
-import { I付箋コンテンツView } from "./I付箋コンテンツView";
+import { I付箋コンテンツView, I付箋コンテンツView配線 } from "./I付箋コンテンツView";
 import { 札参照コンテンツを作る, 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
 import { 付箋設定状態 } from "../設定パネル";
 import { FudabaAPIクライアント } from "../../Fudaba連携/FudabaAPIクライアント";
@@ -17,13 +17,12 @@ export type { 札参照コンテンツView依存関係 } from "./札参照コン
 export class 札参照コンテンツView extends LV2HtmlComponentBase implements I付箋コンテンツView {
     protected _componentRoot: DivC;
     private readonly _札ID: string;
-    private readonly _onHeightChange: (newHeight: number) => void;
+    private readonly _配線 = new 配線ポート<I付箋コンテンツView配線>("札参照コンテンツView");
     private _表示状態: 札参照表示状態 = { 種別: "読込中" };
 
     public constructor(依存関係: 札参照コンテンツView依存関係) {
         super();
         this._札ID = 依存関係.初期札ID;
-        this._onHeightChange = 依存関係.onHeightChange;
         this._componentRoot = div({ class: 札参照カード });
         this._表示を更新する();
         void this._札を読み込む(依存関係.fudabaAPIクライアント);
@@ -46,7 +45,13 @@ export class 札参照コンテンツView extends LV2HtmlComponentBase implement
     }
 
     private _表示を更新する(): void {
-        札参照表示を更新する(this._componentRoot, this._表示状態, this._札ID, this._onHeightChange);
+        札参照表示を更新する(this._componentRoot, this._表示状態, this._札ID,
+            height => this._配線.先.onHeightChange(height));
+    }
+
+    public 配線する(配線: I付箋コンテンツView配線): this {
+        this._配線.配線する(配線);
+        return this;
     }
 
     public get text(): string {

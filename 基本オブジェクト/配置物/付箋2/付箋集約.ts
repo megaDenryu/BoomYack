@@ -8,7 +8,7 @@ import { 矢印接続可能なもの, 矢印接続可能なもの依存関係 } 
 import { 折れ線矢印集約 } from "../折れ線矢印";
 import { 付箋設定状態 } from "../設定パネル";
 import { 付箋選択状態, 自動リサイズ付箋View, 自動リサイズ付箋Viewオプション, 自動リサイズ付箋用コンテキストメニュー依存関係 } from "./自動リサイズ付箋View";
-import { 付箋Viewオプションを強化する, 付箋をシリアライズする, 別の付箋へ矢印を作る } from "./付箋集約操作";
+import { 付箋View配線を作る, 付箋をシリアライズする, 別の付箋へ矢印を作る } from "./付箋集約操作";
 
 export class 付箋集約<T extends Canvas座標Base<T> & 配置物座標点>
     implements I付箋集約, I選択可能配置物, I付箋シリアライズ可能, I接続点親情報<T> {
@@ -22,14 +22,9 @@ export class 付箋集約<T extends Canvas座標Base<T> & 配置物座標点>
         id: 付箋ID, menuDep: 自動リサイズ付箋用コンテキストメニュー依存関係,
     ) {
         const selection = arrowDep.i配置物選択機能集約;
-        this.view = new 自動リサイズ付箋View(付箋Viewオプションを強化する(options, selection, () => this), arrowDep, id, menuDep)
-            .選択するを登録(e => this._選択する(e, selection))
-            .onHover(() => selection.setホバー中配置物(this));
+        this.view = new 自動リサイズ付箋View(options, arrowDep, id, menuDep)
+            .配線する(付箋View配線を作る(options, selection, () => this));
         this.設定を適用(this._setting);
-    }
-
-    private _選択する(e: MouseEvent, selection: I配置物選択機能集約): void {
-        if (e.ctrlKey) selection.追加選択(this); else selection.set選択中配置物(this);
     }
 
     public get 配置物ID(): 付箋ID { return this.view.配置物ID; }
