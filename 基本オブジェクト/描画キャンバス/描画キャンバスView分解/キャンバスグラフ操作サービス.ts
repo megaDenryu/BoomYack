@@ -1,15 +1,13 @@
-import { MouseEventData, 画面座標点, 描画座標点, Px2DVector } from "SengenUI/index";
 import { I付箋シリアライズ可能, I配置物集約 } from "../../I配置物";
 import { 配置物連結グラフ, 配置物連結グラフをすべて抽出, 配置物連結グラフ群 } from "../配置物グラフ/配置物連結グラフ";
-import { テキスト用グラフ, テキスト用グラフノード, テキスト用グラフ_付箋textfromJson, 付箋text, 配置物連結グラフtoテキスト用グラフノード } from "../配置物グラフ/テキスト化情報";
+import { テキスト用グラフ, テキスト用グラフノード, 付箋text, 配置物連結グラフtoテキスト用グラフノード } from "../配置物グラフ/テキスト化情報";
 import { 付箋コンテンツをtextへ変換 } from "../付箋コンテンツデータ";
 import { JSONファイル出力サービス } from "BoomYack/基本オブジェクト/ファイル入出力/JSONファイル出力サービス";
 import { クリップボードサービス } from "BoomYack/基本オブジェクト/ファイル入出力/クリップボードサービス";
-import { テキスト用グラフからキャンバスに配置するサービス } from "BoomYack/基本オブジェクト/グラフ計算サービス/グラフ計算サービス";
 import { Iキャンバスコマンド } from "BoomYack/基本オブジェクト/キャンバス操作/コマンドリポジトリ/Iキャンバスコマンド";
-import { 配置物追加コマンド } from "BoomYack/基本オブジェクト/キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
 import { CanvasGraphModel } from "./CanvasGraphModel";
 import { ボード基準座標変換 } from "BoomYack/基本オブジェクト/キャンバス操作/座標変換/ボード基準座標変換";
+import { クリップボードから貼り付ける } from "./クリップボード貼り付け";
 
 export class キャンバスグラフ操作サービス {
     private readonly Json出力サービス: JSONファイル出力サービス = JSONファイル出力サービス.create();
@@ -70,42 +68,7 @@ export class キャンバスグラフ操作サービス {
     public グラフJson出力(_選択配置物: I配置物集約): void {}
 
     public async クリップボードから貼り付け(e?: MouseEvent, onCommandPush?: (cmd: Iキャンバスコマンド) => void): Promise<void> {
-        console.log('[BoomYack貼り付け] 貼り付け処理開始');
-        const text = await this.クリップボードサービス.貼り付け();
-        let pos: 描画座標点;
-        if (e) {
-            const data = new MouseEventData(e);
-            const 補正済み画面座標点 = this.座標変換.画面座標点を補正する(data.position.x, data.position.y);
-            pos = 補正済み画面座標点.to描画座標点(this.配置先.描画基準座標);
-        } else {
-            const centerPx = Px2DVector.fromNumbers(window.innerWidth / 2, window.innerHeight / 2); // 画面中央
-            pos = new 画面座標点(centerPx).to描画座標点(this.配置先.描画基準座標);
-        }
-        console.log('[BoomYack貼り付け] クリップボードから取得したテキスト長:', text.length);
-        const グラフ: テキスト用グラフ<付箋text> | null = テキスト用グラフ_付箋textfromJson(text);
-        if (グラフ === null) {
-            console.warn('[BoomYack貼り付け] グラフ情報のパースに失敗しました。通常のテキストとして付箋に貼り付けます。');
-            const item = this.配置先.描画座標点でadd付箋(pos, text);
-            if (onCommandPush && item) {
-                onCommandPush(new 配置物追加コマンド(this.配置先, item));
-            }
-            return;
-        }
-        try {
-            console.log('[BoomYack貼り付け] ✓ グラフのパース成功, 配置開始');
-            let addedItems: I配置物集約[] = [];
-            グラフ.exec(グラフ => {
-                addedItems = new テキスト用グラフからキャンバスに配置するサービス(this.配置先, グラフ, pos).グラフを配置する();
-            });
-            if (onCommandPush && addedItems.length > 0) {
-                onCommandPush(new 配置物追加コマンド(this.配置先, addedItems));
-            }
-            console.log('[BoomYack貼り付け] ✓ 貼り付け完了');
-        } catch (error) {
-            console.error('[BoomYack貼り付け] ✗ 配置処理中にエラー:', error instanceof Error ? error.message : error);
-            if (error instanceof Error) {
-                console.error('[BoomYack貼り付け] スタックトレース:', error.stack);
-            }
-        }
+        await クリップボードから貼り付ける(
+            this.配置先, this.クリップボードサービス, this.座標変換, e, onCommandPush);
     }
 }
