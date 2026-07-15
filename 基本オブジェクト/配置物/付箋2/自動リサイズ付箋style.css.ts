@@ -1,15 +1,17 @@
 import { style } from '@vanilla-extract/css';
 
-// 付箋ホバー領域(外枠)のスタイル
-export const 付箋ホバー領域 = style({
+// 付箋全体を配置する座標シェル。ドラッグ責務は付箋ドラッグ操作領域が持つ。
+export const 付箋座標シェル = style({
     position: "absolute",
-    cursor: "move",
-    background: "linear-gradient(#ffffd0, #ffffd0) content-box",
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
 });
 
-// 付箋コンテンツコンテナ
-export const 付箋コンテンツコンテナ = style({});
+// 操作枠の中央に置く実寸の付箋本体。
+export const 付箋本体 = style({
+    position: "absolute",
+    backgroundColor: "#ffffd0",
+    boxSizing: "border-box",
+});
 
 // 付箋テキストエリアのスタイル
 export const sticky_note_textarea = style({

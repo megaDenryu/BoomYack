@@ -1,10 +1,11 @@
 import {
-    div, DivC, Drag中値, LV2HtmlComponentBase, PointerWife,
+    div, DivC, Drag中値, LV2HtmlComponentBase,
     Px2DVector, TextAreaC, 描画座標点,
 } from "SengenUI/index";
 import {
     付箋召喚寸法, 付箋召喚操作領域, 付箋召喚テキストエリア, 付箋召喚本体,
 } from "./付箋召喚UIstyle.css";
+import { 付箋ドラッグ操作領域 } from "./付箋ドラッグ操作領域";
 
 export interface 付箋召喚ドラッグ対象 {
     ドラッグ中(e: Drag中値): void;
@@ -30,8 +31,10 @@ export class 付箋召喚UI extends LV2HtmlComponentBase {
         this._textArea = this._テキストエリアを構築する();
         this._付箋本体 = div({ class: 付箋召喚本体 }).child(this._textArea);
         this._componentRoot = div({ class: 付箋召喚操作領域 })
-            .tap(self => {
-                new PointerWife(self).ドラッグ連動登録({
+            .setAttribute("data-boomyack-role", "付箋召喚UI")
+            .childs([
+                new 付箋ドラッグ操作領域({
+                    ariaLabel: "付箋をドラッグして作成",
                     onドラッグ開始: () => {
                         this._ドラッグ対象 = option.on召喚開始(this._text);
                         this._text = "";
@@ -42,11 +45,9 @@ export class 付箋召喚UI extends LV2HtmlComponentBase {
                     onドラッグ終了: () => {
                         this._ドラッグ対象 = null;
                     },
-                });
-            })
-            .setAttribute("aria-label", "付箋をドラッグして作成")
-            .setAttribute("data-boomyack-role", "付箋召喚UI")
-            .child(this._付箋本体);
+                }),
+                this._付箋本体,
+            ]);
         this.再描画();
     }
 

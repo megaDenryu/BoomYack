@@ -14,7 +14,7 @@ export interface I配置物選択機能集約 {
     全て選択(全配置物: I配置物集約[]): void;
     setホバー中配置物(配置物: I配置物集約): void;
     選択解除(): void;
-    ホバー解除(): void;
+    ホバー解除(対象?: I配置物集約): void;
     全ての接続点を表示非表示切り替え(表示する: boolean): void;
     まとめて移動<座標点T extends Canvas座標Base<座標点T> & 配置物座標点>(e: Drag中値, ドラッグしたコンポーネント: 自動リサイズ付箋View<座標点T>): void;
 }
@@ -86,7 +86,8 @@ export class 配置物選択機能集約 implements I配置物選択機能集約
         this.選択中配置物 = [];
     }
 
-    public ホバー解除(): void {
+    public ホバー解除(対象?: I配置物集約): void {
+        if (対象 && this.ホバー中配置物 !== 対象) { return; }
         this.ホバー中配置物?.ホバー解除されたときの処理();
         this.ホバー中配置物 = null;
     }

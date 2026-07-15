@@ -1,11 +1,11 @@
-import { Canvas座標Base, div, DivC, Drag開始値, Drag終了値, Drag中値, HtmlComponentBase, LV2HtmlComponentBase, MouseEventData, PointerWife, Px2DVector, Px長さ, TypedEventListener, 図形内座標点, 配置物座標点, 描画座標点 } from "SengenUI/index";
+import { Canvas座標Base, div, DivC, Drag中値, LV2HtmlComponentBase, MouseEventData, Px2DVector, Px長さ, TypedEventListener, 図形内座標点, 配置物座標点, 描画座標点 } from "SengenUI/index";
 
 
 
 
 
 
-import { auto_resize_handle_left, auto_resize_handle_right, 付箋ホバー領域, 付箋コンテンツコンテナ } from "./自動リサイズ付箋style.css";
+import { 付箋座標シェル, 付箋本体 } from "./自動リサイズ付箋style.css";
 import { I付箋View, 配置物zIndex } from "../../I配置物";
 
 import { 多段格子コンテキストメニュー, 格子メニュー1層オプション, 格子メニュー2層オプション } from "../../キャンバス操作/多段格子コンテキストメニュー/多段格子コンテキストメニュー";
@@ -28,6 +28,8 @@ import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
 import 折れ線矢印Icon from '../../../SVGImg/折れ線矢印.svg?url';
 import MicOnIcon from '../../../SVGImg/MicOn.svg?url';
 import MicOffIcon from '../../../SVGImg/MicOff.svg?url';
+import { 付箋ドラッグ操作領域 } from "./付箋ドラッグ操作領域";
+import { 付箋ドラッグ操作余白Px, 付箋ドラッグ枠線 } from "./付箋操作仕様";
 
 /** 付箋の選択線の状態 */
 export enum 付箋選択状態 {
@@ -72,12 +74,14 @@ export interface 自動リサイズ付箋用コンテキストメニュー依存
 
 export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends LV2HtmlComponentBase implements I付箋View,I接続点親情報<座標点T> {
     protected _componentRoot: DivC;
-    private 付箋ホバー領域: DivC;
+    private _付箋座標シェル: DivC;
+    private _付箋本体: DivC;
+    private _ドラッグ操作領域: 付箋ドラッグ操作領域;
     private _content!: I付箋コンテンツView;
     private _position: 座標点T;
     public get position(): 描画座標点|図形内座標点{ return this._position;}
     private _size: Px2DVector;
-    private readonly _hoverPadding: Px長さ = new Px長さ(30); //ホバー領域拡張用のpadding
+    private readonly _hoverPadding = new Px長さ(付箋ドラッグ操作余白Px);
     private readonly _padding: Px長さ = new Px長さ(15); //矢印接続ポイント計算用のpadding
     public readonly 配置物ID: 付箋ID;
     private _矢印接続可能なもの: 矢印接続可能なもの<座標点T>;
@@ -107,8 +111,6 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
     private _onDrag?: (e: Drag中値, ドラッグしたコンポーネント: 自動リサイズ付箋View<座標点T>) => void;
     private _onResize?: () => void;
     private _onTextChange?: (text: string) => void;
-    private _mouseWife: PointerWife;
-    public get mouseWife(): PointerWife { return this._mouseWife; }
     private _コンテキストメニュー: Iコンテキストメニュー;
     private _コンテキストメニューコンテナ: コンテキストメニューコンテナ;
 
@@ -201,82 +203,84 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
         コンテキストメニュー依存関係: 自動リサイズ付箋用コンテキストメニュー依存関係
     ): DivC {
         const 矢印上下左右Position = this.calculate矢印接続ポイント(this._padding);
-        return (
-            div({ class : 付箋ホバー領域}).tap(self => {
-                                                                                            this.付箋ホバー領域 = self;
-                                                                                            this.set付箋ボードTransform({position:this._position, size:this._size});
-                                                                                            this._mouseWife = new PointerWife(self).ドラッグ連動登録({
-                                                                                                onドラッグ開始: (e: Drag開始値)=> {option.onDragStart?.();},
-                                                                                                onドラッグ中: (e: Drag中値)=> {
-                                                                                                    this.ドラッグ移動処理(e);
-                                                                                                    this.onDrag(e, this);
-                                                                                                },
-                                                                                                onドラッグ終了: (e: Drag終了値)=> {option.onDragEnd?.();}
-                                                                                            });
-                                                                                        })
-                                                                            .setStyleCSS({
-                                                                                        transition: "background 0.2s ease-in-out"
-                                                                                    })
-                                                                            .addDivEventListener('contextmenu', (e: MouseEvent) => {
-                                                                                e.preventDefault();
-                                                                                const position = new MouseEventData(e).position;
-                                                                                const 補正済み位置 = コンテキストメニュー依存関係.座標変換.viewportPointを補正する(position.x, position.y);
-                                                                                this._コンテキストメニュー.表示({ x: 補正済み位置.x.値, y: 補正済み位置.y.値 });
-                                                                            })
-                                                                            .addDivEventListener('click', (e: MouseEvent) => {
-                                                                                this._コンテキストメニュー.非表示();
-                                                                            })
-                                                                            .addDivEventListener('pointerdown', (e: PointerEvent) => {
-                                                                                this.選択する?.(e);
-                                                                            })
-                                                                            .childs([
-                            div({class: 付箋コンテンツコンテナ})
-                                .setStyleCSS({
-                                    flex: "1",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    minHeight: this._minHeight.minus(new Px長さ(30)).toStr(),
-                                    zIndex: 配置物zIndex.付箋内部構造.コンテナ
-                                })
-                                .childs([
-                                    付箋コンテンツViewを生成する(option.初期コンテンツ, {
-                                        最小高さ: this._minHeight,
-                                        onTextChange: (text: string) => {
-                                            this._onTextChange?.(text);
-                                        },
-                                        onBlurTextCommit: (oldText: string, newText: string) => {
-                                            option.onTextCommit?.(oldText, newText);
-                                        },
-                                        onHeightChange: (newHeight: number) => {
-                                            this.set付箋ボードTransform({size:new Px2DVector(this._size.x, new Px長さ(newHeight))});
-                                            this.update接続点座標();
-                                            this.onResize();
-                                        },
-                                        onFocus: () => {
-                                            // フォーカス時に自身を選択状態にする（バグ修正）
-                                            if (this.選択する) {
-                                                this.選択する(new MouseEvent('mousedown'));
-                                            }
-                                        }
-                                    }, { fudabaAPIクライアント: option.fudabaAPIクライアント }).tap((content) => { this._content = content; })
-                                ]),
-                            new リサイズハンドル("left").tap((handle) => { handle.mouseWife.ドラッグ連動登録({
-                                                                                                onドラッグ開始: (e: Drag開始値)=> {},
-                                                                                                onドラッグ中: (e: Drag中値)=> { this.leftHandleドラッグ中(e);},
-                                                                                                onドラッグ終了: (e: Drag終了値)=> {}
-                                                                                            })})
-                                                                                            .setStyleCSS({zIndex: 配置物zIndex.付箋内部構造.リサイズハンドル}),
-                            new リサイズハンドル("right").tap((handle) => { handle.mouseWife.ドラッグ連動登録({
-                                                                                                onドラッグ開始: (e: Drag開始値)=> {},
-                                                                                                onドラッグ中: (e: Drag中値)=> { this.rightHandleドラッグ中(e);},
-                                                                                                onドラッグ終了: (e: Drag終了値)=> {}
-                                                                                            })})
-                                                                                            .setStyleCSS({zIndex: 配置物zIndex.付箋内部構造.リサイズハンドル}),
-                            new 矢印接続可能なもの<座標点T>( 矢印上下左右Position, 矢印接続可能なもの依存関係, this )
-                                                        .tap((self)=>{this._矢印接続可能なもの = self;}),
+        const コンテキストメニューを表示する = (e: MouseEvent): void => {
+            e.preventDefault();
+            const position = new MouseEventData(e).position;
+            const 補正済み位置 = コンテキストメニュー依存関係.座標変換
+                .viewportPointを補正する(position.x, position.y);
+            this._コンテキストメニュー.表示({
+                x: 補正済み位置.x.値,
+                y: 補正済み位置.y.値,
+            });
+        };
 
-                        ])
-        );
+        this._ドラッグ操作領域 = new 付箋ドラッグ操作領域({
+            ariaLabel: "付箋をドラッグ",
+            onPointerDown: e => this.選択する?.(e),
+            onContextMenu: コンテキストメニューを表示する,
+            onドラッグ開始: () => option.onDragStart?.(),
+            onドラッグ中: e => {
+                this.ドラッグ移動処理(e);
+                this.onDrag(e, this);
+            },
+            onドラッグ終了: () => option.onDragEnd?.(),
+        });
+
+        this._付箋本体 = div({ class: 付箋本体 })
+            .setStyleCSS({
+                display: "flex",
+                flexDirection: "column",
+                zIndex: 配置物zIndex.付箋内部構造.コンテナ,
+            })
+            .child(
+                付箋コンテンツViewを生成する(option.初期コンテンツ, {
+                    最小高さ: this._minHeight,
+                    onTextChange: text => this._onTextChange?.(text),
+                    onBlurTextCommit: (oldText, newText) => option.onTextCommit?.(oldText, newText),
+                    onHeightChange: newHeight => {
+                        this.set付箋ボードTransform({
+                            size: new Px2DVector(this._size.x, new Px長さ(newHeight)),
+                        });
+                        this.update接続点座標();
+                        this.onResize();
+                    },
+                    onFocus: () => this.選択する?.(new MouseEvent("mousedown")),
+                }, { fudabaAPIクライアント: option.fudabaAPIクライアント })
+                    .tap(content => { this._content = content; })
+            );
+
+        const leftHandle = new リサイズハンドル("left")
+            .tap(handle => handle.mouseWife.ドラッグ連動登録({
+                onドラッグ開始: () => {},
+                onドラッグ中: e => this.leftHandleドラッグ中(e),
+                onドラッグ終了: () => {},
+            }))
+            .setStyleCSS({ zIndex: 配置物zIndex.付箋内部構造.リサイズハンドル });
+        const rightHandle = new リサイズハンドル("right")
+            .tap(handle => handle.mouseWife.ドラッグ連動登録({
+                onドラッグ開始: () => {},
+                onドラッグ中: e => this.rightHandleドラッグ中(e),
+                onドラッグ終了: () => {},
+            }))
+            .setStyleCSS({ zIndex: 配置物zIndex.付箋内部構造.リサイズハンドル });
+        const 接続点 = new 矢印接続可能なもの<座標点T>(
+            矢印上下左右Position,
+            矢印接続可能なもの依存関係,
+            this
+        ).tap(self => { this._矢印接続可能なもの = self; });
+
+        this._付箋座標シェル = div({ class: 付箋座標シェル })
+            .addDivEventListener("contextmenu", コンテキストメニューを表示する)
+            .addDivEventListener("click", () => this._コンテキストメニュー.非表示())
+            .childs([
+                this._ドラッグ操作領域,
+                this._付箋本体,
+                leftHandle,
+                rightHandle,
+                接続点,
+            ]);
+        this.set付箋ボードTransform({ position: this._position, size: this._size });
+        return this._付箋座標シェル;
     }
 
     public ドラッグ移動処理(e: Drag中値): this {
@@ -324,15 +328,7 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
     }
 
 
-    /**
-     * 付箋ボードのTransformを設定する
-     * paddingを使用してホバー領域を拡張する
-     * 
-     * 構造:
-     * - 付箋ボード全体のサイズ = コンテンツサイズ + padding*2
-     * - paddingは要素内部なのでオフセット計算不要
-     * - positionは付箋ボードの左上角（padding含む）を指す
-     */
+    /** 付箋本体と、その外側30pxにあるドラッグ操作枠の矩形を更新する。 */
     private set付箋ボードTransform(rect: {size?: Px2DVector, position?: 座標点T}):this{
         if (rect.position) {this._position = rect.position;}
         if (rect.size) {this._size = rect.size;}
@@ -345,13 +341,18 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
             new Px2DVector(this._hoverPadding, this._hoverPadding)
         );
         
-        this.付箋ホバー領域.setStyleCSS({
+        this._付箋座標シェル.setStyleCSS({
             width: 全体幅.toStr(),
             height: 全体高さ.toStr(),
-            padding: this._hoverPadding.toStr(),
-            boxSizing: "border-box",
         });
-        this.付箋ホバー領域.setViewportPositionByTransform(offsetPosition.toビューポート座標値());
+        this._付箋座標シェル.setViewportPositionByTransform(offsetPosition.toビューポート座標値());
+        this._付箋本体.setStyleCSS({
+            top: this._hoverPadding.toStr(),
+            left: this._hoverPadding.toStr(),
+            width: this._size.x.toStr(),
+            height: this._size.y.toStr(),
+            minHeight: this._minHeight.toStr(),
+        });
         return this;
     }
 
@@ -420,18 +421,19 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
     }
 
     public onHover(callback: TypedEventListener<'mouseover'>): this {
-        this._componentRoot.onMouseOver(callback);
+        this._ドラッグ操作領域.onHover(callback);
+        return this;
+    }
+
+    public onHoverEnd(callback: TypedEventListener<'mouseleave'>): this {
+        this._ドラッグ操作領域.onHoverEnd(callback);
         return this;
     }
 
 
     /** 選択状態を設定し、アウトラインを更新 */
     public set選択状態(状態: 付箋選択状態): void {
-        this.付箋ホバー領域.setStyleCSS({
-            outline: this.getアウトラインスタイル(状態),
-            outlineOffset: "0px",
-            transition: "outline 0.2s ease-in-out"
-        });
+        this._ドラッグ操作領域.アウトラインを設定する(this.getアウトラインスタイル(状態));
     }
 
     /** テキストを取得 */
@@ -454,14 +456,15 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
     private getアウトラインスタイル(状態: 付箋選択状態): string {
         switch (状態) {
             case 付箋選択状態.選択:
-                return "2px dashed red";           // 赤
+                return 付箋ドラッグ枠線.選択;
             case 付箋選択状態.ホバー:
-                return "2px dashed #4caf50";       // 緑
+                return 付箋ドラッグ枠線.ホバー;
             case 付箋選択状態.矢印選択:
-                return "2px dashed #a5d6a7";       // 薄い緑
+                return 付箋ドラッグ枠線.矢印選択;
             case 付箋選択状態.なし:
             default:
-                return "none";                     // 透明
+                // inline指定を外し、操作領域自身の:hoverに緑枠の責務を戻す。
+                return "";
         }
     }
 
@@ -487,11 +490,7 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
     }
 
     public 設定を適用(設定: 付箋設定状態): void {
-        // グラデーションを使ってcontent-boxにのみ色を塗る（padding部分は透明のまま）
-        this.付箋ホバー領域.setStyleCSS({
-            background: `linear-gradient(${設定.背景色}, ${設定.背景色}) content-box`,
-            backgroundColor: "transparent"
-        });
+        this._付箋本体.setStyleCSS({ backgroundColor: 設定.背景色 });
         this._content.設定を適用(設定);
     }
 }

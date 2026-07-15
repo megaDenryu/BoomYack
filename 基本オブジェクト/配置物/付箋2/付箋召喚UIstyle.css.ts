@@ -1,9 +1,10 @@
 import { style } from '@vanilla-extract/css';
+import { 付箋ドラッグ操作余白Px } from "./付箋操作仕様";
 
 export const 付箋召喚寸法 = {
     本体幅: 200,
     本体最小高さ: 52,
-    操作余白: 30,
+    操作余白: 付箋ドラッグ操作余白Px,
 } as const;
 
 /** 実付箋と同じ外観を持つが、配置物ではない生成UIの操作領域。 */
@@ -11,15 +12,17 @@ export const 付箋召喚操作領域 = style({
     position: "absolute",
     width: `${付箋召喚寸法.本体幅 + 付箋召喚寸法.操作余白 * 2}px`,
     height: `${付箋召喚寸法.本体最小高さ + 付箋召喚寸法.操作余白 * 2}px`,
-    padding: `${付箋召喚寸法.操作余白}px`,
     boxSizing: "border-box",
     backgroundColor: "transparent",
 });
 
 /** 操作領域の中央にある、実背景と実寸を持つ付箋プレビュー。 */
 export const 付箋召喚本体 = style({
-    width: "100%",
-    height: "100%",
+    position: "absolute",
+    top: `${付箋召喚寸法.操作余白}px`,
+    left: `${付箋召喚寸法.操作余白}px`,
+    width: `${付箋召喚寸法.本体幅}px`,
+    height: `${付箋召喚寸法.本体最小高さ}px`,
     backgroundColor: "#ffffd0",
 });
 
