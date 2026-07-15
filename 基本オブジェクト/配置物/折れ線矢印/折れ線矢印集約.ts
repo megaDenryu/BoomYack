@@ -54,15 +54,14 @@ export class 折れ線矢印集約<座標点T extends Canvas座標Base<座標点
         const 中点ハンドルリスト = vm.中点リスト.map((pos, index) => new 中点ハンドル(new 中点State(pos), index+1, this, this._i描画基準座標を持つ));
         this.点ハンドルリスト = [this.始点ハンドル, ...中点ハンドルリスト, this.終点ハンドル];
         this.線分ハンドルリスト = this.create線分ハンドルリスト(this.点ハンドルリスト);
-        this.view = new 折れ線矢印View( this.始点ハンドル.view, this.終点ハンドル.view)
-                        .onClick((e) => {
+        this.view = new 折れ線矢印View(this.始点ハンドル.view, this.終点ハンドル.view)
+                        .配線する({ on選択: (e) => {
                             if (e.ctrlKey) {
                                 this._i配置物選択機能集約.追加選択(this);
                                 return;
                             }
                             this._i配置物選択機能集約.set選択中配置物(this);
-                        })
-                        .onHover(() => {this._i配置物選択機能集約.setホバー中配置物(this);});
+                        }, onHover: () => this._i配置物選択機能集約.setホバー中配置物(this) });
         中点ハンドルリスト.forEach( (中点ハンドル) => {
             this.view.add中点ハンドル(中点ハンドル.view);
         });
