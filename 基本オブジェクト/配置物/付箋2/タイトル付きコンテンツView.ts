@@ -1,28 +1,15 @@
-import { div, DivC, LV2HtmlComponentBase, Px長さ } from "SengenUI/index";
+import { div, DivC, LV2HtmlComponentBase } from "SengenUI/index";
 
 import { 自動リサイズテキストエリア } from "./自動リサイズテキストエリア";
 import { テキストエリアサイズパラメータ } from "./テキストエリアサイズパラメータ";
-import { I付箋コンテンツView, 付箋コンテンツView共通依存関係 } from "./I付箋コンテンツView";
+import { I付箋コンテンツView } from "./I付箋コンテンツView";
 import { タイトル付きコンテンツを作る, 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
 import { テキストフォーマット適用 } from "./テキストフォーマッタサービス";
 import { タイトル入力欄, タイトル付き付箋コンテナ } from "./style.css";
 import { 付箋設定状態 } from "../設定パネル";
+import { タイトルのプレースホルダー, タイトル付きコンテンツView依存関係, タイトル欄の最小高さ, 本文のプレースホルダー } from "./タイトル付きコンテンツ仕様";
+export type { タイトル付きコンテンツView依存関係 } from "./タイトル付きコンテンツ仕様";
 
-const タイトルのプレースホルダー = "タイトルを入力...";
-const 本文のプレースホルダー = "本文を入力...";
-const タイトル欄の最小高さ = new Px長さ(30);
-
-/** タイトル付きコンテンツViewを構築するために枠から渡す依存関係 */
-export interface タイトル付きコンテンツView依存関係 extends 付箋コンテンツView共通依存関係 {
-    初期タイトル: string;
-    初期本文: string;
-}
-
-/**
- * 「タイトル付き」種別の付箋コンテンツ。タイトル行(1行、編集可)+本文テキストエリアの2フィールド。
- * I付箋コンテンツViewの2つ目の実装。枠(自動リサイズ付箋View)への変更なしに載ることが
- * 枠/コンテンツ分離の証明であり、このクラスは既存のI付箋コンテンツView契約のみに依存する。
- */
 export class タイトル付きコンテンツView extends LV2HtmlComponentBase implements I付箋コンテンツView {
     protected _componentRoot: DivC;
     private _タイトルエリア: 自動リサイズテキストエリア;
@@ -38,10 +25,7 @@ export class タイトル付きコンテンツView extends LV2HtmlComponentBase 
     }
 
     private _ルートを構築する(依存関係: タイトル付きコンテンツView依存関係): DivC {
-        const 高さ変更を通知する = (): void => {
-            依存関係.onHeightChange(this._タイトル高さ + this._本文高さ);
-        };
-
+        const 高さ変更を通知する = (): void => 依存関係.onHeightChange(this._タイトル高さ + this._本文高さ);
         return (
             div({ class: タイトル付き付箋コンテナ }).childs([
                 new 自動リサイズテキストエリア({
@@ -49,6 +33,7 @@ export class タイトル付きコンテンツView extends LV2HtmlComponentBase 
                     placeholder: タイトルのプレースホルダー,
                     追加クラス: タイトル入力欄,
                     初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(タイトル欄の最小高さ),
+                }).配線する({
                     onTextChange: () => { 依存関係.onTextChange(this.text); },
                     onHeightChange: (newHeight) => {
                         this._タイトル高さ = newHeight;
@@ -61,11 +46,13 @@ export class タイトル付きコンテンツView extends LV2HtmlComponentBase 
                         );
                     },
                     onFocus: 依存関係.onFocus,
+                    onBlur: () => {},
                 }).tap((self) => { this._タイトルエリア = self; }),
                 new 自動リサイズテキストエリア({
                     initialText: 依存関係.初期本文,
                     placeholder: 本文のプレースホルダー,
                     初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(依存関係.最小高さ),
+                }).配線する({
                     onTextChange: () => { 依存関係.onTextChange(this.text); },
                     onHeightChange: (newHeight) => {
                         this._本文高さ = newHeight;
@@ -78,15 +65,13 @@ export class タイトル付きコンテンツView extends LV2HtmlComponentBase 
                         );
                     },
                     onFocus: 依存関係.onFocus,
+                    onBlur: () => {},
                 }).tap((self) => { this._本文エリア = self; }),
             ])
         );
     }
 
-    public get text(): string {
-        return `${this._タイトルエリア.getText()}\n${this._本文エリア.getText()}`;
-    }
-
+    public get text(): string { return `${this._タイトルエリア.getText()}\n${this._本文エリア.getText()}`; }
     public setText(text: string): void {
         const 改行位置 = text.indexOf("\n");
         if (改行位置 === -1) {
@@ -107,10 +92,7 @@ export class タイトル付きコンテンツView extends LV2HtmlComponentBase 
         this._本文エリア.setTextSize(設定.文字サイズ).set文字色(設定.文字色);
     }
 
-    public AI操作に対応しているか(): boolean {
-        return true;
-    }
-
+    public AI操作に対応しているか(): boolean { return true; }
     public delete(): void {
         super.delete();
         this._formatterCleanup?.();

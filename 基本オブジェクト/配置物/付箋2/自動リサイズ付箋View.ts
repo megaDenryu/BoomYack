@@ -1,493 +1,58 @@
-import { Canvas座標Base, div, DivC, Drag中値, LV2HtmlComponentBase, MouseEventData, Px2DVector, Px長さ, TypedEventListener, 図形内座標点, 配置物座標点, 描画座標点 } from "SengenUI/index";
-
-
-
-
-
-
-import { 付箋座標シェル, 付箋本体 } from "./自動リサイズ付箋style.css";
+import {
+    Canvas座標Base, DivC, Drag中値, LV2HtmlComponentBase, Px2DVector, Px長さ,
+    TypedEventListener, 図形内座標点, 配置物座標点, 描画座標点,
+} from "SengenUI/index";
 import { I付箋View, 配置物zIndex } from "../../I配置物";
-
-import { 多段格子コンテキストメニュー, 格子メニュー1層オプション, 格子メニュー2層オプション } from "../../キャンバス操作/多段格子コンテキストメニュー/多段格子コンテキストメニュー";
-import { 矢印接続可能なもの, 矢印接続可能なもの依存関係, 絶対矢印上下左右Position, 矢印上下左右Position } from "../矢印接続可能なもの/矢印接続可能なもの";
 import { 付箋ID } from "../../ID";
-import { Iコンテキストメニュー } from "../../キャンバス操作/円状コンテキストメニュー/円状コンテキストメニュー";
-
-import { コンテキストメニューコンテナ } from "BoomYack/基本オブジェクト/キャンバス操作/円状コンテキストメニュー/コンテキストメニューコンテナ";
-import { 付箋設定状態 } from "../設定パネル";
+import type { 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
 import { I接続点親情報 } from "../矢印接続可能なもの/接続点";
-import { I付箋コンテンツView } from "./I付箋コンテンツView";
-import { 付箋コンテンツViewを生成する } from "./付箋コンテンツViewファクトリ";
-import { 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
-import { FudabaAPIクライアント } from "../../Fudaba連携/FudabaAPIクライアント";
-import { リサイズハンドル } from "./リサイズハンドル";
-import { ボード基準座標変換 } from "BoomYack/基本オブジェクト/キャンバス操作/座標変換/ボード基準座標変換";
-import 付箋Icon from '../../../SVGImg/付箋文字でか斜め色付き.svg?url';
-import SaveIcon from '../../../SVGImg/SaveIcon.svg?url';
-import ゴミ箱Icon from '../../../SVGImg/ゴミ箱2.svg?url';
-import 折れ線矢印Icon from '../../../SVGImg/折れ線矢印.svg?url';
-import MicOnIcon from '../../../SVGImg/MicOn.svg?url';
-import MicOffIcon from '../../../SVGImg/MicOff.svg?url';
-import { 付箋ドラッグ操作領域 } from "./付箋ドラッグ操作領域";
-import { 付箋ドラッグ操作余白Px, 付箋ドラッグ枠線 } from "./付箋操作仕様";
+import { 矢印接続可能なもの, 矢印接続可能なもの依存関係, 絶対矢印上下左右Position, 矢印上下左右Position } from "../矢印接続可能なもの/矢印接続可能なもの";
+import { 付箋設定状態 } from "../設定パネル";
+import { 付箋アウトライン, 付箋選択状態 } from "./付箋選択状態";
+import { 付箋View内部, 付箋View内部を構築する } from "./付箋View内部";
+import type { 自動リサイズ付箋Viewオプション, 自動リサイズ付箋用コンテキストメニュー依存関係 } from "./自動リサイズ付箋Viewオプション";
+export { 付箋選択状態 } from "./付箋選択状態";
+export type { 自動リサイズ付箋Viewオプション, 自動リサイズ付箋用コンテキストメニュー依存関係 } from "./自動リサイズ付箋Viewオプション";
 
-/** 付箋の選択線の状態 */
-export enum 付箋選択状態 {
-    なし = "none",           // 透明
-    ホバー = "hover",         // 緑
-    矢印選択 = "arrowSelect",  // 薄い緑
-    選択 = "selected"        // 赤
-}
-
-export interface 自動リサイズ付箋Viewオプション<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> {
-    position: 座標点T;
-    size: Px2DVector;
-    minHeight: Px長さ;
-    初期コンテンツ: 付箋コンテンツデータ;
-    コンテキストメニューコンテナ: コンテキストメニューコンテナ;
-    fudabaAPIクライアント: FudabaAPIクライアント;
-    onDelete?: () => void;
-    onDrag?: (e: Drag中値, ドラッグしたコンポーネント: 自動リサイズ付箋View<座標点T>) => void;
-    onResize?: () => void;
-    onTextChange?: (text: string) => void;
-    onDragStart?: () => void;
-    onDragEnd?: () => void;
-    onTextCommit?: (oldText: string, newText: string) => void;
-}
-
-export interface 自動リサイズ付箋用コンテキストメニュー依存関係 {
-    座標変換: ボード基準座標変換;
-    on削除: () => void;
-    on設定パネル表示: (現在位置: 描画座標点) => void;
-    onAI生成?: () => void;
-    onAI分解_LLM?: () => void;
-    onAI分解_区切り文字?: () => void;
-    onグラフをテキストとしてコピー?: () => void;
-    onグラフをJSON出力?: () => void;
-    on選択配置物をコピー?: () => void;
-    onクリップボードから貼り付け?: (e: MouseEvent) => void;
-    onグラフ選択?: () => void;
-    onマイク入力トグル?: () => void;
-    getマイク入力状態?: () => boolean;
-    onマイク状態監視登録?: (callback: (isRecording: boolean) => void) => void;
-}
-
-export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> extends LV2HtmlComponentBase implements I付箋View,I接続点親情報<座標点T> {
+export class 自動リサイズ付箋View<T extends Canvas座標Base<T> & 配置物座標点>
+    extends LV2HtmlComponentBase implements I付箋View, I接続点親情報<T> {
     protected _componentRoot: DivC;
-    private _付箋座標シェル: DivC;
-    private _付箋本体: DivC;
-    private _ドラッグ操作領域: 付箋ドラッグ操作領域;
-    private _content!: I付箋コンテンツView;
-    private _position: 座標点T;
-    public get position(): 描画座標点|図形内座標点{ return this._position;}
-    private _size: Px2DVector;
-    private readonly _hoverPadding = new Px長さ(付箋ドラッグ操作余白Px);
-    private readonly _padding: Px長さ = new Px長さ(15); //矢印接続ポイント計算用のpadding
-    public readonly 配置物ID: 付箋ID;
-    private _矢印接続可能なもの: 矢印接続可能なもの<座標点T>;
-    public get 矢印接続可能なもの(): 矢印接続可能なもの<座標点T> { return this._矢印接続可能なもの; }
-
-
-    public getSize(): Px2DVector { return this._size; }
-    public get hoverPadding(): Px長さ { return this._hoverPadding; }
-    public get衝突判定用矩形(): { 位置: 描画座標点|図形内座標点; サイズ: Px2DVector } {
-        const パディング込みサイズ = new Px2DVector(
-            this._size.x.plus(this._hoverPadding.multiply(2)),
-            this._size.y.plus(this._hoverPadding.multiply(2))
-        );
-        const パディング分オフセット位置 = this._position.minus(new Px2DVector(this._hoverPadding, this._hoverPadding));
-        return { 位置: パディング分オフセット位置, サイズ: パディング込みサイズ };
-    }
-    public get横幅の半分(): Px長さ { return this._size.x.divide(2); }
-    public get縦幅の半分(): Px長さ { return this._size.y.divide(2); }
-    public get重心位置(): 描画座標点|図形内座標点 {
-        const vec = this._position.px2DVector.plus(new Px2DVector(this.get横幅の半分(), this.get縦幅の半分()));
-        if (this._position instanceof 描画座標点) {
-            return 描画座標点.fromPx2DVector(vec,this._position.描画基準座標);
-        }
-        return 図形内座標点.fromPx2DVector(vec,this._position.図形内基準座標);
-    }
-    private _minHeight: Px長さ;
-    private _onDrag?: (e: Drag中値, ドラッグしたコンポーネント: 自動リサイズ付箋View<座標点T>) => void;
-    private _onResize?: () => void;
-    private _onTextChange?: (text: string) => void;
-    private _コンテキストメニュー: Iコンテキストメニュー;
-    private _コンテキストメニューコンテナ: コンテキストメニューコンテナ;
+    private readonly _内部: 付箋View内部<T>;
+    private _on選択: TypedEventListener<"mousedown"> | null = null;
 
     public constructor(
-        option: 自動リサイズ付箋Viewオプション<座標点T>,
-        矢印接続可能なもの依存関係: 矢印接続可能なもの依存関係<座標点T>,
-        配置物ID: 付箋ID,
-        コンテキストメニュー依存関係: 自動リサイズ付箋用コンテキストメニュー依存関係
+        option: 自動リサイズ付箋Viewオプション<T>,
+        arrowDep: 矢印接続可能なもの依存関係<T>,
+        public readonly 配置物ID: 付箋ID,
+        menuDep: 自動リサイズ付箋用コンテキストメニュー依存関係,
     ) {
         super();
-        this.配置物ID = 配置物ID;
-        this._position = option.position;
-        this._minHeight = option.minHeight;
-        this._size = option.size;
-        this._コンテキストメニューコンテナ = option.コンテキストメニューコンテナ;
-        this._onDrag = option.onDrag;
-        this._onResize = option.onResize;
-        this._onTextChange = option.onTextChange;
-        this._componentRoot = this._ルートを構築する(option, 矢印接続可能なもの依存関係, コンテキストメニュー依存関係);
-        const imgBg = "rgba(255, 255, 255, 0.5)";
-        // 札参照コンテンツ等、外部データの投影であるコンテンツはLLMへ渡すと実体と乖離した
-        // 平文が独り歩きするためAI分解/AI生成を無効化する(設計2026-07-14_付箋コンテンツ設計.md 7.3節)
-        const AI操作対応 = this._content.AI操作に対応しているか();
-
-        this._コンテキストメニューコンテナ.コンテキストメニュー追加(
-            new 多段格子コンテキストメニュー({
-                mode: "clickable",
-                opacity: 0.85,
-                showCenterButton: false,
-                layer1Items: [
-                    // アイコン系（1層目十字）
-                    { id: 'L1-save', iconUrl: SaveIcon, backgroundColor: imgBg, Position: 'right', onClick: () => { /* 保存処理があれば */ } },
-                    { id: 'L1-delete', iconUrl: ゴミ箱Icon, backgroundColor: imgBg, Position: 'bottom', onClick: () => { コンテキストメニュー依存関係.on削除(); } },
-                    // 未来への拡張用
-                    { id: 'L1-sticky', iconUrl: 付箋Icon, backgroundColor: imgBg, Position: 'top' },
-                    { id: 'L1-arrow', iconUrl: 折れ線矢印Icon, backgroundColor: imgBg, Position: 'left' },
-
-                    // カテゴリ系（1層目斜め）
-                    { id: 'L1-decomp', label: '分解生成', Position: 'lt' },
-                    { id: 'L1-graph', label: ['グラフ', '操作'], Position: 'rt' },
-                    { id: 'L1-mic', iconUrl: MicOffIcon, backgroundColor: imgBg, Position: 'lb', onClick: (e) => { e.stopPropagation(); コンテキストメニュー依存関係.onマイク入力トグル?.(); } },
-                    { id: 'L1-settings', label: '設定', Position: 'rb', onClick: () => { コンテキストメニュー依存関係.on設定パネル表示?.(this._position as 描画座標点); } },
-                ],
-                layer2Items: [
-                    // 分解生成 (LT)。AI操作対応可否はコンテンツ種別ごとに決まる(I付箋コンテンツView.AI操作に対応しているか)
-                    { parentId: 'L1-decomp', label: "LLM分解", onClick: () => { if (AI操作対応) { コンテキストメニュー依存関係.onAI分解_LLM?.(); } } },
-                    { parentId: 'L1-decomp', label: "区切り分解", onClick: () => { if (AI操作対応) { コンテキストメニュー依存関係.onAI分解_区切り文字?.(); } } },
-                    { parentId: 'L1-decomp', label: "続き生成", onClick: () => { if (AI操作対応) { コンテキストメニュー依存関係.onAI生成?.(); } } },
-
-                    // グラフ操作 (RT)
-                    { parentId: 'L1-graph', label: "グラフ選択", onClick: () => { コンテキストメニュー依存関係.onグラフ選択?.(); } },
-                    { parentId: 'L1-graph', label: ["グラフをテキスト", "としてコピー"], onClick: () => { コンテキストメニュー依存関係.onグラフをテキストとしてコピー?.(); } },
-                    { parentId: 'L1-graph', label: ["グラフを", "JSON出力"], onClick: () => { コンテキストメニュー依存関係.onグラフをJSON出力?.(); } },
-                    { parentId: 'L1-graph', label: "コピー", onClick: () => { コンテキストメニュー依存関係.on選択配置物をコピー?.(); } },
-                    { parentId: 'L1-graph', label: "貼り付け", onClick: (e) => { コンテキストメニュー依存関係.onクリップボードから貼り付け?.(e); } },
-                ]
-            }).tap((menu) => { this._コンテキストメニュー = menu; })
-        );
-
-        if (!AI操作対応) {
-            // 分解生成カテゴリボタン自体を無効相当の見た目(灰色)にして、対応不可であることを一目で示す
-            requestAnimationFrame(() => {
-                this._コンテキストメニュー.updateItem?.('L1-decomp', { backgroundColor: 'rgba(120, 120, 120, 0.4)' });
-            });
-        }
-
-        if (コンテキストメニュー依存関係.onマイク状態監視登録) {
-            コンテキストメニュー依存関係.onマイク状態監視登録((isRecording) => {
-                if (this._コンテキストメニュー && this._コンテキストメニュー.updateItem) {
-                    if (isRecording) {
-                        this._コンテキストメニュー.updateItem("L1-mic", { iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' });
-                    } else {
-                        this._コンテキストメニュー.updateItem("L1-mic", { iconUrl: MicOffIcon });
-                    }
-                }
-            });
-            // 初期状態反映
-            if (コンテキストメニュー依存関係.getマイク入力状態 && コンテキストメニュー依存関係.getマイク入力状態()) {
-                 requestAnimationFrame(() => {
-                     this._コンテキストメニュー.updateItem?.("L1-mic", { iconUrl: MicOnIcon, backgroundColor: 'rgba(231, 76, 60, 0.85)' });
-                 });
-            }
-        }
-
+        this._内部 = 付箋View内部を構築する(option, arrowDep, menuDep, this, e => this._on選択?.(e as MouseEvent));
+        this._componentRoot = this._内部.root;
     }
 
-    protected _ルートを構築する(
-        option: 自動リサイズ付箋Viewオプション<座標点T>,
-        矢印接続可能なもの依存関係: 矢印接続可能なもの依存関係<座標点T>,
-        コンテキストメニュー依存関係: 自動リサイズ付箋用コンテキストメニュー依存関係
-    ): DivC {
-        const 矢印上下左右Position = this.calculate矢印接続ポイント(this._padding);
-        const コンテキストメニューを表示する = (e: MouseEvent): void => {
-            e.preventDefault();
-            const position = new MouseEventData(e).position;
-            const 補正済み位置 = コンテキストメニュー依存関係.座標変換
-                .viewportPointを補正する(position.x, position.y);
-            this._コンテキストメニュー.表示({
-                x: 補正済み位置.x.値,
-                y: 補正済み位置.y.値,
-            });
-        };
+    public get position(): 描画座標点 | 図形内座標点 { return this._内部.layout.position; }
+    public get 矢印接続可能なもの(): 矢印接続可能なもの<T> { return this._内部.部品.接続点; }
+    public get hoverPadding(): Px長さ { return this._内部.layout.hoverPadding; }
+    public get text(): string { return this._内部.部品.コンテンツ.text; }
+    public get コンテンツデータ(): 付箋コンテンツデータ { return this._内部.部品.コンテンツ.コンテンツデータ; }
+    public getSize(): Px2DVector { return this._内部.layout.size; }
+    public get衝突判定用矩形(): { 位置: 描画座標点 | 図形内座標点; サイズ: Px2DVector } { return this._内部.layout.ジオメトリ.衝突判定用矩形; }
+    public calculate矢印接続ポイント(p: Px長さ): 絶対矢印上下左右Position<T> { return this._内部.layout.ジオメトリ.接続点(p); }
+    public calculate矢印接続ポイント相対Transform(p: 絶対矢印上下左右Position<T>): 矢印上下左右Position<T> { return this._内部.layout.ジオメトリ.相対接続点(p); }
 
-        this._ドラッグ操作領域 = new 付箋ドラッグ操作領域("付箋をドラッグ").配線する({
-            onPointerDown: e => this.選択する?.(e),
-            onContextMenu: コンテキストメニューを表示する,
-            onドラッグ開始: () => option.onDragStart?.(),
-            onドラッグ中: e => {
-                this.ドラッグ移動処理(e);
-                this.onDrag(e, this);
-            },
-            onドラッグ終了: () => option.onDragEnd?.(),
-        });
-
-        this._付箋本体 = div({ class: 付箋本体 })
-            .setStyleCSS({
-                display: "flex",
-                flexDirection: "column",
-                zIndex: 配置物zIndex.付箋内部構造.コンテナ,
-            })
-            .child(
-                付箋コンテンツViewを生成する(option.初期コンテンツ, {
-                    最小高さ: this._minHeight,
-                    onTextChange: text => this._onTextChange?.(text),
-                    onBlurTextCommit: (oldText, newText) => option.onTextCommit?.(oldText, newText),
-                    onHeightChange: newHeight => {
-                        this.set付箋ボードTransform({
-                            size: new Px2DVector(this._size.x, new Px長さ(newHeight)),
-                        });
-                        this.update接続点座標();
-                        this.onResize();
-                    },
-                    onFocus: () => this.選択する?.(new MouseEvent("mousedown")),
-                }, { fudabaAPIクライアント: option.fudabaAPIクライアント })
-                    .tap(content => { this._content = content; })
-            );
-
-        const leftHandle = new リサイズハンドル("left")
-            .tap(handle => handle.mouseWife.ドラッグ連動登録({
-                onドラッグ開始: () => {},
-                onドラッグ中: e => this.leftHandleドラッグ中(e),
-                onドラッグ終了: () => {},
-            }))
-            .setStyleCSS({ zIndex: 配置物zIndex.付箋内部構造.リサイズハンドル });
-        const rightHandle = new リサイズハンドル("right")
-            .tap(handle => handle.mouseWife.ドラッグ連動登録({
-                onドラッグ開始: () => {},
-                onドラッグ中: e => this.rightHandleドラッグ中(e),
-                onドラッグ終了: () => {},
-            }))
-            .setStyleCSS({ zIndex: 配置物zIndex.付箋内部構造.リサイズハンドル });
-        const 接続点 = new 矢印接続可能なもの<座標点T>(
-            矢印上下左右Position,
-            矢印接続可能なもの依存関係,
-            this
-        ).tap(self => { this._矢印接続可能なもの = self; });
-
-        this._付箋座標シェル = div({ class: 付箋座標シェル })
-            .addDivEventListener("contextmenu", コンテキストメニューを表示する)
-            .addDivEventListener("click", () => this._コンテキストメニュー.非表示())
-            .childs([
-                this._ドラッグ操作領域,
-                this._付箋本体,
-                leftHandle,
-                rightHandle,
-                接続点,
-            ]);
-        this.set付箋ボードTransform({ position: this._position, size: this._size });
-        return this._付箋座標シェル;
-    }
-
-    public ドラッグ移動処理(e: Drag中値): this {
-        const delta = e.data.直前のマウス位置から現在位置までの差分;
-        // 拡縮率を考慮: 視覚的に正しい移動量にするため、deltaを拡縮率で割る
-        const 拡縮率 = this._position.拡縮率;
-        const 補正されたdelta = Px2DVector.fromNumbers(
-            delta.x / 拡縮率,
-            delta.y / 拡縮率
-        );
-        this.set付箋ボードTransform({position:this._position.plus(補正されたdelta)})
-        this.update接続点座標();
-
-        return this;
-    }
-
-    private leftHandleドラッグ中(e: Drag中値): void {
-        const deltaX = e.data.直前のマウス位置から現在位置までの差分.x;
-        // 拡縮率を考慮: 視覚的に正しい移動量にするため、deltaXを拡縮率で割る
-        const 拡縮率 = this._position.拡縮率;
-        const 補正されたdeltaX = deltaX / 拡縮率;
-        const newWidth = this._size.x.minus(new Px長さ(補正されたdeltaX));
-        this._componentRoot.setViewportPositionByTransform(this._position.toビューポート座標値());
-        this.set付箋ボードTransform({size:new Px2DVector(newWidth, this._size.y), position:this._position.plus(Px2DVector.fromNumbers(補正されたdeltaX,0))});
-        this.onResize();
-    }
-
-    private onResize(): void {
-        this.update接続点座標();
-        this._onResize?.();
-    }
-
-    private onDrag(e: Drag中値, ドラッグしたコンポーネント: 自動リサイズ付箋View<座標点T>): void {
-        this._onDrag?.(e, ドラッグしたコンポーネント);
-    }
-
-    private rightHandleドラッグ中(e: Drag中値): void {
-        const deltaX = e.data.直前のマウス位置から現在位置までの差分.x;
-        // 拡縮率を考慮: 視覚的に正しい移動量にするため、deltaXを拡縮率で割る
-        const 拡縮率 = this._position.拡縮率;
-        const 補正されたdeltaX = deltaX / 拡縮率;
-        const newWidth = this._size.x.plus(new Px長さ(補正されたdeltaX));
-        this.set付箋ボードTransform({size:new Px2DVector(newWidth, this._size.y)});
-        this.onResize();
-    }
-
-
-    /** 付箋本体と、その外側30pxにあるドラッグ操作枠の矩形を更新する。 */
-    private set付箋ボードTransform(rect: {size?: Px2DVector, position?: 座標点T}):this{
-        if (rect.position) {this._position = rect.position;}
-        if (rect.size) {this._size = rect.size;}
-        
-        // paddingを含めた全体サイズ
-        const 全体幅 = this._size.x.plus(this._hoverPadding.multiply(2));
-        const 全体高さ = this._size.y.plus(this._hoverPadding.multiply(2));
-        // マージン分だけ左上にオフセットした位置（border原点がpositionと一致するように）
-        const offsetPosition = this._position.minus(
-            new Px2DVector(this._hoverPadding, this._hoverPadding)
-        );
-        
-        this._付箋座標シェル.setStyleCSS({
-            width: 全体幅.toStr(),
-            height: 全体高さ.toStr(),
-        });
-        this._付箋座標シェル.setViewportPositionByTransform(offsetPosition.toビューポート座標値());
-        this._付箋本体.setStyleCSS({
-            top: this._hoverPadding.toStr(),
-            left: this._hoverPadding.toStr(),
-            width: this._size.x.toStr(),
-            height: this._size.y.toStr(),
-            minHeight: this._minHeight.toStr(),
-        });
-        return this;
-    }
-
-
-    public add矢印接続可能なもの( v矢印接続可能なもの:矢印接続可能なもの<座標点T>){
-        this.child(
-            v矢印接続可能なもの.setStyleCSS({
-                zIndex: 配置物zIndex.付箋内部構造.ホバー用四角形
-            })
-        )
-    }
-
-    /**
-     * 矢印接続ポイントを計算する
-     * @param padding 付箋の外側に配置する接続ポイントのパディング
-     * @returns 上下左右の接続ポイント座標
-     */
-    public calculate矢印接続ポイント(padding: Px長さ): 絶対矢印上下左右Position<座標点T> {
-        const 付箋view横幅の半分 = this.get横幅の半分();
-        const 付箋view縦幅の半分 = this.get縦幅の半分();
-        const 付箋view重心 = this.get重心位置();
-        
-        return {
-            上: 付箋view重心.plus(new Px2DVector(new Px長さ(0), 付箋view縦幅の半分.plus(padding))) as 座標点T,
-            下: 付箋view重心.minus(new Px2DVector(new Px長さ(0), 付箋view縦幅の半分.plus(padding))) as 座標点T,
-            左: 付箋view重心.minus(new Px2DVector(付箋view横幅の半分.plus(padding), new Px長さ(0))) as 座標点T,
-            右: 付箋view重心.plus(new Px2DVector(付箋view横幅の半分.plus(padding), new Px長さ(0))) as 座標点T
-        };
-    }
-
-    public calculate矢印接続ポイント相対Transform(position: 絶対矢印上下左右Position<座標点T>): 矢印上下左右Position<座標点T>{
-        // マージン分だけ左上にオフセットした位置（border原点がpositionと一致するように）
-        const offsetPosition = this._position.minus(
-            new Px2DVector(this._hoverPadding, this._hoverPadding)
-        );
-        return {
-            絶対: position,
-            相対: {
-                上: position.上.px2DVector.minus(offsetPosition.px2DVector),
-                下: position.下.px2DVector.minus(offsetPosition.px2DVector),
-                左: position.左.px2DVector.minus(offsetPosition.px2DVector),
-                右: position.右.px2DVector.minus(offsetPosition.px2DVector)
-            }
-        }
-    }
-
-    public 再描画(): void {
-        this.set付箋ボードTransform({});
-    }
-
-    /** 位置を設定する（外部から呼び出し可能） */
-    public 位置を設定(新しい位置: 座標点T): void {
-        this.set付箋ボードTransform({ position: 新しい位置 });
-    }
-
-    private 選択する: TypedEventListener<'mousedown'>|null = null;
-    public 選択するを登録(callback: TypedEventListener<'mousedown'>): this {
-        this.選択する = callback;
-        // this._componentRoot.onClick(callback);
-        return this;
-    }
-
-    public onClick(callback: TypedEventListener<'click'>): this {
-        this._componentRoot.onClick(callback);
-        return this;
-    }
-
-    public onHover(callback: TypedEventListener<'mouseover'>): this {
-        this._componentRoot.onMouseOver(callback);
-        return this;
-    }
-
-
-    /** 選択状態を設定し、アウトラインを更新 */
-    public set選択状態(状態: 付箋選択状態): void {
-        this._ドラッグ操作領域.アウトラインを設定する(this.getアウトラインスタイル(状態));
-    }
-
-    /** テキストを取得 */
-    public get text(): string {
-        return this._content.text;
-    }
-
-    /** テキストを設定（音声認識など外部からの直接書き換え用） */
-    public setText(text: string): void {
-        this._content.setText(text);
-        this._onTextChange?.(text);
-    }
-
-    /** シリアライズ用のコンテンツデータを取得（コンテンツ種別ごとの構造を保ったまま） */
-    public get コンテンツデータ(): 付箋コンテンツデータ {
-        return this._content.コンテンツデータ;
-    }
-
-    /** 状態に応じたアウトラインスタイルを取得 */
-    private getアウトラインスタイル(状態: 付箋選択状態): string {
-        switch (状態) {
-            case 付箋選択状態.選択:
-                return 付箋ドラッグ枠線.選択;
-            case 付箋選択状態.ホバー:
-                return 付箋ドラッグ枠線.ホバー;
-            case 付箋選択状態.矢印選択:
-                return 付箋ドラッグ枠線.矢印選択;
-            case 付箋選択状態.なし:
-            default:
-                // inline指定を外し、操作領域自身の:hoverに緑枠の責務を戻す。
-                return "";
-        }
-    }
-
-    /**
-     * 接続点座標を再計算して更新する
-     */
-    public update接続点座標(): void {
-        this._矢印接続可能なもの.update接続点座標(this.calculate矢印接続ポイント相対Transform(this.calculate矢印接続ポイント(this._padding)));
-    }
-
-    public delete(): void {
-        super.delete();
-        this._コンテキストメニュー.delete();
-        this._content.delete();
-    }
-
-    public 選択状態のzIndexにする(): void {
-        this._componentRoot.setStyleCSS({ zIndex: 配置物zIndex.選択状態.選択中 });
-    }
-
-    public 通常状態のzIndexにする(): void {
-        this._componentRoot.setStyleCSS({ zIndex: 配置物zIndex.選択状態.未選択 });
-    }
-
-    public 設定を適用(設定: 付箋設定状態): void {
-        this._付箋本体.setStyleCSS({ backgroundColor: 設定.背景色 });
-        this._content.設定を適用(設定);
-    }
+    public ドラッグ移動処理(e: Drag中値): this { this._内部.layout.移動する(e); this.update接続点座標(); return this; }
+    public 位置を設定(pos: T): void { this._内部.layout.設定する({ position: pos }); }
+    public 再描画(): void { this._内部.layout.設定する({}); }
+    public update接続点座標(): void { const p = this.calculate矢印接続ポイント(new Px長さ(15)); this.矢印接続可能なもの.update接続点座標(this.calculate矢印接続ポイント相対Transform(p)); }
+    public add矢印接続可能なもの(x: 矢印接続可能なもの<T>): void { this.child(x.setStyleCSS({ zIndex: 配置物zIndex.付箋内部構造.ホバー用四角形 })); }
+    public 選択するを登録(fn: TypedEventListener<"mousedown">): this { this._on選択 = fn; return this; }
+    public onClick(fn: TypedEventListener<"click">): this { this._componentRoot.onClick(fn); return this; }
+    public onHover(fn: TypedEventListener<"mouseover">): this { this._componentRoot.onMouseOver(fn); return this; }
+    public set選択状態(s: 付箋選択状態): void { this._内部.部品.ドラッグ操作領域.アウトラインを設定する(付箋アウトライン(s)); }
+    public setText(text: string): void { this._内部.部品.コンテンツ.setText(text); this._内部.onTextChange(text); }
+    public 選択状態のzIndexにする(): void { this._componentRoot.setStyleCSS({ zIndex: 配置物zIndex.選択状態.選択中 }); }
+    public 通常状態のzIndexにする(): void { this._componentRoot.setStyleCSS({ zIndex: 配置物zIndex.選択状態.未選択 }); }
+    public 設定を適用(s: 付箋設定状態): void { this._内部.部品.本体.setStyleCSS({ backgroundColor: s.背景色 }); this._内部.部品.コンテンツ.設定を適用(s); }
+    public delete(): void { super.delete(); this._内部.menu.delete(); this._内部.部品.コンテンツ.delete(); }
 }
-
-
-

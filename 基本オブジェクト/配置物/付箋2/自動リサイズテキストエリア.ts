@@ -1,205 +1,68 @@
-import { LV2HtmlComponentBase, Px長さ, TextAreaC } from "SengenUI/index";
+import { I配線可能, Px長さ, TextAreaC, 配線ポート } from "SengenUI/index";
 import { sticky_note_textarea } from "./自動リサイズ付箋style.css";
 import { テキストエリアサイズパラメータ, テキストエリアサイズパラメータ管理 } from "./テキストエリアサイズパラメータ";
 
-/**
- * 自動リサイズ対応テキストエリアコンポーネント
- * テキスト量に応じて高さが自動調整される
- */
-export class 自動リサイズテキストエリア extends LV2HtmlComponentBase {
-    protected _componentRoot: TextAreaC;
+export interface 自動リサイズテキストエリアオプション {
+    initialText?: string;
+    placeholder?: string;
+    追加クラス?: string;
+    初期テキストエリアサイズパラメータ?: テキストエリアサイズパラメータ;
+}
+export interface I自動リサイズテキストエリア配線 {
+    onTextChange(text: string): void;
+    onHeightChange(height: number): void;
+    onFocus(): void;
+    onBlur(): void;
+    onBlurTextCommit(oldText: string, newText: string): void;
+}
+
+/** 自動高さ調整と付箋入力操作を所有するLV1拡張。 */
+export class 自動リサイズテキストエリア extends TextAreaC implements I配線可能<I自動リサイズテキストエリア配線> {
     private _text: string;
-    private _テキストエリアサイズパラメータ管理: テキストエリアサイズパラメータ管理;
+    private _focusText = "";
+    private readonly _sizes: テキストエリアサイズパラメータ管理;
+    private readonly _配線 = new 配線ポート<I自動リサイズテキストエリア配線>("自動リサイズテキストエリア");
 
-    // コールバック
-    private _onTextChange: (text: string) => void;
-    private _onHeightChange: (newHeight: number) => void;
-    private _onFocus: () => void;
-    private _onBlur: () => void;
-    private _onBlurTextCommit?: (oldText: string, newText: string) => void;
-    private _textOnFocus: string = "";
-
-    constructor(options: {
-        initialText?: string;
-        placeholder?: string;
-        /** 付箋種別ごとの見た目差分(タイトル行の下線等)を追加するための任意クラス */
-        追加クラス?: string;
-        初期テキストエリアサイズパラメータ?: テキストエリアサイズパラメータ;
-        onTextChange: (text: string) => void;
-        onHeightChange: (newHeight: number) => void;
-        onFocus?: () => void;
-        onBlur?: () => void;
-        onBlurTextCommit?: (oldText: string, newText: string) => void;
-    }) {
-        super();
-        this._text = options.initialText ?? "";
-        this._onTextChange = options.onTextChange;
-        this._onHeightChange = options.onHeightChange;
-        this._onFocus = options.onFocus ?? (() => {});
-        this._onBlur = options.onBlur ?? (() => {});
-        this._onBlurTextCommit = options.onBlurTextCommit;
-        this._テキストエリアサイズパラメータ管理 = new テキストエリアサイズパラメータ管理(
-            options.初期テキストエリアサイズパラメータ ?? new テキストエリアサイズパラメータ()
-        );
-        this._componentRoot = this._ルートを構築する(options.placeholder, options.追加クラス);
-
-        // 初期高さを設定（遅延実行で親コンポーネントの初期化を待つ）
-        setTimeout(() => this.adjustHeight(), 0);
-    }
-
-    protected _ルートを構築する(placeholder?: string, 追加クラス?: string): TextAreaC {
-        return new TextAreaC({
-            value: this._text,
-            placeholder: placeholder ?? "付箋のテキストを入力...",
-            class: 追加クラス ? [sticky_note_textarea, 追加クラス] : sticky_note_textarea,
-            // HTMLTextAreaElementの既定値は2行。未指定だと1文字入力しただけで
-            // scrollHeightが2行分になり、1行付箋が52pxから72pxへ伸びる。
-            rows: 1,
-            spellcheck: false
-        })
-        .setStyleCSS({
-            width: "100%",
-            padding: this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ.padding.toCssValue(),
-            border: "none",
-            backgroundColor: "transparent",
-            fontFamily: "Arial, sans-serif",
-            fontSize: this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ.textSize.toCssValue(),
-            lineHeight: this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ.lineHeight.toCssValue(),
-            resize: "none", // 手動リサイズを無効化
-            outline: "none",
-            boxSizing: "border-box",
-            overflow: "hidden", // スクロールバーを非表示
-            minHeight: this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ.minHeight.toCssValue()
-        })
-        .addTextAreaEventListener('input', (e) => {
-            const target = e.target as HTMLTextAreaElement;
-            this._text = target.value;
-            this._onTextChange(this._text);
-            this.adjustHeight();
-        })
-        .addTextAreaEventListener('focus', (e) => {
-            const target = e.target as HTMLTextAreaElement;
-            target.style.outline = "2px solid #2196f3";
-            this._textOnFocus = target.value;
-            this._onFocus();
-        })
-        .addTextAreaEventListener('blur', (e) => {
-            const target = e.target as HTMLTextAreaElement;
-            target.style.outline = "none";
-            this._onBlur();
-            if (this._onBlurTextCommit && this._textOnFocus !== target.value) {
-                this._onBlurTextCommit(this._textOnFocus, target.value);
-            }
-        })
-        .addTextAreaEventListener('keydown', (e) => {
-            e.stopPropagation(); // Undoショートカット等がCanvasに伝播するのを防ぐ
-        })
-        .addTextAreaEventListener('pointerdown', (e) => {
-            // ドラッグ・リサイズとの競合を回避し、フォーカス取得を確実にする
-            e.stopPropagation();
-        })
-        .addTextAreaEventListener('pointerup', (e) => {
-            // 親要素のMouseWifeドラッグ終了処理がフォーカスを奪うのを防ぐ
-            e.stopPropagation();
-        })
-        .addTextAreaEventListener('click', (e) => {
-            // クリックイベントの伝搬を停止してフォーカスを維持
-            e.stopPropagation();
-        });
-    }
-
-    /**
-     * テキスト量に応じて高さを自動調整する。
-     *
-     * 注意: 空文字時はTextAreaC.autoFitToContent()を使わない。あちらはinline heightを
-     * 外してCSS min-heightへ委ねるだけだが、min-heightはあくまで「下限」でしかなく、
-     * placeholderの自然な折り返し高さ(このアプリでは2行分)がmin-heightを上回ると
-     * textarea自体はmin-heightを無視してその自然高さまで膨らむ(scrollHeightに
-     * placeholderが混入する問題の別形)。そのため空文字時はminHeightを明示的な
-     * heightとして直接設定し、自然高さ計算そのものを起こさせない。
-     * 併せてonHeightChangeへ渡す値も同じ既知の値を使い、実測(高さPxを取得する)に
-     * 頼らない。この付箋がまだdocumentへ未接続の段階でadjustHeightが呼ばれると、
-     * offsetHeightはレイアウト未計算のため信頼できない値を返すため。
-     */
-    private adjustHeight(): void {
-        if (!this._componentRoot) {
-            return; // まだ初期化されていない場合は何もしない
-        }
-        const minHeight = this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ.minHeight;
-        if (this._text.length === 0) {
-            this._componentRoot.setStyleCSS({ height: minHeight.toCssValue() });
-            this._onHeightChange?.(minHeight.value);
-            return;
-        }
-        this._componentRoot.autoFitToContent();
-        this._onHeightChange?.(this._componentRoot.高さPxを取得する());
-    }
-
-    // 外部からテキストを設定
-    public setValue(text: string): void {
+    public constructor(option: 自動リサイズテキストエリアオプション) {
+        const text = option.initialText ?? "";
+        super({ value: text, placeholder: option.placeholder ?? "付箋のテキストを入力...",
+            class: option.追加クラス ? [sticky_note_textarea, option.追加クラス] : sticky_note_textarea,
+            rows: 1, spellcheck: false });
         this._text = text;
-        this._componentRoot.setValue(text);
-        // 高さを再調整
-        setTimeout(() => this.adjustHeight(), 0);
+        this._sizes = new テキストエリアサイズパラメータ管理(option.初期テキストエリアサイズパラメータ ?? new テキストエリアサイズパラメータ());
+        this.setStyleCSS({ width: "100%", border: "none", backgroundColor: "transparent",
+            fontFamily: "Arial, sans-serif", resize: "none", outline: "none",
+            boxSizing: "border-box", overflow: "hidden" });
+        this._sizeStyleを反映する();
+        this.addTextAreaEventListener("input", e => this._入力(e))
+            .addTextAreaEventListener("focus", e => this._focus(e))
+            .addTextAreaEventListener("blur", e => this._blur(e))
+            .addTextAreaEventListener("keydown", e => e.stopPropagation())
+            .addTextAreaEventListener("pointerdown", e => e.stopPropagation())
+            .addTextAreaEventListener("pointerup", e => e.stopPropagation())
+            .addTextAreaEventListener("click", e => e.stopPropagation());
+        setTimeout(() => this._高さを調整する(), 0);
     }
 
-    // 現在のテキストを取得
-    public getValue(): string {
-        return this._componentRoot.getValue();
+    private _入力(e: Event): void { this._text = (e.target as HTMLTextAreaElement).value; this._配線.先.onTextChange(this._text); this._高さを調整する(); }
+    private _focus(e: FocusEvent): void { this.setStyleCSS({ outline: "2px solid #2196f3" }); this._focusText = (e.target as HTMLTextAreaElement).value; this._配線.先.onFocus(); }
+    private _blur(e: FocusEvent): void { const value = (e.target as HTMLTextAreaElement).value; this.setStyleCSS({ outline: "none" }); this._配線.先.onBlur(); if (this._focusText !== value) this._配線.先.onBlurTextCommit(this._focusText, value); }
+    private _高さを調整する(): void {
+        const min = this._sizes.現在のサイズパラメータ.minHeight;
+        if (this._text.length === 0) { this.setStyleCSS({ height: min.toCssValue() }); this._配線.先.onHeightChange(min.value); return; }
+        this.autoFitToContent();
+        this._配線.先.onHeightChange(this.高さPxを取得する());
     }
+    private _sizeStyleを反映する(): void { const x = this._sizes.現在のサイズパラメータ; this.setStyleCSS({ padding: x.padding.toCssValue(), fontSize: x.textSize.toCssValue(), lineHeight: x.lineHeight.toCssValue(), minHeight: x.minHeight.toCssValue() }); }
 
-    /** SengenUIコンポーネント自体を公開する(生DOM要素は渡さない) */
-    public get textArea(): TextAreaC {
-        return this._componentRoot;
-    }
-
-    // フォーカスを当てる
-    public focus(): void {
-        this._componentRoot.focus();
-    }
-
-    // フォーカスを外す
-    public blur(): void {
-        // TextAreaCのblurは自動的に処理される
-    }
-
-    // 現在のテキスト状態を取得
-    public getText(): string {
-        return this._text;
-    }
-
-    // 最小高さを設定
-    public setMinHeight(minHeight: number): this {
-        this._テキストエリアサイズパラメータ管理.scale1の時のサイズパラメータ = this._テキストエリアサイズパラメータ管理.scale1の時のサイズパラメータ.setMinHeight(new Px長さ(minHeight));
-        this.adjustHeight();
-        return this;
-    }
-
-    // 行の高さを設定
-    public setLineHeight(lineHeight: number): this {
-        this._テキストエリアサイズパラメータ管理.scale1の時のサイズパラメータ = this._テキストエリアサイズパラメータ管理.scale1の時のサイズパラメータ.setLineHeight(new Px長さ(lineHeight));
-        this.setTextAreaSize();
-        return this;
-    }
-
-    public setTextSize(textSize: number): this {
-        this._テキストエリアサイズパラメータ管理.scale1の時のサイズパラメータ = this._テキストエリアサイズパラメータ管理.scale1の時のサイズパラメータ.setTextSize(new Px長さ(textSize));
-        this.setTextAreaSize();
-        return this;
-    }
-
-    public setTextAreaSize(): void {
-        this._componentRoot.setStyleCSS({
-            padding: this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ.padding.toCssValue(),
-            fontSize: this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ.textSize.toCssValue(),
-            lineHeight: this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ.lineHeight.toCssValue(),
-            minHeight: this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ.minHeight.toCssValue()
-        });
-        this.adjustHeight();
-    }
-
-    /** 文字色を設定 */
-    public set文字色(色: string): void {
-        this._componentRoot.setStyleCSS({ color: 色 });
-    }
+    public 配線する(配線: I自動リサイズテキストエリア配線): this { this._配線.配線する(配線); return this; }
+    public setValue(text: string): this { this._text = text; super.setValue(text); setTimeout(() => this._高さを調整する(), 0); return this; }
+    public getValue(): string { return super.getValue(); }
+    public get textArea(): TextAreaC { return this; }
+    public getText(): string { return this._text; }
+    public setMinHeight(n: number): this { this._sizes.scale1の時のサイズパラメータ = this._sizes.scale1の時のサイズパラメータ.setMinHeight(new Px長さ(n)); this._高さを調整する(); return this; }
+    public setLineHeight(n: number): this { this._sizes.scale1の時のサイズパラメータ = this._sizes.scale1の時のサイズパラメータ.setLineHeight(new Px長さ(n)); this._sizeStyleを反映する(); return this; }
+    public setTextSize(n: number): this { this._sizes.scale1の時のサイズパラメータ = this._sizes.scale1の時のサイズパラメータ.setTextSize(new Px長さ(n)); this._sizeStyleを反映する(); return this; }
+    public setTextAreaSize(): void { this._sizeStyleを反映する(); this._高さを調整する(); }
+    public set文字色(色: string): void { this.setStyleCSS({ color: 色 }); }
 }

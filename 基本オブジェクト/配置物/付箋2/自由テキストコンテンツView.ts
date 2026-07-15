@@ -23,10 +23,12 @@ export class 自由テキストコンテンツView extends LV2HtmlComponentBase 
             initialText: 依存関係.初期テキスト,
             placeholder: 自由テキストのプレースホルダー,
             初期テキストエリアサイズパラメータ: new テキストエリアサイズパラメータ().setMinHeight(依存関係.最小高さ),
+        }).配線する({
             onTextChange: 依存関係.onTextChange,
             onHeightChange: 依存関係.onHeightChange,
             onBlurTextCommit: 依存関係.onBlurTextCommit,
             onFocus: 依存関係.onFocus,
+            onBlur: () => {},
         });
         this._formatterCleanup = テキストフォーマット適用(this._componentRoot.textArea);
     }
