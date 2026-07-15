@@ -33,37 +33,48 @@ export class なめらか曲線矢印集約<T extends Canvas座標Base<T> & 配�
             .配線する({
                 on選択: e => { if (e.ctrlKey) selection.追加選択(this); else selection.set選択中配置物(this); },
                 onHover: () => selection.setホバー中配置物(this),
-                on曲線右クリック: e => { e.preventDefault(); this.曲線上に中間点ハンドルを生成する(); },
+                on曲線右クリック: e => { e.preventDefault(); this.曲線上に中間点ハンドルを生成する(e); },
             });
         this._middle = new なめらか曲線矢印中間点管理(this, space, this.view);
+        this._middle.初期化する(vm.middlePoints);
         this.再描画();
     }
     private readonly _id: なめらか曲線矢印ID;
-    public get 中間点ハンドル(): なめらか曲線矢印中間点ハンドル<T> | null { return this._middle.handle; }
+    public get 中間点ハンドルリスト(): readonly なめらか曲線矢印中間点ハンドル<T>[] { return this._middle.handles; }
     public get id(): なめらか曲線矢印ID { return this._id; }
     public get idString(): string { return this._id.id; }
     public 判定(_pos: Px2DVector): boolean { throw new Error("画面座標点の実装が必要です"); }
     public get 画面座標点(): 画面座標点 { throw new Error("画面座標点の実装が必要です"); }
     public get衝突判定用矩形(): { 位置: 描画座標点; サイズ: Px2DVector } {
-        return 曲線の衝突判定用矩形(this.始点ハンドル.描画座標点, this.終点ハンドル.描画座標点);
+        return 曲線の衝突判定用矩形(
+            this.始点ハンドル.描画座標点, this.終点ハンドル.描画座標点, this._middle.positions);
     }
     public 再描画(): void {
         this.始点ハンドル.render(); this.終点ハンドル.render(); this._middle.render();
         const start = this.始点ハンドル.state.pos;
         const end = this.終点ハンドル.state.pos;
-        this.view.pathを更新する(start, end, this._middle.position);
-        this.終点ハンドル.view.回転角度を設定(曲線制御点.終点の接線角度を計算する(start, end, this._middle.position));
+        this.view.pathを更新する(start, end, this._middle.positions);
+        this.終点ハンドル.view.回転角度を設定(
+            曲線制御点.終点の接線角度を計算する(start, end, this._middle.positions));
     }
-    public 曲線上に中間点ハンドルを生成する(): void { this._middle.生成する(this.始点ハンドル.state.pos, this.終点ハンドル.state.pos); }
-    public 中間点ハンドルを削除する(): void { this._middle.削除する(); }
+    public 曲線上に中間点ハンドルを生成する(e: MouseEvent): void {
+        this._middle.生成する(this.始点ハンドル.state.pos, this.終点ハンドル.state.pos,
+            this.view.曲線ローカル座標を取得する(e));
+    }
     public 選択された時の処理(): void { this.view.select(); }
     public 選択解除された時の処理(): void { this.view.deselect(); }
     public ホバーされたときの処理(): void { this.view.hover(); }
     public ホバー解除されたときの処理(): void { this.view.unhover(); }
     public 選択状態のzIndexにする(): void { this.view.選択状態のzIndexにする(); }
     public 通常状態のzIndexにする(): void { this.view.通常状態のzIndexにする(); }
-    public toシリアライズデータ(): なめらか曲線矢印データ { return 曲線矢印をシリアライズする(this._id, this.始点ハンドル, this.終点ハンドル); }
-    public updateStateFromData(data: なめらか曲線矢印データ, base: 描画基準座標): void { 曲線矢印データを反映する(data, base, this.始点ハンドル, this.終点ハンドル); }
+    public toシリアライズデータ(): なめらか曲線矢印データ {
+        return 曲線矢印をシリアライズする(
+            this._id, this.始点ハンドル, this.終点ハンドル, this._middle.positions);
+    }
+    public updateStateFromData(data: なめらか曲線矢印データ, base: 描画基準座標): void {
+        this._middle.置換する(曲線矢印データを反映する(
+            data, base, this.始点ハンドル, this.終点ハンドル));
+    }
     public ドラッグ移動対象を収集する(_exclude?: LV2HtmlComponentBase): Iドラッグ移動可能[] { return this._middle.ドラッグ対象へ追加する([this.始点ハンドル, this.終点ハンドル]); }
     public get始点接続付箋ID(): 付箋ID | null { return this.始点ハンドル.接続点?.親配置物ID ?? null; }
     public get終点接続付箋ID(): 付箋ID | null { return this.終点ハンドル.接続点?.親配置物ID ?? null; }

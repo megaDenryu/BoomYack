@@ -227,7 +227,9 @@ export class CanvasItemFactory implements ICanvasItemFactory {
         const vm = new なめらか曲線矢印VM<描画座標点>(
             data.id,
             描画座標点.fromPx2DVector(data.start.toPx2DVector(), this.model.描画基準座標),
-            描画座標点.fromPx2DVector(data.end.toPx2DVector(), this.model.描画基準座標)
+            描画座標点.fromPx2DVector(data.end.toPx2DVector(), this.model.描画基準座標),
+            data.middlePoints.map(point =>
+                描画座標点.fromPx2DVector(point.toPx2DVector(), this.model.描画基準座標))
         );
         return this.createなめらか曲線矢印(vm);
     }

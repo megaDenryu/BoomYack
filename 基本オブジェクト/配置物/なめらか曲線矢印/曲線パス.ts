@@ -1,4 +1,4 @@
-import { PathC, 配置物座標点 } from "SengenUI/index";
+import { PathC, Px2DVector, 配置物座標点 } from "SengenUI/index";
 import { 曲線制御点 } from "./曲線制御点";
 
 const 曲線色 = {
@@ -8,15 +8,18 @@ const 曲線色 = {
 
 abstract class ベジェ曲線パス extends PathC {
     public 曲線を設定する(始点: 配置物座標点, 終点: 配置物座標点,
-        中間点: 配置物座標点 | null): this {
-        const 制御点 = 曲線制御点.計算する(始点, 終点, 中間点);
+        中間点リスト: readonly 配置物座標点[]): this {
+        const 区間リスト = 曲線制御点.区間リストを計算する(始点, 終点, 中間点リスト);
         const start = 始点.toビューポート座標値();
-        const end = 終点.toビューポート座標値();
-        const startControl = 制御点.始点側.toビューポート座標値();
-        const endControl = 制御点.終点側.toビューポート座標値();
-        this.buildPath(builder => builder.moveTo(start.x.値, start.y.値).curveTo(
-            startControl.x.値, startControl.y.値, endControl.x.値, endControl.y.値,
-            end.x.値, end.y.値));
+        this.buildPath(builder => {
+            builder.moveTo(start.x.値, start.y.値);
+            区間リスト.forEach(区間 => {
+                const cp1 = 区間.始点側制御点.toビューポート座標値();
+                const cp2 = 区間.終点側制御点.toビューポート座標値();
+                const end = 区間.終点.toビューポート座標値();
+                builder.curveTo(cp1.x.値, cp1.y.値, cp2.x.値, cp2.y.値, end.x.値, end.y.値);
+            });
+        });
         return this;
     }
 }
@@ -44,5 +47,13 @@ export class 曲線操作パス extends ベジェ曲線パス {
     public constructor() {
         super({ fill: "none", stroke: "transparent", strokeWidth: 20, strokeLinecap: "round" });
         this.setStyleCSS({ pointerEvents: "stroke", cursor: "pointer" });
+    }
+
+    public イベントのローカル座標(e: MouseEvent): Px2DVector {
+        const path = this._svgDom.element as SVGPathElement;
+        const matrix = path.getScreenCTM();
+        if (matrix === null) throw new Error("曲線操作パスの画面変換行列を取得できません");
+        const point = new DOMPoint(e.clientX, e.clientY).matrixTransform(matrix.inverse());
+        return Px2DVector.fromNumbers(point.x, point.y);
     }
 }

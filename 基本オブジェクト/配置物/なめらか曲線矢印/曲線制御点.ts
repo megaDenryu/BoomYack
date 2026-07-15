@@ -1,74 +1,62 @@
 import { Degree角度, Px2DVector, 配置物座標点 } from "SengenUI/index";
 import { 始点中心線分情報 } from "../折れ線矢印/始点中心線分情報";
 
-/**
- * なめらか曲線矢印の3次ベジェ制御点。
- *
- * 中間点ハンドル(なめらか曲線矢印中間点ハンドル参照)が未設置なら始点/終点だけから
- * 自動計算する(設計2026-07-14: 「制御点は自動計算でよい。過剰実装しない」方針)。
- * 始点と終点の差分が大きい軸(dxとdyのうち絶対値が大きい方)へ向けて制御点を各端点から
- * 半分だけ押し出すことで、向きを問わず滑らかなS字カーブになる(React Flow等の
- * ノードエディタで一般的な「デフォルトベジェ」と同じ考え方)。
- *
- * 中間点ハンドルが設置されていれば、その点を通る2次ベジェ(始点, 中間点, 終点)と
- * 同じ形状になるよう3次ベジェへ変換する(標準変換式)。ユーザーが右クリックで
- * 中間点ハンドルを生成しドラッグすると、この経路で曲線形状を直接コントロールできる。
- */
+export interface 曲線区間 {
+    readonly 始点: 配置物座標点;
+    readonly 始点側制御点: 配置物座標点;
+    readonly 終点側制御点: 配置物座標点;
+    readonly 終点: 配置物座標点;
+}
+
 export class 曲線制御点 {
-    public readonly 始点側: 配置物座標点;
-    public readonly 終点側: 配置物座標点;
-
-    private constructor(始点側: 配置物座標点, 終点側: 配置物座標点) {
-        this.始点側 = 始点側;
-        this.終点側 = 終点側;
+    public static 区間リストを計算する(始点: 配置物座標点, 終点: 配置物座標点,
+        中間点リスト: readonly 配置物座標点[]): 曲線区間[] {
+        if (中間点リスト.length === 0) return [this._自動区間(始点, 終点)];
+        if (中間点リスト.length === 1) return this._単一中間点区間(始点, 中間点リスト[0], 終点);
+        const 点列 = [始点, ...中間点リスト, 終点];
+        return 点列.slice(0, -1).map((現在, index) => {
+            const 前 = 点列[index - 1] ?? 現在;
+            const 次 = 点列[index + 1];
+            const 次の次 = 点列[index + 2] ?? 次;
+            return {
+                始点: 現在,
+                始点側制御点: 現在.plus(次.px2DVector.minus(前.px2DVector).times(1 / 6)),
+                終点側制御点: 次.plus(現在.px2DVector.minus(次の次.px2DVector).times(1 / 6)),
+                終点: 次,
+            };
+        });
     }
 
-    public static 計算する(始点: 配置物座標点, 終点: 配置物座標点, 中間点: 配置物座標点 | null): 曲線制御点 {
-        return 中間点 == null
-            ? 曲線制御点.自動計算する(始点, 終点)
-            : 曲線制御点.中間点から計算する(始点, 中間点, 終点);
+    public static 終点の接線角度を計算する(始点: 配置物座標点, 終点: 配置物座標点,
+        中間点リスト: readonly 配置物座標点[]): Degree角度 {
+        const 区間 = this.区間リストを計算する(始点, 終点, 中間点リスト).at(-1);
+        if (区間 === undefined) throw new Error("曲線区間が存在しません");
+        return 始点中心線分情報.計算(区間.終点側制御点, 区間.終点).angle;
     }
 
-    /**
-     * 曲線の終点における接線の向き。終点矢印ハンドル(三角形)の回転角度に使う。
-     * 3次ベジェの終点での接線は「終点側制御点→終点」の向きに一致する。
-     */
-    public static 終点の接線角度を計算する(始点: 配置物座標点, 終点: 配置物座標点, 中間点: 配置物座標点 | null): Degree角度 {
-        const 制御点 = 曲線制御点.計算する(始点, 終点, 中間点);
-        return 始点中心線分情報.計算(制御点.終点側, 終点).angle;
-    }
-
-    private static 自動計算する(始点: 配置物座標点, 終点: 配置物座標点): 曲線制御点 {
+    private static _自動区間(始点: 配置物座標点, 終点: 配置物座標点): 曲線区間 {
         const dx = 終点.px2DVector.x.値 - 始点.px2DVector.x.値;
         const dy = 終点.px2DVector.y.値 - 始点.px2DVector.y.値;
-
-        const 主軸は水平か = Math.abs(dx) >= Math.abs(dy);
-        const 押し出し量 = (主軸は水平か ? dx : dy) * 0.5;
-
-        const 始点側 = 主軸は水平か
-            ? 始点.plus(Px2DVector.fromNumbers(押し出し量, 0))
-            : 始点.plus(Px2DVector.fromNumbers(0, 押し出し量));
-        const 終点側 = 主軸は水平か
-            ? 終点.plus(Px2DVector.fromNumbers(-押し出し量, 0))
-            : 終点.plus(Px2DVector.fromNumbers(0, -押し出し量));
-
-        return new 曲線制御点(始点側, 終点側);
+        const 水平 = Math.abs(dx) >= Math.abs(dy);
+        const amount = (水平 ? dx : dy) * 0.5;
+        const offset = 水平 ? Px2DVector.fromNumbers(amount, 0) : Px2DVector.fromNumbers(0, amount);
+        return { 始点, 始点側制御点: 始点.plus(offset), 終点側制御点: 終点.plus(offset.times(-1)), 終点 };
     }
 
-    /**
-     * 中間点(ユーザーがドラッグしたハンドル位置)を「曲線がt=0.5で通過すべき点」として扱う。
-     * 2次ベジェの制御点P1は定義上曲線から外れた位置にあり(t=0.5点は(始点+2*P1+終点)/4)、
-     * ハンドル位置をそのままP1として使うとハンドルが曲線から外れて見えるバグになる
-     * (Fudaba札#49レビュー指摘)。そこでハンドル位置を「通過点」とみなし、
-     * P1 = 2*中間点 - (始点+終点)/2 で逆算してから標準変換式(cp1 = 始点+2/3(P1-始点)、
-     * cp2 = 終点+2/3(P1-終点))を適用することで、3次ベジェのt=0.5点が中間点と厳密に一致する。
-     */
-    private static 中間点から計算する(始点: 配置物座標点, 中間点: 配置物座標点, 終点: 配置物座標点): 曲線制御点 {
-        const 始点終点の中点ベクトル = 始点.px2DVector.plus(終点.px2DVector).times(0.5);
-        const 制御点P1ベクトル = 中間点.px2DVector.times(2).minus(始点終点の中点ベクトル);
-        const 制御点P1 = 始点.newFromPx2DVector(制御点P1ベクトル);
-        const 始点側 = 始点.plus(制御点P1.px2DVector.minus(始点.px2DVector).times(2 / 3));
-        const 終点側 = 終点.plus(制御点P1.px2DVector.minus(終点.px2DVector).times(2 / 3));
-        return new 曲線制御点(始点側, 終点側);
+    private static _単一中間点区間(始点: 配置物座標点, 中間点: 配置物座標点,
+        終点: 配置物座標点): 曲線区間[] {
+        const 両端の中点 = 始点.px2DVector.plus(終点.px2DVector).times(0.5);
+        const 二次制御点 = 中間点.px2DVector.times(2).minus(両端の中点);
+        const cp1 = 始点.plus(二次制御点.minus(始点.px2DVector).times(2 / 3));
+        const cp2 = 終点.plus(二次制御点.minus(終点.px2DVector).times(2 / 3));
+        const p01 = 始点.newFromPx2DVector(始点.px2DVector.plus(cp1.px2DVector).times(0.5));
+        const p12 = 始点.newFromPx2DVector(cp1.px2DVector.plus(cp2.px2DVector).times(0.5));
+        const p23 = 始点.newFromPx2DVector(cp2.px2DVector.plus(終点.px2DVector).times(0.5));
+        const p012 = 始点.newFromPx2DVector(p01.px2DVector.plus(p12.px2DVector).times(0.5));
+        const p123 = 始点.newFromPx2DVector(p12.px2DVector.plus(p23.px2DVector).times(0.5));
+        return [
+            { 始点, 始点側制御点: p01, 終点側制御点: p012, 終点: 中間点 },
+            { 始点: 中間点, 始点側制御点: p123, 終点側制御点: p23, 終点 },
+        ];
     }
 }
