@@ -24,6 +24,10 @@ import { 配置物テキスト変更コマンド, 配置物移動コマンド, �
 import { VoiceRecognitionService } from "../../キャンバス操作/音声認識サービス";
 import { ボード基準座標変換 } from "../../キャンバス操作/座標変換/ボード基準座標変換";
 
+// 自由テキスト付箋の初期最小高さ。テキストエリアのpadding(16px×2)+lineHeight(20px)の
+// 1行分と一致させる(この値未満だとscrollHeightが常にminHeightを上回り無意味な値になる)。
+const 自由テキスト付箋の初期最小高さ = new Px長さ(52);
+
 export class CanvasItemFactory implements ICanvasItemFactory {
     private 衝突判定サービス: 配置物衝突判定サービス;
     private _aiOperation: AiOperationService;
@@ -46,8 +50,8 @@ export class CanvasItemFactory implements ICanvasItemFactory {
     public create付箋(pos: 描画座標点, text?: string, id?: string): 付箋集約<描画座標点> {
         return this.付箋を構築する(
             pos,
-            new Px2DVector(new Px長さ(200), new Px長さ(50)),
-            new Px長さ(50),
+            new Px2DVector(new Px長さ(200), 自由テキスト付箋の初期最小高さ),
+            自由テキスト付箋の初期最小高さ,
             自由テキストコンテンツを作る(text ?? ""),
             new 付箋ID(id)
         );

@@ -218,7 +218,7 @@ export class テキストエリアサイズパラメータ {
     constructor(
         padding: Px長さ = new Px長さ(16),
         lineHeight: Px長さ = new Px長さ(20),
-        minHeight: Px長さ = new Px長さ(80),
+        minHeight: Px長さ = new Px長さ(52),
         textSize: Px長さ = new Px長さ(14)
     ) {
         this.padding = padding;
