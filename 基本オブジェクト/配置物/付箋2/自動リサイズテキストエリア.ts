@@ -120,17 +120,30 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
             return; // DOM要素が取得できない場合は何もしない
         }
         
+        const minHeight = this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ.minHeight;
+
+        // 空文字時はplaceholder描画がscrollHeightに混入し、実際より大きい値
+        // (例: 1行分のはずが2行分)を返すことがある(Chromiumの既知の挙動)。
+        // 空文字はどんな種別でも最小高さで足りるため、scrollHeight計測自体を
+        // 行わずminHeightを直接採用して回避する。
+        if (this._text.length === 0) {
+            textarea.style.height = minHeight.toCssValue();
+            if (this._onHeightChange) {
+                this._onHeightChange(minHeight.value);
+            }
+            return;
+        }
+
         // 一時的に高さをリセットしてscrollHeightを正確に取得
         textarea.style.height = 'auto';
-        
+
         // 必要な高さを計算
         const scrollHeight = new Px長さ(textarea.scrollHeight);
-        const minHeight = this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ.minHeight;
         const newHeight = minHeight.isGreaterThan(scrollHeight) ? minHeight : scrollHeight;
-        
+
         // 新しい高さを適用
         textarea.style.height = newHeight.toCssValue();
-        
+
         // 親コンポーネントに高さ変更を通知
         if (this._onHeightChange) {
             this._onHeightChange(newHeight.value);

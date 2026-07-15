@@ -5,7 +5,7 @@ import { Canvas座標Base, div, DivC, Drag開始値, Drag終了値, Drag中値, 
 
 
 
-import { auto_resize_handle_left, auto_resize_handle_right, auto_resize_sticky_note, 付箋ホバー領域, 付箋コンテンツコンテナ } from "./自動リサイズ付箋style.css";
+import { auto_resize_handle_left, auto_resize_handle_right, 付箋ホバー領域, 付箋コンテンツコンテナ } from "./自動リサイズ付箋style.css";
 import { I付箋View, 配置物zIndex } from "../../I配置物";
 
 import { 多段格子コンテキストメニュー, 格子メニュー1層オプション, 格子メニュー2層オプション } from "../../キャンバス操作/多段格子コンテキストメニュー/多段格子コンテキストメニュー";
@@ -202,7 +202,7 @@ export class 自動リサイズ付箋View<座標点T extends Canvas座標Base<�
     ): DivC {
         const 矢印上下左右Position = this.calculate矢印接続ポイント(this._padding);
         return (
-            div({ class : [付箋ホバー領域, auto_resize_sticky_note]}).tap(self => {
+            div({ class : 付箋ホバー領域}).tap(self => {
                                                                                             this.付箋ホバー領域 = self;
                                                                                             this.set付箋ボードTransform({position:this._position, size:this._size});
                                                                                             this._mouseWife = new PointerWife(self).ドラッグ連動登録({

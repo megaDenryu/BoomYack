@@ -26,11 +26,6 @@ export const sticky_note_textarea = style({
     boxSizing: "border-box"
 });
 
-// 自動リサイズ付箋用のスタイル
-export const auto_resize_sticky_note = style({
-    minHeight: "80px"
-});
-
 // 自動リサイズ付箋用の左右リサイズハンドル
 export const auto_resize_handle_left = style({
     position: "absolute",
