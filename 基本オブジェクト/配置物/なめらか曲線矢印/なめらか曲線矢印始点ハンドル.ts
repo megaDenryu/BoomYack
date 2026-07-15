@@ -10,6 +10,6 @@ export class 始点ハンドル<T extends Canvas座標Base<T> & 配置物座標�
     public readonly index = 0;
     public constructor(state: 始点State<T>, parent: Iなめらか曲線矢印集約<T>, space: I描画空間,
         contacts: I接触点を教えてくれる人<T>, selection: I配置物選択機能集約) {
-        super(state, parent, space, contacts, selection, commands => new 始点ハンドルView(commands));
+        super(state, parent, space, contacts, selection, () => new 始点ハンドルView());
     }
 }

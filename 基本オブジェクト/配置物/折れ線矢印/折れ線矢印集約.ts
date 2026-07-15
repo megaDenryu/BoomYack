@@ -404,23 +404,21 @@ export class 中点ハンドル<座標点T extends Canvas座標Base<座標点T> 
     constructor(state: 中点State<座標点T>, index: number, i折れ線矢印集約: I折れ線矢印集約<座標点T>, i描画基準座標を持つ: I描画空間) {
         this._i描画基準座標を持つ = i描画基準座標を持つ;
         this.親の折れ線矢印集約 = i折れ線矢印集約;
-        this._view = new 中点ハンドルView([
-            {
-                onハンドルドラッグ開始: (e: Drag開始値): void => {
+        this._view = new 中点ハンドルView().配線する({
+                onドラッグ開始: (): void => {
                     this.親の折れ線矢印集約.onハンドルドラッグ開始?.();
                 },
-                onハンドルドラッグ中: (e: Drag中値): void => {
+                onドラッグ中: (e): void => {
                     this.ドラッグ移動処理(e);
                 },
-                onハンドルドラッグ終了: (e: Drag中値): void => {
+                onドラッグ終了: (): void => {
                     this.親の折れ線矢印集約.onハンドルドラッグ終了?.();
                 },
                 on右クリック: (e: MouseEvent): void => {
                     e.preventDefault();// ブラウザのコンテキストメニューを抑制
                     this.親の折れ線矢印集約.delete中点(this.index);
                 }
-            }
-        ]);
+            });
         this._state = state;
         this.index = index;
     }

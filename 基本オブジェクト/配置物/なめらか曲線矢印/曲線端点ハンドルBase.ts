@@ -1,12 +1,12 @@
-import { Canvas座標Base, Drag開始値, Drag中値, I描画空間, Px2DVector, 配置物座標点, 描画座標点 } from "SengenUI/index";
+import { Canvas座標Base, Drag開始値, Drag中値, I描画空間, I配線可能, Px2DVector, 配置物座標点, 描画座標点 } from "SengenUI/index";
 import { Iなめらか曲線矢印集約, I接続点, I接触点を教えてくれる人, I点ハンドル, 接触判定可能な点 } from "../../I配置物";
 import { I配置物選択機能集約 } from "../../キャンバス操作/配置物選択管理";
 import { 接続参照データ } from "../../描画キャンバス/データクラス";
 import { I点state } from "../折れ線矢印/折れ線矢印state";
 import { I点ハンドルView } from "../折れ線矢印/I点ハンドルView";
-import { Iハンドル操作実行時コマンド } from "../折れ線矢印/Iハンドル操作実行時コマンド";
+import { IハンドルView配線 } from "../折れ線矢印/IハンドルView配線";
 
-interface 接続表示可能ハンドルView extends I点ハンドルView {
+interface 接続表示可能ハンドルView extends I点ハンドルView, I配線可能<IハンドルView配線> {
     見た目を接続状態にする(): void;
 }
 
@@ -23,18 +23,19 @@ export abstract class 曲線端点ハンドルBase<
         private readonly _state: S, parent: Iなめらか曲線矢印集約<T>,
         private readonly _space: I描画空間, private readonly _contacts: I接触点を教えてくれる人<T>,
         private readonly _selection: I配置物選択機能集約,
-        viewFactory: (commands: Iハンドル操作実行時コマンド[]) => V,
+        viewFactory: () => V,
     ) {
         this.親の折れ線矢印集約 = parent;
-        this._view = viewFactory(this._操作());
+        this._view = viewFactory().配線する(this._操作());
     }
 
-    private _操作(): Iハンドル操作実行時コマンド[] {
-        return [{
-            onハンドルドラッグ開始: e => { this.移動開始(e); this.親の折れ線矢印集約.onハンドルドラッグ開始?.(); },
-            onハンドルドラッグ中: e => { this.ドラッグ移動処理(e); },
-            onハンドルドラッグ終了: e => { this.移動終了(e); this.親の折れ線矢印集約.onハンドルドラッグ終了?.(); },
-        }];
+    private _操作(): IハンドルView配線 {
+        return {
+            onドラッグ開始: e => { this.移動開始(e); this.親の折れ線矢印集約.onハンドルドラッグ開始?.(); },
+            onドラッグ中: e => { this.ドラッグ移動処理(e); },
+            onドラッグ終了: e => { this.移動終了(e); this.親の折れ線矢印集約.onハンドルドラッグ終了?.(); },
+            on右クリック: () => {},
+        };
     }
 
     public get view(): V { return this._view; }

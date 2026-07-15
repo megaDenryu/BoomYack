@@ -30,17 +30,15 @@ export class なめらか曲線矢印中間点ハンドル<座標点T extends Ca
         this._state = state;
         this._親の曲線矢印集約 = 親の曲線矢印集約;
         this._i描画基準座標を持つ = i描画基準座標を持つ;
-        this._view = new 中点ハンドルView([
-            {
-                onハンドルドラッグ開始: (): void => { this._親の曲線矢印集約.onハンドルドラッグ開始?.(); },
-                onハンドルドラッグ中: (e: Drag中値): void => { this.ドラッグ移動処理(e); },
-                onハンドルドラッグ終了: (): void => { this._親の曲線矢印集約.onハンドルドラッグ終了?.(); },
+        this._view = new 中点ハンドルView().配線する({
+                onドラッグ開始: (): void => { this._親の曲線矢印集約.onハンドルドラッグ開始?.(); },
+                onドラッグ中: (e: Drag中値): void => { this.ドラッグ移動処理(e); },
+                onドラッグ終了: (): void => { this._親の曲線矢印集約.onハンドルドラッグ終了?.(); },
                 on右クリック: (e: MouseEvent): void => {
                     e.preventDefault();
                     this._親の曲線矢印集約.中間点ハンドルを削除する();
                 }
-            }
-        ]);
+            });
     }
 
     public get 描画座標点(): 描画座標点 {
