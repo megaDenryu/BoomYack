@@ -1,7 +1,7 @@
 import { LV2HtmlComponentBase, Px長さ, TextAreaC } from "SengenUI/index";
 
 
-import { sticky_note_textarea } from "../style.css";
+import { sticky_note_textarea } from "./自動リサイズ付箋style.css";
 
 
 /**

@@ -5,7 +5,7 @@ import { Canvas座標Base, div, DivC, Drag開始値, Drag終了値, Drag中値, 
 
 
 
-import { auto_resize_handle_left, auto_resize_handle_right, auto_resize_sticky_note, 付箋ホバー領域, 付箋コンテンツコンテナ } from "../付箋/付箋View/style.css";
+import { auto_resize_handle_left, auto_resize_handle_right, auto_resize_sticky_note, 付箋ホバー領域, 付箋コンテンツコンテナ } from "./自動リサイズ付箋style.css";
 import { I付箋View, 配置物zIndex } from "../../I配置物";
 
 import { 多段格子コンテキストメニュー, 格子メニュー1層オプション, 格子メニュー2層オプション } from "../../キャンバス操作/多段格子コンテキストメニュー/多段格子コンテキストメニュー";

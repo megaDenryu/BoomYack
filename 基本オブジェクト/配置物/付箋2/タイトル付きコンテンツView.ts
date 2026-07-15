@@ -1,6 +1,6 @@
 import { div, DivC, LV2HtmlComponentBase, Px長さ } from "SengenUI/index";
 
-import { テキストエリアサイズパラメータ, 自動リサイズテキストエリア } from "../付箋/付箋View/自動リサイズモード/自動リサイズテキストエリア";
+import { テキストエリアサイズパラメータ, 自動リサイズテキストエリア } from "./自動リサイズテキストエリア";
 import { I付箋コンテンツView, 付箋コンテンツView共通依存関係 } from "./I付箋コンテンツView";
 import { タイトル付きコンテンツを作る, 付箋コンテンツデータ } from "../../描画キャンバス/付箋コンテンツデータ";
 import { テキストフォーマット適用 } from "./テキストフォーマッタサービス";

@@ -3,7 +3,7 @@ import { div, HtmlComponentBase, LV2HtmlComponentBase, PointerWife } from "Senge
 import {
     auto_resize_handle_left,
     auto_resize_handle_right,
-} from "../付箋/付箋View/style.css";
+} from "./自動リサイズ付箋style.css";
 
 export class リサイズハンドル extends LV2HtmlComponentBase {
     protected _componentRoot: HtmlComponentBase;
