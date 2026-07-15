@@ -107,17 +107,30 @@ export class 自動リサイズテキストエリア extends LV2HtmlComponentBas
 
     /**
      * テキスト量に応じて高さを自動調整する。
-     * 空文字時のscrollHeight混入バグ(placeholder描画の影響)はTextAreaC.autoFitToContent()側で
-     * 対処済み(inline heightを外してCSS min-heightへ委ねる)なのでここでは呼ぶだけでよい。
+     *
+     * 注意: 空文字時はTextAreaC.autoFitToContent()を使わない。あちらはinline heightを
+     * 外してCSS min-heightへ委ねるだけだが、min-heightはあくまで「下限」でしかなく、
+     * placeholderの自然な折り返し高さ(このアプリでは2行分)がmin-heightを上回ると
+     * textarea自体はmin-heightを無視してその自然高さまで膨らむ(scrollHeightに
+     * placeholderが混入する問題の別形)。そのため空文字時はminHeightを明示的な
+     * heightとして直接設定し、自然高さ計算そのものを起こさせない。
+     * 併せてonHeightChangeへ渡す値も同じ既知の値を使い、実測(高さPxを取得する)に
+     * 頼らない。この付箋がまだdocumentへ未接続の段階(例: 付箋グラフボードの
+     * コンストラクタ内で同期的に生成される「一番上の付箋」)でadjustHeightが呼ばれると、
+     * offsetHeightはレイアウト未計算のため信頼できない値を返すため。
      */
     private adjustHeight(): void {
         if (!this._componentRoot) {
             return; // まだ初期化されていない場合は何もしない
         }
-        this._componentRoot.autoFitToContent();
-        if (this._onHeightChange) {
-            this._onHeightChange(this._componentRoot.高さPxを取得する());
+        const minHeight = this._テキストエリアサイズパラメータ管理.現在のサイズパラメータ.minHeight;
+        if (this._text.length === 0) {
+            this._componentRoot.setStyleCSS({ height: minHeight.toCssValue() });
+            this._onHeightChange?.(minHeight.value);
+            return;
         }
+        this._componentRoot.autoFitToContent();
+        this._onHeightChange?.(this._componentRoot.高さPxを取得する());
     }
 
     // 外部からテキストを設定
