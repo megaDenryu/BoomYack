@@ -1,6 +1,6 @@
 import { Px2DVector, Px長さ, ビューポート座標値, 描画座標点 } from "SengenUI/index";
 import { 付箋集約 } from "../../配置物/付箋2/付箋集約";
-import { 自動リサイズ付箋Viewオプション } from "../../配置物/付箋2/自動リサイズ付箋View";
+import { 自動リサイズ付箋Viewオプション } from "../../配置物/付箋2/付箋枠";
 import { 矢印VM } from "../../配置物/折れ線矢印/矢印集約";
 import { 折れ線矢印VM, 折れ線矢印集約 } from "../../配置物";
 import { なめらか曲線矢印VM } from "../../配置物/なめらか曲線矢印/なめらか曲線矢印VM";
