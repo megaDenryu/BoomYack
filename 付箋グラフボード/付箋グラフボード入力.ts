@@ -13,6 +13,7 @@ export class GlobalMouseManager {
         private readonly onScale: Action<拡縮入力>,
         private readonly 座標変換: ボード基準座標変換
     ) {
+        this.mousePos = this.座標変換.画面座標点を補正する(window.innerWidth / 2, window.innerHeight / 2);
         グローバルイベントを購読する(document, "pointermove", event => this.onGlobalPointerMove(event));
         グローバルイベントを購読する(window, "wheel", event => this.onWheel(event), { passive: false });
     }
