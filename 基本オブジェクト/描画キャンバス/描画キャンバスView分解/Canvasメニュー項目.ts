@@ -23,9 +23,9 @@ export function メニュー項目を生成する(状態: CanvasView状態, 操�
     ];
     const selected = () => 状態.selectionManager.選択中配置物[0];
     const layer2: 格子メニュー2層オプション[] = [
-        { parentId: "L1-sticky", label: "自由テキスト", onClick: e => 操作.addStickyNote(e) },
-        { parentId: "L1-sticky", label: ["タイトル付き", "付箋"], onClick: e => 操作.addTitledStickyNote(e) },
-        { parentId: "L1-sticky", label: ["Fudaba札を", "貼り付け"], onClick: e => 操作.pasteFudabaCard(e) },
+        { parentId: "L1-sticky", label: ["自由", "テキスト"], onClick: e => 操作.addStickyNote(e) },
+        { parentId: "L1-sticky", label: ["タイトル", "付き", "付箋"], onClick: e => 操作.addTitledStickyNote(e) },
+        { parentId: "L1-sticky", label: ["Fudaba", "札を", "貼り付け"], onClick: e => 操作.pasteFudabaCard(e) },
         { parentId: "L1-arrow", label: "折れ線矢印", onClick: e => 操作.addArrow(e) },
         { parentId: "L1-arrow", label: ["なめらか", "矢印"], onClick: e => 操作.addSmoothArrow(e) },
         { parentId: "L1-graph", label: "グラフ選択", onClick: () => key.selectGraph() },

@@ -18,8 +18,13 @@ export const GridCellを構築する = (
     padding: options.label ? "4px 8px" : "2px", display: "flex", flexDirection: "column",
     alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: "bold",
     cursor: "pointer", boxShadow: "0 4px 6px rgba(0,0,0,0.3)", userSelect: "none",
-    transition: "background-color 0.2s, transform 0.2s", whiteSpace: "nowrap",
-    overflow: "hidden", textOverflow: "ellipsis",
+    transition: "background-color 0.2s, transform 0.2s",
+    // ラベル(文字)を持つセルはtop/bottom方向が単一列(64px)幅の場合があり、
+    // nowrap+ellipsisだとフレックスアイテム内では省略記号が効かず見切れる。
+    // 折返しを許してセルの縦幅内に収める(アイコンのみのセルは従来通りnowrap)
+    whiteSpace: options.label ? "normal" : "nowrap",
+    overflow: "hidden", textOverflow: "ellipsis", wordBreak: "break-word",
+    textAlign: "center",
   }).addDivEventListener("mouseenter", () => {
     if (options.isCenter) return;
     root.setStyleCSS({ backgroundColor: getCurrentBackground() !== base || options.backgroundColor
