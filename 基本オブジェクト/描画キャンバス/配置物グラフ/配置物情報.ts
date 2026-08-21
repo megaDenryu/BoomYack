@@ -13,8 +13,8 @@ export class 付箋情報<座標点T extends Canvas座標Base<座標点T> & 配�
     public readonly type = "付箋データ";
     public readonly 配置物: I配置物集約 & I付箋シリアライズ可能
     public readonly 配置物データ: 付箋データ
-    public 始点が接続している矢印: 折れ線矢印情報<座標点T>[] = []
-    public 終点が接続している矢印: 折れ線矢印情報<座標点T>[] = []
+    public 始点が接続している矢印: 矢印情報<座標点T>[] = []
+    public 終点が接続している矢印: 矢印情報<座標点T>[] = []
     public constructor(配置物: I配置物集約 & I付箋シリアライズ可能){
         this.配置物 = 配置物;
         this.配置物データ = (配置物 as I付箋シリアライズ可能).toシリアライズデータ()
@@ -52,6 +52,10 @@ export class なめらか曲線矢印情報<座標点T extends Canvas座標Base<
 }
 
 export type 配置物情報 = 付箋情報<配置物座標点>|折れ線矢印情報<配置物座標点>|なめらか曲線矢印情報<配置物座標点>
+
+// 付箋に接続する矢印は種別を問わず辿れる必要がある。新しい矢印種別を追加したときは
+// この共用体に加えるだけで、配置物連結グラフ側のswitch式が網羅性チェックで検出する。
+export type 矢印情報<座標点T extends Canvas座標Base<座標点T> & 配置物座標点> = 折れ線矢印情報<座標点T>|なめらか曲線矢印情報<座標点T>
 
 function is折れ線矢印集約(item: I配置物集約): item is I折れ線矢印集約<配置物座標点> & I折れ線矢印シリアライズ可能 {
     return item.type === "折れ線矢印";
