@@ -17,7 +17,9 @@ export interface 付箋を更新する {
     readonly kind: '付箋を更新する';
     readonly 付箋ID: string;
     readonly コンテンツ?: 付箋コンテンツJSON;
-    readonly 設定状態?: 付箋設定状態JSON;
+    readonly 背景色?: string;
+    readonly 文字サイズ?: number;
+    readonly 文字色?: string;
     readonly position?: 座標JSON;
     readonly size?: サイズJSON;
 }

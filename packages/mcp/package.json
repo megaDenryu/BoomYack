@@ -2,5 +2,14 @@
   "name": "@boomyack/mcp",
   "version": "0.1.0",
   "private": true,
-  "description": "MCPツール登録package(issue #7)。coreのsemantic APIだけを呼ぶ薄いadapterをここに置く"
+  "description": "MCPツール登録package(issue #7)。coreのサービスだけを呼ぶ薄いadapterで、保存JSONを独自に解釈しない",
+  "main": "src/BoomYackツールを登録する.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "typescript": "^5.5.0",
+    "zod": "^3.23.0"
+  }
 }
