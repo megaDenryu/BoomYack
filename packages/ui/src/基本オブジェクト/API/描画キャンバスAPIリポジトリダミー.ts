@@ -24,4 +24,8 @@ export class 描画キャンバスAPIリポジトリダミー implements I描画
     public async 削除(canvasId: string | { id: string }): Promise<{ success: boolean; message: string }> {
         return { success: false, message: "サーバーが利用できないため削除できません" };
     }
+
+    public 記録済みrevision(canvasId: string): number | null {
+        return null;
+    }
 }

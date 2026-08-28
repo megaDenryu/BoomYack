@@ -3,6 +3,7 @@ import { DropFileLoader } from "TypeScriptBenriKakuchou/FileSystem/ローダー/
 
 import { I描画キャンバスAPIリポジトリ } from "BoomYack/基本オブジェクト/API/I描画キャンバスAPIリポジトリ";
 import { 描画キャンバスローカルリポジトリ } from "BoomYack/基本オブジェクト/API/描画キャンバスAPIリポジトリ";
+import { ボード外部更新監視 } from "BoomYack/基本オブジェクト/API/ボード外部更新監視";
 import { ボード基準座標変換 } from "BoomYack/基本オブジェクト/キャンバス操作/座標変換/ボード基準座標変換";
 import { セーブパネル } from "BoomYack/基本オブジェクト/キャンバス操作/セーブパネル";
 import { JSON読み込みサービス } from "BoomYack/基本オブジェクト/ファイル入出力/JSON読み込みサービス";
@@ -43,6 +44,12 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
         this.mouseGlobal = new GlobalMouseManager(
             input => this.描画キャンバスView.scaleUpdate(input), this.座標変換
         );
+        if (this.api.isAvailable) {
+            new ボード外部更新監視({
+                現在のボードIDを得る: () => this.描画キャンバスView.canvasId || null,
+                既知のrevisionを得る: canvasId => this.api.記録済みrevision(canvasId),
+            }).開始する();
+        }
     }
 
     protected _ルートを構築する(): DivC {

@@ -1,18 +1,18 @@
 /**
  * 描画キャンバス APIのレスポンス型定義
- * バックエンドのCanvasRouterと対応
+ * バックエンドの /BoomYack/board/* (HttpServerAdapter) と対応
  */
 
 import { I描画キャンバスJSON, IキャンバスメタデータJSON } from "./データクラス";
 
-// キャンバス保存レスポンスはデータクラスで定義されているが、
-// ここで再定義して循環参照を回避する
-export type キャンバス保存レスポンス = 
-    | { success: true; message: string; data: I描画キャンバスJSON }
-    | { success: false; message: string; data?: undefined };
+// revisionはサーバー側の楽観ロック(古い状態からの上書きを拒否する仕組み)の照合値。
+// 読み込みで受け取り、次の保存でexpectedRevisionとして送り返す
+export type キャンバス保存レスポンス =
+    | { success: true; message: string; revision: number }
+    | { success: false; message: string; kind?: string };
 
-export type CanvasLoadResponse = 
-    | { success: true; data: I描画キャンバスJSON; message?: string }
+export type CanvasLoadResponse =
+    | { success: true; data: I描画キャンバスJSON; revision: number; message?: string }
     | { success: false; data: null; message: string };
 
 export type CanvasListResponse = 

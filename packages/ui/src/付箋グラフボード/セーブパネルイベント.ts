@@ -1,3 +1,4 @@
+import { Toast } from "OneONetUIComponents/Toast/Toast";
 import { 描画キャンバスローカルリポジトリ } from "BoomYack/基本オブジェクト/API/描画キャンバスAPIリポジトリ";
 import { I描画キャンバスAPIリポジトリ } from "BoomYack/基本オブジェクト/API/I描画キャンバスAPIリポジトリ";
 import { ISavePanelEvents, SaveMode } from "BoomYack/基本オブジェクト/キャンバス操作/セーブパネル";
@@ -12,8 +13,13 @@ export function セーブパネルイベントを作る(
     return {
         onSave: async (name: string, mode: SaveMode) => {
             view().setCanvasIdAndName(安全なID(name), name);
-            if (mode === "server") await view().persistence.save(view().canvasId);
-            else view().persistence.localSave(view().canvasId);
+            if (mode === "server") {
+                // サーバー側がrevisionを照合する。競合 (外部で更新済み) やボード既存は
+                // ここで失敗として表示し、無言で上書きしない
+                const 結果 = await view().persistence.save(view().canvasId);
+                if (結果.success) Toast.success("保存しました");
+                else Toast.error(結果.message);
+            } else view().persistence.localSave(view().canvasId);
         },
         onLoad: async (id: string, mode: SaveMode) => {
             view().setCanvasId(id);

@@ -7,6 +7,7 @@ export interface I描画キャンバスAPIリポジトリ {
     読み込み(canvasId: string | { id: string }): Promise<描画キャンバスJSON | null>;
     一覧取得(): Promise<キャンバスメタデータ[]>;
     削除(canvasId: string | { id: string }): Promise<{ success: boolean; message: string }>;
+    記録済みrevision(canvasId: string): number | null; // 未読み込みのボードはnull (外部更新監視が新規判定に使う)
 }
 
 export interface I描画キャンバスローカルリポジトリ {

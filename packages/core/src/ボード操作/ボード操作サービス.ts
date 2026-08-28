@@ -5,6 +5,9 @@
 // 楽観ロック (issue #5): 全書き込みは読み取り時のrevisionをexpectedRevisionとして受け取り、
 // ディスク上のrevisionと一致しなければrevision競合で失敗する。時刻でなく単調増加する
 // revisionを正典とするため、時計精度や同一ミリ秒更新に依存しない。
+// 100行超過の根拠: このファイルはボード操作の公開境界1型を統合したもので、操作の一部を
+// 別ファイルへ切ると「読み込み→照合→適用→保存」の流れの一片になるため分割しない
+// (純粋な変換は 配置物を編集する.ts / 全量保存を準備する.ts へ既に分離済み)。
 
 import { 最新版のversion } from '../保存形式/最新版保存形式';
 import type { 最新版ボードJSON } from '../保存形式/最新版保存形式';
@@ -12,10 +15,13 @@ import { 保存JSONから最新版ボードを読み込む } from '../保存形�
 import type { ボード保存リポジトリ, ボード一覧項目JSON } from './ボード保存リポジトリ';
 import type { ボード編集コマンド } from './ボード編集コマンド';
 import type { ボード操作結果, ボード削除結果 } from './ボード操作結果';
+import type { ボード変更通知先 } from './ボード変更通知';
 import { ボード編集コマンドを適用する } from './配置物を編集する';
+import { 全量保存の内容を準備する } from './全量保存を準備する';
 
 export interface ボード操作サービス依存 {
     readonly リポジトリ: ボード保存リポジトリ;
+    readonly 変更通知先?: ボード変更通知先;
     IDを生成する(): string;
     現在時刻をISO文字列で得る(): string;
 }
@@ -48,7 +54,26 @@ export class ボード操作サービス {
             配置物リスト: [],
         };
         await this.依存.リポジトリ.最新版ボードを書き込む(ボード.id, ボード);
+        this.依存.変更通知先?.変更を受け取る({ boardId: ボード.id, revision: ボード.revision, 種別: '保存' });
         return { kind: '成功', ボード };
+    }
+
+    // UIの全量保存 (キャンバス全体のJSONをそのまま保存する既存方式) をrevision照合付きで受ける。
+    public async ボード全体を置き換える(ボードID: string, expectedRevision: number, 生データ: unknown): Promise<ボード操作結果> {
+        const 読み込み = await this.revisionを照合して読み込む(ボードID, expectedRevision);
+        if (読み込み.kind !== '成功') return 読み込み;
+        const 準備 = 全量保存の内容を準備する(ボードID, 読み込み.ボード.revision, 生データ);
+        if (準備.kind === '保存データ不正') return { kind: '保存データ不正', ボードID, 理由: 準備.理由 };
+        return this.保存する(準備.ボード);
+    }
+
+    public async 新規ボードとして全量保存する(ボードID: string, 生データ: unknown): Promise<ボード操作結果> {
+        if (await this.依存.リポジトリ.生データを読み込む(ボードID) !== null) {
+            return { kind: 'ボード既存', ボードID };
+        }
+        const 準備 = 全量保存の内容を準備する(ボードID, -1, 生データ); // 保存する()が+1するため初回はrevision 0になる
+        if (準備.kind === '保存データ不正') return { kind: '保存データ不正', ボードID, 理由: 準備.理由 };
+        return this.保存する(準備.ボード);
     }
 
     public async ボード名を変更する(ボードID: string, expectedRevision: number, 新しい名前: string): Promise<ボード操作結果> {
@@ -62,6 +87,7 @@ export class ボード操作サービス {
         if (読み込み.kind === '対象不在') throw new Error('到達しないはずの分岐: 読み込みが対象不在を返した');
         if (読み込み.kind !== '成功') return 読み込み;
         await this.依存.リポジトリ.削除する(ボードID);
+        this.依存.変更通知先?.変更を受け取る({ boardId: ボードID, revision: 読み込み.ボード.revision, 種別: '削除' });
         return { kind: '成功' };
     }
 
@@ -97,6 +123,7 @@ export class ボード操作サービス {
             revision: ボード.revision + 1,
         };
         await this.依存.リポジトリ.最新版ボードを書き込む(保存版.id, 保存版);
+        this.依存.変更通知先?.変更を受け取る({ boardId: 保存版.id, revision: 保存版.revision, 種別: '保存' });
         return { kind: '成功', ボード: 保存版 };
     }
 }

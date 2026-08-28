@@ -6,6 +6,7 @@ import type { 最新版ボードJSON } from '../保存形式/最新版保存形�
 
 export type ボード操作失敗 =
     | { readonly kind: 'ボード不在'; readonly ボードID: string }
+    | { readonly kind: 'ボード既存'; readonly ボードID: string }
     | { readonly kind: '保存データ不正'; readonly ボードID: string; readonly 理由: string }
     | { readonly kind: '対象不在'; readonly 対象の種類: '付箋' | '矢印'; readonly 対象ID: string }
     | { readonly kind: 'revision競合'; readonly ボードID: string; readonly expectedRevision: number; readonly 現在のrevision: number };
