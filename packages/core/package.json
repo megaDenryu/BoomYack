@@ -1,0 +1,6 @@
+{
+  "name": "@boomyack/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DOM/SengenUI非依存の純粋ドメイン層。保存形式の正典とmigration(issue #3)、Board Application Service(issue #4)をここに置く"
+}

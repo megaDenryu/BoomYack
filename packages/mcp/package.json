@@ -1,0 +1,6 @@
+{
+  "name": "@boomyack/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCPツール登録package(issue #7)。coreのsemantic APIだけを呼ぶ薄いadapterをここに置く"
+}
