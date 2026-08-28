@@ -3,7 +3,7 @@ import { AiApiRepository, 分解戦略 } from "./AiApiRepository";
 import { CanvasGraphModel } from "../描画キャンバス/描画キャンバスView分解/CanvasGraphModel";
 import { 付箋集約 } from "../配置物/付箋2/付箋集約";
 import { 付箋選択状態 } from "../配置物/付箋2/自動リサイズ付箋View";
-import { Toast } from "../../../OneONetUIComponents/Toast/Toast";
+import { Toast } from "OneONetUIComponents/Toast/Toast";
 import { Iキャンバスコマンド } from "../キャンバス操作/コマンドリポジトリ/Iキャンバスコマンド";
 import { 配置物追加コマンド } from "../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
 import { AI分解付箋を作る, AI続き付箋を作る } from "./Ai生成物構築";

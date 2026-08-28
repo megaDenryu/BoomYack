@@ -1,5 +1,5 @@
 import { Canvas座標Base, 配置物座標点 } from "SengenUI/index";
-import { I配置物集約, I折れ線矢印集約, I付箋シリアライズ可能, I折れ線矢印シリアライズ可能, Iなめらか曲線矢印集約, Iなめらか曲線矢印シリアライズ可能 } from "../../../../BoomYack/基本オブジェクト/I配置物";
+import { I配置物集約, I折れ線矢印集約, I付箋シリアライズ可能, I折れ線矢印シリアライズ可能, Iなめらか曲線矢印集約, Iなめらか曲線矢印シリアライズ可能 } from "BoomYack/基本オブジェクト/I配置物";
 import { 配置物データ, 付箋データ, 折れ線矢印データ, なめらか曲線矢印データ } from "../データクラス";
 import { Func } from "TypeScriptBenriKakuchou/アーキテクチャBase";
 
