@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0",
+  "id": "fixture-fusei",
+  "name": "不正fixture: 未知の配置物type",
+  "createdAt": "2026-08-01T00:00:00.000Z",
+  "updatedAt": "2026-08-01T00:00:00.000Z",
+  "描画原点": { "x": 0, "y": 0 },
+  "配置物リスト": [
+    {
+      "type": "付箋",
+      "id": "note-ok",
+      "position": { "x": 0, "y": 0 },
+      "size": { "width": 200, "height": 100 },
+      "text": "正常な付箋"
+    },
+    {
+      "type": "謎の図形",
+      "id": "unknown-1",
+      "position": { "x": 100, "y": 100 }
+    }
+  ]
+}

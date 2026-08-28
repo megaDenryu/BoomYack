@@ -2,5 +2,15 @@
   "name": "@boomyack/core",
   "version": "0.1.0",
   "private": true,
-  "description": "DOM/SengenUI非依存の純粋ドメイン層。保存形式の正典とmigration(issue #3)、Board Application Service(issue #4)をここに置く"
+  "description": "DOM/SengenUI非依存の純粋ドメイン層。保存形式の正典とmigration(issue #3)。Board Application Service(issue #4)以降もここに置く",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0"
+  }
 }

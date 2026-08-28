@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0",
+  "id": "fixture-kyuban",
+  "name": "旧版fixture: text付箋とまっすぐ矢印",
+  "createdAt": "2026-07-14T00:00:00.000Z",
+  "updatedAt": "2026-07-14T01:00:00.000Z",
+  "描画原点": { "x": 0, "y": 0 },
+  "配置物リスト": [
+    {
+      "type": "付箋",
+      "id": "note-a",
+      "position": { "x": 100, "y": 100 },
+      "size": { "width": 200, "height": 100 },
+      "text": "旧形式の付箋A"
+    },
+    {
+      "type": "付箋",
+      "id": "note-b",
+      "position": { "x": 450, "y": 100 },
+      "size": { "width": 200, "height": 100 },
+      "text": "旧形式の付箋B (設定状態が部分的)",
+      "設定状態": { "背景色": "#ffd0d0" }
+    },
+    {
+      "type": "まっすぐ矢印",
+      "id": "arrow-straight-1",
+      "start": { "x": 300, "y": 150 },
+      "end": { "x": 450, "y": 150 },
+      "startRef": { "配置物ID": "note-a", "接続位置": "右" },
+      "endRef": { "配置物ID": "note-b", "接続位置": "左" }
+    },
+    {
+      "type": "まっすぐ矢印",
+      "id": "arrow-straight-2",
+      "start": { "x": 100, "y": 300 },
+      "end": { "x": 300, "y": 400 },
+      "startRef": null,
+      "endRef": null
+    }
+  ]
+}
