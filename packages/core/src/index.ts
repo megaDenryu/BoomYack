@@ -11,3 +11,10 @@ export type {
 export { is最新版ボードJSON, is最新版配置物JSON, is最新版付箋JSON } from './保存形式/最新版型ガード';
 export { 保存JSONから最新版ボードを読み込む } from './保存形式/保存JSONから読み込む';
 export type { ボード読み込み結果 } from './保存形式/保存JSONから読み込む';
+
+// ボード操作の境界 (issue #4)。UI・MCPはこのサービス経由でだけ保存操作を行う。
+export { ボード操作サービス } from './ボード操作/ボード操作サービス';
+export type { ボード操作サービス依存 } from './ボード操作/ボード操作サービス';
+export type { ボード保存リポジトリ, ボード一覧項目JSON } from './ボード操作/ボード保存リポジトリ';
+export type { ボード編集コマンド } from './ボード操作/ボード編集コマンド';
+export type { ボード操作結果, ボード操作失敗, ボード削除結果 } from './ボード操作/ボード操作結果';
