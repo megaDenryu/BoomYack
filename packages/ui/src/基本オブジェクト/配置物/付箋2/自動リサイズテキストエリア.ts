@@ -51,7 +51,8 @@ export class 自動リサイズテキストエリア extends TextAreaC implement
         const min = this._sizes.現在のサイズパラメータ.minHeight;
         if (this._text.length === 0) { this.setStyleCSS({ height: min.toCssValue() }); this._配線.先.onHeightChange(min.value); return; }
         this.autoFitToContent();
-        this._配線.先.onHeightChange(this.高さPxを取得する());
+        // 注意: 描画高さ(offsetHeight)は親のflex縦並びで縮められ、枠の今の高さに張り付いて伸びなくなる。中身の全高(scrollHeight)を渡す。
+        this._配線.先.onHeightChange(Math.max(min.value, this.内容サイズを取得する().scrollHeight));
     }
     private _sizeStyleを反映する(): void { const x = this._sizes.現在のサイズパラメータ; this.setStyleCSS({ padding: x.padding.toCssValue(), fontSize: x.textSize.toCssValue(), lineHeight: x.lineHeight.toCssValue(), minHeight: x.minHeight.toCssValue() }); }
 
