@@ -4,6 +4,7 @@ import { 付箋設定パネル, 付箋設定状態 } from "../../配置物/設�
 import { ボード基準座標変換 } from "../../キャンバス操作/座標変換/ボード基準座標変換";
 import { CanvasGraphModel } from "./CanvasGraphModel";
 import { 配置物衝突判定サービス } from "./配置物衝突判定サービス";
+import { 画面矩形 } from "./配置物画面矩形";
 
 export class 付箋設定パネル表示 {
     private readonly _衝突判定 = new 配置物衝突判定サービス();
@@ -13,7 +14,7 @@ export class 付箋設定パネル表示 {
 
     public 表示する(付箋: 付箋集約<描画座標点>, 中心位置: 描画座標点): void {
         const 表示位置 = this._衝突判定.被らない位置を探す(
-            中心位置, 220, 250, this._model.配置物リスト, 付箋, this._model.描画基準座標);
+            中心位置, 220, 250, this._model.配置物リスト, 付箋, this._model.描画基準座標, this._見えている範囲());
         const パネル = new 付箋設定パネル({
             position: 表示位置,
             初期設定: 付箋.get設定状態(),
@@ -21,5 +22,11 @@ export class 付箋設定パネル表示 {
             on閉じる: () => パネル.dom.element.remove(),
         });
         this._座標変換.ルート要素().appendChild(パネル.dom.element);
+    }
+
+    private _見えている範囲(): 画面矩形 {
+        const 左上 = this._座標変換.ルートのスクロール量();
+        const 大きさ = this._座標変換.ルートの見えている大きさ();
+        return { x: 左上.x.値, y: 左上.y.値, width: 大きさ.x.値, height: 大きさ.y.値 };
     }
 }

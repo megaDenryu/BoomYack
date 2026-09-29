@@ -17,6 +17,7 @@ export function キャンバスルートを構築する(状態: CanvasView状態
     const canvas = div({ class: 描画キャンバスView }).setStyleCSS({
         position: "absolute", top: "0", left: "0", width: "100%", height: "100%", zIndex: 配置物zIndex.キャンバス.描画キャンバス,
     }).tap(self => {
+        状態.ドラッグを受ける背景 = self;
         状態.mouseWife = new PointerWife(self).ドラッグ連動登録({
             onドラッグ開始: () => {}, onドラッグ中: (e: Drag中値) => 表示.canvasDrag(e), onドラッグ終了: e => 表示.canvasDragEnd(e),
         }).onPinchZoom((ratio, x, y) => 表示.pinchZoom(ratio, x, y));

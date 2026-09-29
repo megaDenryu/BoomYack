@@ -1,4 +1,4 @@
-import { DivC, LV2HtmlComponentBase, 描画基準座標, 画面座標点 } from "SengenUI/index";
+import { DivC, HtmlComponentBase, LV2HtmlComponentBase, 描画基準座標, 画面座標点 } from "SengenUI/index";
 import { 描画キャンバスリポジトリ } from "../../API/I描画キャンバスAPIリポジトリ";
 import { ボード基準座標変換 } from "../../キャンバス操作/座標変換/ボード基準座標変換";
 import { グローバルイベントを購読する } from "../../グローバルイベント購読";
@@ -51,6 +51,10 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     public update描画基準座標原点(pos: 画面座標点): void { this.model.update描画基準座標原点(pos); }
     public 全ての接続点を表示非表示切り替え(表示: boolean): void { this.表示操作.全接続点を切り替える(表示); }
     public scaleUpdate(input: 拡縮入力): void { this.表示操作.scaleUpdate(input); }
+    /** ボードルートの見えている範囲に固定して見せる要素(ドラッグを受ける背景・録音中の表示)。スクロールへの追従はボード側が行う。 */
+    public get 見えている範囲に固定する要素一覧(): HtmlComponentBase[] {
+        return this.状態.recordingIndicator ? [this.状態.ドラッグを受ける背景, this.状態.recordingIndicator] : [this.状態.ドラッグを受ける背景];
+    }
     public setCanvasIdAndName(id: string, name: string): void { this.配置物操作.setCanvasIdAndName(id, name); }
     public setCanvasId(id: string): void { this.配置物操作.setCanvasId(id); }
     public 全配置物クリア(): void { this.model.全配置物クリア(); }

@@ -1,4 +1,4 @@
-import { MouseEventData, 画面座標点, 描画座標点, Px2DVector } from "SengenUI/index";
+import { MouseEventData, 描画座標点 } from "SengenUI/index";
 import { I配置物集約 } from "../../I配置物";
 import { Iキャンバスコマンド } from "../../キャンバス操作/コマンドリポジトリ/Iキャンバスコマンド";
 import { 配置物追加コマンド } from "../../キャンバス操作/コマンドリポジトリ/具体的なコマンド群";
@@ -40,6 +40,5 @@ function 貼り付け位置を得る(model: CanvasGraphModel, 座標変換: ボ�
         const data = new MouseEventData(e);
         return 座標変換.画面座標点を補正する(data.position.x, data.position.y).to描画座標点(model.描画基準座標);
     }
-    return new 画面座標点(Px2DVector.fromNumbers(window.innerWidth / 2, window.innerHeight / 2))
-        .to描画座標点(model.描画基準座標);
+    return 座標変換.画面座標点を補正する(window.innerWidth / 2, window.innerHeight / 2).to描画座標点(model.描画基準座標);
 }

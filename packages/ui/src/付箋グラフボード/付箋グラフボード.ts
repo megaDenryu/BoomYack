@@ -14,6 +14,7 @@ import { CanvasView, CanvasViewOptions } from "BoomYack/基本オブジェクト
 import { セーブパネルイベントを作る } from "./セーブパネルイベント";
 import { GlobalMouseManager, WindowSizeScaleObserver } from "./付箋グラフボード入力";
 import { sticky_graph_board_container } from "./style.css";
+import { 見えている範囲への追従 } from "./見えている範囲への追従";
 
 export { GlobalMouseManager, WindowSize, WindowSizeScaleObserver } from "./付箋グラフボード入力";
 export type { UpdateWindowSizeInfo } from "./付箋グラフボード入力";
@@ -29,6 +30,7 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
     private 描画キャンバスView: CanvasView;
     private testCanvas: CanvasC;
     private セーブパネル: セーブパネル;
+    private readonly 見えている範囲への追従: 見えている範囲への追従;
 
     public constructor(props: { apiリポジトリ: I描画キャンバスAPIリポジトリ }) {
         super();
@@ -36,6 +38,7 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
         this.local = new 描画キャンバスローカルリポジトリ();
         this.windowSizeScaleObserver = new WindowSizeScaleObserver();
         this.座標変換 = new ボード基準座標変換(() => this._componentRoot.dom.element);
+        this.見えている範囲への追従 = new 見えている範囲への追従(this.座標変換);
         this._componentRoot = this._ルートを構築する();
         this.json読み込み = new JSON読み込みサービス(
             new DropFileLoader(), new 描画キャンバスデータバリデーター()
@@ -60,19 +63,21 @@ export class StickyGraphBoard extends LV2HtmlComponentBase {
             canvasId: "sticky-graph-board",
             onSaveClick: () => this.セーブパネル.開く()
         };
-        return div({ class: sticky_graph_board_container }).childs([
+        return div({ class: sticky_graph_board_container }).onScroll(() => this.見えている範囲への追従.スクロール量へ合わせる()).childs([
             new CanvasView(options, { api: this.api, local: this.local }, this.座標変換)
                 .tap(self => { this.描画キャンバスView = self; self.onDropFile = this.onDropFile; })
+                .tap(self => self.見えている範囲に固定する要素一覧.forEach(要素 => this.見えている範囲への追従.登録する(要素)))
                 .setStyleCSS({ zIndex: 配置物zIndex.キャンバス.描画キャンバス }),
             canvas()
                 .tap(self => {
                     this.testCanvas = self;
+                    this.見えている範囲への追従.登録する(self);
                     self.setWidth(window.innerWidth);
                     self.setHeight(window.innerHeight);
                 })
                 .setStyleCSS({ position: "absolute", width: "100%", height: "100%", top: "0", left: "0",
                     zIndex: 配置物zIndex.お絵描きキャンバス }),
-            this.セーブパネル
+            this.セーブパネル.tap(self => { this.見えている範囲への追従.登録する(self); })
         ]);
     }
 

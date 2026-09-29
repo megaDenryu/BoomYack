@@ -16,9 +16,11 @@ export function 矩形が交差する(a: 画面矩形, b: 画面矩形): boolean
         && a.y < b.y + b.height && a.y + a.height > b.y;
 }
 
-export function 画面内に収める(x: number, y: number, width: number, height: number): { x: number; y: number } {
+/** 左上が(x, y)で大きさがwidth×heightの矩形を、見えている範囲(ボードルートの中身の座標)の中へ押し戻す。 */
+export function 画面内に収める(x: number, y: number, width: number, height: number,
+    見えている範囲: 画面矩形): { x: number; y: number } {
     return {
-        x: Math.max(0, Math.min(x, window.innerWidth - width)),
-        y: Math.max(0, Math.min(y, window.innerHeight - height)),
+        x: Math.max(見えている範囲.x, Math.min(x, 見えている範囲.x + 見えている範囲.width - width)),
+        y: Math.max(見えている範囲.y, Math.min(y, 見えている範囲.y + 見えている範囲.height - height)),
     };
 }

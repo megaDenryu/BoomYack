@@ -8,7 +8,7 @@ export class 配置物衝突判定サービス {
 
     public 被らない位置を探す(中心位置: 描画座標点, パネル幅: number, パネル高さ: number,
         配置物リスト: Iterable<I配置物集約>, ターゲット: I配置物集約,
-        描画基準座標: 描画基準座標): ビューポート座標値 {
+        描画基準座標: 描画基準座標, 見えている範囲: 画面矩形): ビューポート座標値 {
         const center = 中心位置.toビューポート座標値();
         const targetRect = 配置物の画面矩形を得る(ターゲット);
         const その他配置物矩形リスト = Array.from(配置物リスト)
@@ -22,14 +22,14 @@ export class 配置物衝突判定サービス {
                 const position = 画面内に収める(
                     center.x.値 + Math.cos(angle) * radius,
                     center.y.値 + Math.sin(angle) * radius,
-                    パネル幅, パネル高さ);
+                    パネル幅, パネル高さ, 見えている範囲);
                 const panelRect = { ...position, width: パネル幅, height: パネル高さ };
                 if (!this.矩形交差判定(panelRect, targetRect))
                     return ビューポート座標値.fromNumbers(position.x, position.y);
             }
         }
 
-        const position = 画面内に収める(center.x.値, center.y.値, パネル幅, パネル高さ);
+        const position = 画面内に収める(center.x.値, center.y.値, パネル幅, パネル高さ, 見えている範囲);
         return ビューポート座標値.fromNumbers(position.x, position.y);
     }
 }

@@ -8,16 +8,20 @@ export const panelFadeOut = keyframes({
   "0%": { opacity: 1, transform: "translate(-50%, -50%) scale(1)" },
   "100%": { opacity: 0, transform: "translate(-50%, -50%) scale(0.9)" },
 });
-export const savePanelWrapper = style({});
+// ボードルートの見えている範囲を覆う入れ物。スクロールへの追従は 見えている範囲への追従 が translate で行い、
+// その transform により中の fixed の覆いとパネルはこの入れ物を基準に置かれる。
+export const savePanelWrapper = style({
+  position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 998,
+});
 export const overlayBackdrop = style({
-  position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
+  position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
   backgroundColor: "rgba(0, 0, 0, 0.5)", zIndex: 998, opacity: 0,
   pointerEvents: "none", transition: "opacity 0.2s ease",
 });
 export const overlayBackdropVisible = style({ opacity: 1, pointerEvents: "auto" });
 export const savePanelContainer = style({
   position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-  zIndex: 999, width: "400px", maxHeight: "80vh", backgroundColor: "#2d2d2d",
+  zIndex: 999, width: "400px", maxHeight: "80%", backgroundColor: "#2d2d2d",
   borderRadius: "12px", boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
   display: "flex", flexDirection: "column", overflow: "hidden", color: "#fff",
 });

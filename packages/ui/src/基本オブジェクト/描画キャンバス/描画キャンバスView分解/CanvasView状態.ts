@@ -32,6 +32,7 @@ export class CanvasView状態 {
     public readonly persistence: CanvasPersistenceManager;
     public menu?: Iコンテキストメニュー;
     public 配置物コンテナ!: DivC;
+    public ドラッグを受ける背景!: DivC; // ボードのドラッグ・右クリック・ファイルのドロップを受ける背景の要素
     public recordingIndicator: DivC | null = null;
     public fudaba検索ダイアログ: Fudaba札検索ダイアログ | null = null;
     public 付箋召喚UI!: 付箋召喚UI;
