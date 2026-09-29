@@ -1,6 +1,6 @@
 import { DivC } from "SengenUI/index";
 import { セーブパネル共有状態 } from "./セーブパネル共有状態";
-import { overlayBackdrop, overlayBackdropVisible, panelFadeIn, panelFadeOut } from "./style.css";
+import { overlayBackdropVisible, panelFadeIn, panelFadeOut, savePanelContainerVisible } from "./style.css";
 
 export class セーブパネル表示制御 {
   private visible = false;
@@ -13,13 +13,15 @@ export class セーブパネル表示制御 {
   public async open(): Promise<void> {
     this.visible = true;
     this.root.setStyleCSS({ display: "block" });
-    this.backdrop.addClass([overlayBackdrop, overlayBackdropVisible]);
+    this.backdrop.addClass(overlayBackdropVisible);
+    this.panel.addClass(savePanelContainerVisible);
     this.panel.setStyleCSS({ animation: `${panelFadeIn} 0.2s ease-out forwards` });
     await this.state.refreshList();
   }
   public async close(): Promise<void> {
     this.visible = false;
-    this.backdrop.addClass(overlayBackdrop);
+    this.backdrop.removeClass(overlayBackdropVisible);
+    this.panel.removeClass(savePanelContainerVisible);
     this.panel.setStyleCSS({ animation: `${panelFadeOut} 0.2s ease-in forwards` });
     this.state.list.resetTrashView();
     await new Promise<void>(resolve => setTimeout(() => {

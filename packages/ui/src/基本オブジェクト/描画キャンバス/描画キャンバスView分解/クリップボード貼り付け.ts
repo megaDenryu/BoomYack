@@ -40,5 +40,5 @@ function 貼り付け位置を得る(model: CanvasGraphModel, 座標変換: ボ�
         const data = new MouseEventData(e);
         return 座標変換.画面座標点を補正する(data.position.x, data.position.y).to描画座標点(model.描画基準座標);
     }
-    return 座標変換.画面座標点を補正する(window.innerWidth / 2, window.innerHeight / 2).to描画座標点(model.描画基準座標);
+    return 座標変換.ルートの見えている範囲の中心().to描画座標点(model.描画基準座標);
 }

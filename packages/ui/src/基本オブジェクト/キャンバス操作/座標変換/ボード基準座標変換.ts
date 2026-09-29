@@ -37,6 +37,11 @@ export class ボード基準座標変換 {
         return Px2DVector.fromNumbers(ルート.clientWidth, ルート.clientHeight);
     }
 
+    /** ボードルートの見えている範囲の中心を、ボードルートの中身の座標(スクロール量を含む)で返す。 */
+    public ルートの見えている範囲の中心(): 画面座標点 {
+        return 画面座標点.fromPx2DVector(this.ルートのスクロール量().plus(this.ルートの見えている大きさ().times(0.5)));
+    }
+
     /** ビューポート基準の点を、ボードルートの中身の座標(スクロール量を含む)へ変換する。 */
     public viewportPointを補正する(viewportX: number, viewportY: number): Px2DVector {
         const rect = this.ルート要素().getBoundingClientRect();

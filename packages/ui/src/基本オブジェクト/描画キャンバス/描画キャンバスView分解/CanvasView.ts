@@ -53,7 +53,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     public scaleUpdate(input: 拡縮入力): void { this.表示操作.scaleUpdate(input); }
     /** ボードルートの見えている範囲に固定して見せる要素(ドラッグを受ける背景・録音中の表示)。スクロールへの追従はボード側が行う。 */
     public get 見えている範囲に固定する要素一覧(): HtmlComponentBase[] {
-        return this.状態.recordingIndicator ? [this.状態.ドラッグを受ける背景, this.状態.recordingIndicator] : [this.状態.ドラッグを受ける背景];
+        return [this.状態.ドラッグを受ける背景, this.状態.recordingIndicator];
     }
     public setCanvasIdAndName(id: string, name: string): void { this.配置物操作.setCanvasIdAndName(id, name); }
     public setCanvasId(id: string): void { this.配置物操作.setCanvasId(id); }

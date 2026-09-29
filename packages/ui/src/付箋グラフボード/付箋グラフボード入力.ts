@@ -7,15 +7,20 @@ import { グローバルイベントを購読する } from "BoomYack/基本オ�
 
 export class GlobalMouseManager {
     public scale = 1;
-    public mousePos: 画面座標点;
+    private 最後のポインタ位置: 画面座標点 | null = null;
 
     public constructor(
         private readonly onScale: Action<拡縮入力>,
         private readonly 座標変換: ボード基準座標変換
     ) {
-        this.mousePos = this.座標変換.画面座標点を補正する(window.innerWidth / 2, window.innerHeight / 2);
         グローバルイベントを購読する(document, "pointermove", event => this.onGlobalPointerMove(event));
         グローバルイベントを購読する(window, "wheel", event => this.onWheel(event), { passive: false });
+    }
+
+    /** ポインタがまだ動いていなければ、ボードルートの見えている範囲の中心を返す。 */
+    public get mousePos(): 画面座標点 {
+        // 注意: 構築時はボードルートが文書へ付く前で大きさが0のため、中心は読むときに求める。
+        return this.最後のポインタ位置 ?? this.座標変換.ルートの見えている範囲の中心();
     }
 
     private onWheel(event: WheelEvent): void {
@@ -31,7 +36,7 @@ export class GlobalMouseManager {
 
     private onGlobalPointerMove(event: MouseEvent | PointerEvent): void {
         const pos = new MouseEventData(event).position;
-        this.mousePos = this.座標変換.画面座標点を補正する(pos.x, pos.y);
+        this.最後のポインタ位置 = this.座標変換.画面座標点を補正する(pos.x, pos.y);
     }
 }
 

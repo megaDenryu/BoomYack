@@ -1,5 +1,11 @@
 import { keyframes, style } from "@vanilla-extract/css";
 
+/**
+ * savePanelWrapper は、ボードルートの見えている範囲を覆う入れ物である。見えている範囲への追従 が translate で動かし、
+ * その transform により中の fixed の覆いとパネルは入れ物を基準に置かれる。
+ * 注意: 入れ物は閉じる途中の200ミリ秒も全面を覆うため、入れ物自身は操作を受けない。操作を受けるのは、表示中のクラスを付けた覆いとパネルだけである。
+ */
+
 export const panelFadeIn = keyframes({
   "0%": { opacity: 0, transform: "translate(-50%, -50%) scale(0.9)" },
   "100%": { opacity: 1, transform: "translate(-50%, -50%) scale(1)" },
@@ -8,10 +14,8 @@ export const panelFadeOut = keyframes({
   "0%": { opacity: 1, transform: "translate(-50%, -50%) scale(1)" },
   "100%": { opacity: 0, transform: "translate(-50%, -50%) scale(0.9)" },
 });
-// ボードルートの見えている範囲を覆う入れ物。スクロールへの追従は 見えている範囲への追従 が translate で行い、
-// その transform により中の fixed の覆いとパネルはこの入れ物を基準に置かれる。
 export const savePanelWrapper = style({
-  position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 998,
+  position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 998, pointerEvents: "none",
 });
 export const overlayBackdrop = style({
   position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
@@ -23,8 +27,9 @@ export const savePanelContainer = style({
   position: "fixed", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
   zIndex: 999, width: "400px", maxHeight: "80%", backgroundColor: "#2d2d2d",
   borderRadius: "12px", boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
-  display: "flex", flexDirection: "column", overflow: "hidden", color: "#fff",
+  display: "flex", flexDirection: "column", overflow: "hidden", color: "#fff", pointerEvents: "none",
 });
+export const savePanelContainerVisible = style({ pointerEvents: "auto" });
 export const panelHeader = style({
   display: "flex", justifyContent: "space-between", alignItems: "center",
   padding: "16px 20px", borderBottom: "1px solid #444", backgroundColor: "#363636",
