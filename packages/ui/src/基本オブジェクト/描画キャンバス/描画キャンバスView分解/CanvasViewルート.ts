@@ -20,7 +20,7 @@ export function キャンバスルートを構築する(状態: CanvasView状態
         状態.ドラッグを受ける背景 = self;
         状態.mouseWife = new PointerWife(self).ドラッグ連動登録({
             onドラッグ開始: () => {}, onドラッグ中: (e: Drag中値) => 表示.canvasDrag(e), onドラッグ終了: e => 表示.canvasDragEnd(e),
-        }).onPinchZoom((ratio, x, y) => 表示.pinchZoom(ratio, x, y));
+        });
     }).addDivEventListener("contextmenu", (e: MouseEvent) => {
         e.preventDefault();
         const p = new MouseEventData(e).position;
@@ -51,6 +51,8 @@ export function キャンバスルートを構築する(状態: CanvasView状態
         fontWeight: "bold", boxShadow: "0 4px 6px rgba(0,0,0,0.3)", zIndex: 配置物zIndex.キャンバス.コンテキストメニューコンテナ,
         pointerEvents: "none", animation: "pulse 1.5s infinite",
     }).tap(self => { 状態.recordingIndicator = self; });
+    // ピンチは背景だけでなく、背景と並ぶ付箋の上で1本目の指を置いたときも受けるため、キャンバス全体を範囲にする。
     return div({ class: キャンバスコンテナ }).setTabIndex(0).tap(x => { container = x; })
+        .tap(x => 状態.mouseWife?.onPinchZoom((変化率, 中心X, 中心Y) => 表示.pinchZoom(変化率, 中心X, 中心Y), x))
         .addDivEventListener("keydown", e => { void key.handleCanvasKeyDown(e); }).childs([canvas, placement, menu, recording]);
 }

@@ -1,5 +1,6 @@
 import { DivC, LV2HtmlComponentBase } from "SengenUI/index";
 import { 描画キャンバスデータ } from "../../描画キャンバス/データクラス";
+import { ボード購読台帳 } from "../../ボード購読台帳";
 import { セーブパネル実装 } from "./セーブパネル実装";
 import { ISavePanelEvents } from "./セーブパネル型定義";
 
@@ -9,9 +10,9 @@ export class セーブパネル extends LV2HtmlComponentBase {
   protected _componentRoot: DivC;
   private readonly implementation: セーブパネル実装;
 
-  constructor(events: ISavePanelEvents) {
+  constructor(events: ISavePanelEvents, 購読台帳: ボード購読台帳) {
     super();
-    this.implementation = new セーブパネル実装(events);
+    this.implementation = new セーブパネル実装(events, 購読台帳);
     this._componentRoot = this.implementation.root;
   }
   protected _ルートを構築する(): DivC { return this.implementation.root; }

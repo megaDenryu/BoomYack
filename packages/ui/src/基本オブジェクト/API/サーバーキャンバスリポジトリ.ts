@@ -12,6 +12,9 @@ export class 描画キャンバスAPIリポジトリ implements I描画キャン
     private readonly revision記録 = new Map<string, number>();
     public constructor(public readonly isAvailable: boolean) {}
 
+    /** サーバー(/BoomYack/board/*)へ保存する、使えるリポジトリを作る。 */
+    public static サーバーへ保存するものを作る(): 描画キャンバスAPIリポジトリ { return new 描画キャンバスAPIリポジトリ(true); }
+
     public 記録済みrevision(canvasId: string): number | null {
         return this.revision記録.get(canvasId) ?? null;
     }

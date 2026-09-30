@@ -1,7 +1,8 @@
 import { Toast } from "OneONetUIComponents/index";
 import { DivC } from "SengenUI/index";
 import { 描画キャンバスデータ } from "../../描画キャンバス/データクラス";
-import { グローバルイベントを購読する } from "../../グローバルイベント購読";
+import { グローバルイベント購読 } from "../../グローバルイベント購読";
+import { ボード購読台帳 } from "../../ボード購読台帳";
 import { セーブパネル外枠 } from "./セーブパネル外枠UI";
 import { セーブパネル改名処理 } from "./セーブパネル改名処理";
 import { セーブパネル共有状態 } from "./セーブパネル共有状態";
@@ -20,8 +21,8 @@ export class セーブパネル実装 {
   private readonly rename: セーブパネル改名処理;
   private readonly trashUi: セーブパネルゴミ箱UI制御;
 
-  constructor(events: ISavePanelEvents) {
-    this.state = new セーブパネル共有状態(events);
+  constructor(events: ISavePanelEvents, 購読台帳: ボード購読台帳) {
+    this.state = new セーブパネル共有状態(events, 購読台帳);
     this.visibility = new セーブパネル表示制御(this.state);
     this.save = new セーブパネル保存処理(this.state, () => this.visibility.close());
     this.rename = new セーブパネル改名処理(this.state);
@@ -29,7 +30,7 @@ export class セーブパネル実装 {
     this.state.onTrashUpdate = () => this.trashUi.update();
     this.root = this.buildRoot();
     this.visibility.root = this.root;
-    this.registerSaveShortcut();
+    購読台帳.操作対象の間だけ動くものとして登録する(グローバルイベント購読.作成する(window, "keydown", event => this.onSaveShortcut(event)));
   }
   public get isVisible(): boolean { return this.visibility.isVisible; }
   public async open(): Promise<void> { await this.visibility.open(); }
@@ -65,15 +66,13 @@ export class セーブパネル実装 {
     ], () => this.visibility.close(), value => this.visibility.backdrop = value,
       value => this.visibility.panel = value);
   }
-  private registerSaveShortcut(): void {
-    グローバルイベントを購読する(window, "keydown", event => {
-      if (event.key !== "s" || !event.ctrlKey) return;
-      event.preventDefault();
-      if (this.state.currentName === null) this.visibility.open();
-      else {
-        this.state.events.onSave(this.state.currentName, this.state.mode);
-        Toast.success(`${this.state.currentName}を上書き保存しました`, { type: "success" });
-      }
-    });
+  private onSaveShortcut(event: KeyboardEvent): void {
+    if (event.key !== "s" || !event.ctrlKey) return;
+    event.preventDefault();
+    if (this.state.currentName === null) this.visibility.open();
+    else {
+      this.state.events.onSave(this.state.currentName, this.state.mode);
+      Toast.success(`${this.state.currentName}を上書き保存しました`, { type: "success" });
+    }
   }
 }

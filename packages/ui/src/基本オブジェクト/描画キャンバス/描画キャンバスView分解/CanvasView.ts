@@ -1,7 +1,8 @@
 import { DivC, HtmlComponentBase, LV2HtmlComponentBase, 描画基準座標, 画面座標点 } from "SengenUI/index";
 import { 描画キャンバスリポジトリ } from "../../API/I描画キャンバスAPIリポジトリ";
 import { ボード基準座標変換 } from "../../キャンバス操作/座標変換/ボード基準座標変換";
-import { グローバルイベントを購読する } from "../../グローバルイベント購読";
+import { グローバルイベント購読 } from "../../グローバルイベント購読";
+import { ボード購読台帳 } from "../../ボード購読台帳";
 import { CanvasGraphModel } from "./CanvasGraphModel";
 import { CanvasItemFactory } from "./CanvasItemFactory";
 import { CanvasPersistenceManager } from "./CanvasPersistenceManager";
@@ -25,7 +26,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     private readonly キーボード操作: Canvasキーボード操作;
     public onDropFile?: (e: DragEvent) => Promise<void>;
 
-    public constructor(options: CanvasViewOptions, repository: 描画キャンバスリポジトリ, 座標変換: ボード基準座標変換) {
+    public constructor(options: CanvasViewOptions, repository: 描画キャンバスリポジトリ, 座標変換: ボード基準座標変換, 購読台帳: ボード購読台帳) {
         super();
         this.状態 = new CanvasView状態(options, repository, 座標変換, this, () => this.配置物操作.deleteSelectedItem());
         this.配置物操作 = new Canvas配置物操作(this.状態);
@@ -34,7 +35,7 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
         this._componentRoot = this._ルートを構築する();
         this.状態.付箋召喚UIを初期化(text => this.配置物操作.付箋召喚を開始する(text));
         this.状態.model.subscribe(e => this.表示操作.handleGraphEvent(e));
-        this.状態.keydown購読 = グローバルイベントを購読する(document, "keydown", e => this.キーボード操作.handleGlobalKeyDown(e));
+        購読台帳.操作対象の間だけ動くものとして登録する(グローバルイベント購読.作成する(document, "keydown", e => this.キーボード操作.handleGlobalKeyDown(e)));
     }
 
     protected _ルートを構築する(): DivC {
@@ -59,9 +60,10 @@ export class CanvasView extends LV2HtmlComponentBase implements I配置物選択
     public setCanvasId(id: string): void { this.配置物操作.setCanvasId(id); }
     public 全配置物クリア(): void { this.model.全配置物クリア(); }
     public delete(): void {
+        this.状態.voiceRecognitionService.stopRecording();
+        this.状態.mouseWife?.解除する();
         super.delete();
         this.状態.contextMenuContainer.delete();
-        this.状態.keydown購読?.解除する();
         this.状態.fudaba検索ダイアログ?.delete();
         this.表示操作.再描画予約を解除する();
     }

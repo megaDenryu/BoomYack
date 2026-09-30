@@ -1,57 +1,54 @@
-import { RequestAPI } from "TypeScriptBenriKakuchou/Web/RequestApi";
 import { Toast } from "OneONetUIComponents/Toast/Toast";
+import { ボード購読台帳 } from "../ボード購読台帳";
+import { 開始と停止のできる購読 } from "../開始と停止のできる購読";
+import { ボード変更通知, ボード変更通知の受け手, ボード外部更新の受信 } from "./ボード外部更新の受信";
 
-// サーバーの /BoomYack/events (SSE) を購読し、開いているボードが外部 (MCP・別ウィンドウ) で
-// 保存・削除されたことを利用者へ知らせる。自動再読込はしない (未保存の編集を勝手に
-// 破棄しないため)。再読込の導線は既存のセーブパネルのロード。通知を取り逃しても、
-// 保存時のrevision照合が上書き事故を防ぐ。
+// 開いているボードが外部 (MCP・別ウィンドウ) で保存・削除されたことを知らせる。自動再読込はしない (未保存の編集を
+// 勝手に破棄しないため)。通知はボードがある間ずっと受け、知らせるのは操作対象の間だけ。裏で受けた知らせは操作対象に戻ったときに出す。
 
-interface ボード変更通知JSON {
-    readonly boardId: string;
-    readonly revision: number;
-    readonly 種別: "保存" | "削除";
-    readonly source: string; // "ui" | "mcp"。自分 (ui) の保存の折り返し表示を避けるためだけに使い、整合性判断には使わない
-}
-
-function isボード変更通知JSON(value: unknown): value is ボード変更通知JSON {
-    if (typeof value !== "object" || value === null) return false;
-    const 通知 = value as Record<string, unknown>;
-    return typeof 通知.boardId === "string" && typeof 通知.revision === "number"
-        && (通知.種別 === "保存" || 通知.種別 === "削除")
-        && typeof 通知.source === "string";
-}
+type 外部更新の知らせ = { readonly kind: "削除された" } | { readonly kind: "更新された"; readonly revision: number };
+type 保留中の知らせ = { readonly kind: "無し" } | { readonly kind: "有り"; readonly 知らせ: 外部更新の知らせ };
 
 export interface ボード外部更新監視依存 {
     現在のボードIDを得る(): string | null;
     既知のrevisionを得る(canvasId: string): number | null;
 }
 
-export class ボード外部更新監視 {
-    private eventSource: EventSource | null = null;
+export class ボード外部更新監視 implements ボード変更通知の受け手, 開始と停止のできる購読 {
+    private 知らせてよいか = false;
+    private 保留中: 保留中の知らせ = { kind: "無し" };
 
-    public constructor(private readonly 依存: ボード外部更新監視依存) {}
-
-    public 開始する(): void {
-        if (this.eventSource !== null) return;
-        this.eventSource = new EventSource(`${RequestAPI.origin}/BoomYack/events`);
-        this.eventSource.onmessage = event => this.通知を処理する(event.data);
-        // 切断時はEventSourceが自動再接続する。エラーは接続断の通常経過なのでログだけに留める
-        this.eventSource.onerror = () => console.log("ボード外部更新監視: 接続が切れました (自動再接続します)");
+    public constructor(private readonly 依存: ボード外部更新監視依存, 受信: ボード外部更新の受信, 購読台帳: ボード購読台帳) {
+        購読台帳.常に動くものとして登録する(受信.受け手の登録を作る(this));
+        購読台帳.操作対象の間だけ動くものとして登録する(this);
     }
 
-    private 通知を処理する(生データ: string): void {
-        let parsed: unknown;
-        try { parsed = JSON.parse(生データ); } catch { return; }
-        if (!isボード変更通知JSON(parsed)) return;
-        if (parsed.source === "ui") return; // 自分の保存経路からの通知
+    public 始める(): void {
+        this.知らせてよいか = true;
+        if (this.保留中.kind === "有り") this.知らせを出す(this.保留中.知らせ);
+        this.保留中 = { kind: "無し" };
+    }
+
+    public 止める(): void { this.知らせてよいか = false; }
+
+    public 通知を受ける(通知: ボード変更通知): void {
+        if (通知.source === "ui") return; // 自分の保存経路からの通知
         const 現在のボードID = this.依存.現在のボードIDを得る();
-        if (現在のボードID === null || parsed.boardId !== 現在のボードID) return;
-        if (parsed.種別 === "削除") {
-            Toast.error("表示中のボードが外部で削除されました");
-            return;
-        }
+        if (現在のボードID === null || 通知.boardId !== 現在のボードID) return;
         const 既知 = this.依存.既知のrevisionを得る(現在のボードID);
-        if (既知 !== null && parsed.revision <= 既知) return; // 自分の保存の折り返し通知は無視する
-        Toast.success(`ボードが外部で更新されました (revision ${parsed.revision})。セーブパネルから読み込み直してください`);
+        if (通知.種別 === "保存" && 既知 !== null && 通知.revision <= 既知) return; // 自分の保存の折り返し通知は無視する
+        const 知らせ: 外部更新の知らせ = 通知.種別 === "削除" ? { kind: "削除された" } : { kind: "更新された", revision: 通知.revision };
+        if (this.知らせてよいか) this.知らせを出す(知らせ);
+        else this.保留中 = { kind: "有り", 知らせ };
+    }
+
+    private 知らせを出す(知らせ: 外部更新の知らせ): void {
+        switch (知らせ.kind) {
+            case "削除された": Toast.error("表示中のボードが外部で削除されました"); return;
+            case "更新された":
+                Toast.success(`ボードが外部で更新されました (revision ${知らせ.revision})。セーブパネルから読み込み直してください`);
+                return;
+            default: { const 網羅の確認: never = 知らせ; return 網羅の確認; }
+        }
     }
 }

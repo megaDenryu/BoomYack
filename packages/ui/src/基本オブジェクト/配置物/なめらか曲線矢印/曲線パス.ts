@@ -1,4 +1,5 @@
 import { PathC, Px2DVector, 配置物座標点 } from "SengenUI/index";
+import { 曲線ドラッグの受け手, 曲線のドラッグ } from "./曲線のドラッグ";
 import { 曲線制御点 } from "./曲線制御点";
 
 const 曲線色 = {
@@ -44,8 +45,6 @@ export class 曲線表示パス extends ベジェ曲線パス {
 }
 
 export class 曲線操作パス extends ベジェ曲線パス {
-    private _直前位置: Px2DVector | null = null;
-
     public constructor() {
         super({ fill: "none", stroke: "transparent", strokeWidth: 20, strokeLinecap: "round" });
         this.setStyleCSS({ pointerEvents: "stroke", cursor: "pointer" });
@@ -59,30 +58,9 @@ export class 曲線操作パス extends ベジェ曲線パス {
         return Px2DVector.fromNumbers(point.x, point.y);
     }
 
-    public ドラッグ配線する(callbacks: {
-        開始(position: Px2DVector): void;
-        移動(delta: Px2DVector): void;
-        終了(): void;
-    }): this {
-        this.addSvgEventListener("pointerdown", e => {
-            if (e.button !== 0 || this._直前位置 !== null) return;
-            e.preventDefault(); e.stopPropagation();
-            this._直前位置 = Px2DVector.fromNumbers(e.clientX, e.clientY);
-            callbacks.開始(this.イベントのローカル座標(e));
-        });
-        document.addEventListener("pointermove", e => {
-            if (this._直前位置 === null) return;
-            e.preventDefault(); e.stopPropagation();
-            const current = Px2DVector.fromNumbers(e.clientX, e.clientY);
-            callbacks.移動(current.minus(this._直前位置));
-            this._直前位置 = current;
-        });
-        document.addEventListener("pointerup", e => {
-            if (this._直前位置 === null) return;
-            e.preventDefault(); e.stopPropagation();
-            this._直前位置 = null;
-            callbacks.終了();
-        });
+    public ドラッグ配線する(受け手: 曲線ドラッグの受け手): this {
+        const ドラッグ = new 曲線のドラッグ(this, 受け手);
+        this.addSvgEventListener("pointerdown", e => ドラッグ.押された(e));
         return this;
     }
 }

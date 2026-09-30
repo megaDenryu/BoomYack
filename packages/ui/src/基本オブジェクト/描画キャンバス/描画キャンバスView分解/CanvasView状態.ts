@@ -8,7 +8,6 @@ import { VoiceRecognitionService } from "../../キャンバス操作/音声認�
 import { ボード基準座標変換 } from "../../キャンバス操作/座標変換/ボード基準座標変換";
 import { FudabaAPIクライアント } from "../../Fudaba連携/FudabaAPIクライアント";
 import { Fudaba札検索ダイアログ } from "../../Fudaba連携/Fudaba札検索ダイアログ";
-import { グローバルイベント購読ハンドル } from "../../グローバルイベント購読";
 import { 付箋召喚UI } from "../../配置物/付箋2/付箋召喚UI";
 import type { 付箋召喚ドラッグ対象 } from "../../配置物/付箋2/付箋召喚UI";
 import { CanvasGraphModel } from "./CanvasGraphModel";
@@ -37,7 +36,6 @@ export class CanvasView状態 {
     public fudaba検索ダイアログ: Fudaba札検索ダイアログ | null = null;
     public 付箋召喚UI!: 付箋召喚UI;
     public mouseWife?: PointerWife;
-    public keydown購読?: グローバルイベント購読ハンドル;
     public currentScale = 1;
     public 再描画予約済み = false;
     public 再描画ID: number | null = null;

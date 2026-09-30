@@ -5,6 +5,7 @@ import { ISavePanelEvents, SaveMode } from "./セーブパネル型定義";
 import { セーブパネルリスト } from "./セーブパネルリスト";
 import { セーブパネル仮ゴミ箱 } from "./セーブパネル仮ゴミ箱";
 import { modeButtonActive } from "./style.css";
+import { ボード購読台帳 } from "../../ボード購読台帳";
 
 export class セーブパネル共有状態 {
   public mode: SaveMode = "local";
@@ -24,11 +25,11 @@ export class セーブパネル共有状態 {
   public onTrashUpdate = (): void => {};
   private readonly json = キャンバスJSON出力サービス.create();
 
-  constructor(public readonly events: ISavePanelEvents) {
+  constructor(public readonly events: ISavePanelEvents, 購読台帳: ボード購読台帳) {
     this.trash = new セーブパネル仮ゴミ箱({
       onDelete: (id, mode) => events.onDelete(id, mode),
       onUpdate: () => { this.onTrashUpdate(); this.list.render(); },
-    });
+    }, 購読台帳);
     this.list = new セーブパネルリスト(this.trash, {
       onSelect: () => {},
       onMoveToTrash: item => this.trash.moveToTrash(item, this.mode),
